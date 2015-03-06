@@ -1,5 +1,18 @@
 #hydrogen-dao
 
-hydrogen-dao ÊÇÒ»¸ö Java µÄÇáÁ¿¼¶µÄÊı¾İ¿â·ÃÎÊ¿â£¬ÒÀÀµ±ê×¼µÄ JDBC ½Ó¿Ú¡£
+hydrogen-dao æ˜¯ä¸€ä¸ª Java çš„è½»é‡çº§çš„æ•°æ®åº“è®¿é—®åº“ï¼Œä¾èµ–æ ‡å‡†çš„ JDBC æ¥å£ã€‚ä¸‹é¢æ˜¯ä¸€ä¸ªä½¿ç”¨ä¾‹å­ï¼š
 
-Ê¹ÓÃ·½·¨²Î¿¼ [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)¡£
+~~~Java
+    DAO dao = getDAO();
+    
+    List<Row> rows = dao.query(
+            "select * from USER where USERNAME like ? and ROLE=?", 
+            "admin%", 3);
+            
+    for (Row row: rows) {
+        System.out.println("username: " + row.getString("username"));
+    }
+~~~
+
+
+ä½¿ç”¨æ–¹æ³•å‚è€ƒ [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)ã€‚
