@@ -18,7 +18,7 @@ public class Connection extends HashMap<String, String> {
     }
 
     public boolean isDefaultConfig() {
-        return get("defaultConfig") != null && get("defaultConfig").equals("true");
+        return get("defaultConfig") != null && "true".equals(get("defaultConfig"));
     }
 
     public void setDefaultConfig(boolean defaultConfig) {
@@ -59,6 +59,6 @@ public class Connection extends HashMap<String, String> {
     }
 
     public boolean getBool(String key) {
-        return get(key).equalsIgnoreCase("true") || get(key).equalsIgnoreCase("yes");
+        return "true".equalsIgnoreCase(get(key)) || "yes".equalsIgnoreCase(get(key));
     }
 }

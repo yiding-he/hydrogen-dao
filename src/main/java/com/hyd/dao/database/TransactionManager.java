@@ -22,9 +22,13 @@ public class TransactionManager {
 
     public static final int DEFAULT_ISOLATION_LEVEL = Connection.TRANSACTION_READ_COMMITTED;
 
-    static final Logger log = LoggerFactory.getLogger(TransactionManager.class);
+    static final Logger LOG = LoggerFactory.getLogger(TransactionManager.class);
 
     /////////////////////////////////////////////////////////
+
+    private TransactionManager() {
+        // hide public constructor
+    }
 
     /**
      * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
@@ -111,13 +115,13 @@ public class TransactionManager {
         int _level;
 
         if (!isInTransaction()) {
-            executorCache.set(new HashMap<Integer, Map<String, Executor>>());
+            executorCache.set(new HashMap<Integer, Map<String, Executor>>()); // start level1 transaction
             _level = 1;
         } else {
             _level = level.get() + 1;
         }
 
-        log.debug("Starting transaction level " + _level);
+        LOG.debug("Starting transaction level " + _level);
         level.set(_level);
         executorCache.get().put(_level, new HashMap<String, Executor>());
     }
@@ -136,7 +140,7 @@ public class TransactionManager {
             executor.close();
         }
 
-        log.info("Transaction level {} commited.", _level);
+        LOG.info("Transaction level {} commited.", _level);
         level.set(_level - 1);
     }
 
@@ -154,7 +158,7 @@ public class TransactionManager {
             executor.rollbackAndClose();
         }
 
-        log.info("Transaction level {} rollbacked.", _level);
+        LOG.info("Transaction level {} rollbacked.", _level);
         level.set(_level - 1);
     }
 

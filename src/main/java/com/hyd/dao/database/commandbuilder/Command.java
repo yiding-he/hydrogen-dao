@@ -9,9 +9,9 @@ public class Command {
 
     private String statement;
 
-    private List params;
+    private List<Object> params;
 
-    private List paramTypes;
+    private List<Integer> paramTypes;
 
     /**
      * 缺省构造函数
@@ -25,12 +25,12 @@ public class Command {
      * @param statement SQL 语句
      * @param params    参数
      */
-    public Command(String statement, List params) {
+    public Command(String statement, List<Object> params) {
         this.statement = statement;
         this.params = params;
     }
 
-    public Command(String statement, List params, List paramTypes) {
+    public Command(String statement, List<Object> params, List<Integer> paramTypes) {
         this.statement = statement;
         this.params = params;
         this.paramTypes = paramTypes;
@@ -40,7 +40,7 @@ public class Command {
         return paramTypes;
     }
 
-    public void setParamTypes(List paramTypes) {
+    public void setParamTypes(List<Integer> paramTypes) {
         this.paramTypes = paramTypes;
     }
 
@@ -67,7 +67,7 @@ public class Command {
      *
      * @return 参数
      */
-    public List getParams() {
+    public List<Object> getParams() {
         return params;
     }
 
@@ -76,7 +76,7 @@ public class Command {
      *
      * @param params 参数
      */
-    public void setParams(List params) {
+    public void setParams(List<Object> params) {
         this.params = params;
     }
 

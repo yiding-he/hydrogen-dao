@@ -3,6 +3,8 @@ package com.hyd.dao.database;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
 import com.hyd.dao.util.ResultSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -33,6 +35,8 @@ import java.sql.Statement;
  * </code></p>
  */
 public class RowIterator {
+
+    static final Logger LOG = LoggerFactory.getLogger(RowIterator.class);
 
     private ResultSet rs;
 
@@ -77,23 +81,24 @@ public class RowIterator {
                 st = rs.getStatement();
                 conn = st.getConnection();
             } catch (SQLException e) {
+                LOG.warn(e.getMessage(), e);
                 return;
             } finally {
                 try {
                     rs.close();
                 } catch (SQLException e) {
-                    // do nothing
+                    LOG.warn(e.getMessage(), e);
                 }
             }
             try {
                 st.close();
             } catch (SQLException e) {
-                // do nothing
+                LOG.warn(e.getMessage(), e);
             }
             try {
                 conn.close();
             } catch (SQLException e) {
-                // do nothing
+                LOG.warn(e.getMessage(), e);
             }
         }
     }

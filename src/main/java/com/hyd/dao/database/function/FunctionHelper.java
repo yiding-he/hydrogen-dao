@@ -48,10 +48,10 @@ public class FunctionHelper {
     public static SpParam[] createFunctionParams(String name, Object[] params, Connection connection) throws Exception {
         DatabaseMetaData metaData = connection.getMetaData();
 
-        String schema = name.indexOf(".") == -1 ?
-                metaData.getUserName().toUpperCase() : name.split("\\.")[0].toUpperCase();
+        String schema = name.contains(".") ?
+                name.split("\\.")[0].toUpperCase() : metaData.getUserName().toUpperCase();
 
-        if (name.indexOf(".") != -1) {
+        if (name.contains(".")) {
             name = name.substring(name.lastIndexOf(".") + 1);
         }
 
@@ -62,6 +62,7 @@ public class FunctionHelper {
             throw new DAOException("存储过程 " + name + " 没有找到任何参数。");
         }
 
+        // 按照 sequence 的值对 map 数组进行排序
         BeanUtil.sort(function_columns, "sequence");
 
         SpParam[] result = new SpParam[function_columns.length];

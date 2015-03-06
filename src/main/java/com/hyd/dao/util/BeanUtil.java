@@ -280,6 +280,17 @@ public class BeanUtil {
             this.columnName = columnName;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ComparableMap)) {
+                return false;
+            }
+
+            ComparableMap m = (ComparableMap) obj;
+            Object value = this.map.get(this.columnName);
+            return value != null && value.equals(m.map.get(this.columnName));
+        }
+
         @SuppressWarnings("NullableProblems")
         public int compareTo(ComparableMap o) {
 

@@ -54,7 +54,7 @@ public class JndiConnectionFactory extends ConnectionFactory {
             }
             log.debug("通过 JNDI 获取数据库连接：" + connection.getMetaData().getURL() + ":" +
                     connection.getMetaData().getUserName());
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new DAOException("connect to database server failed", e);
         }
         return connection;

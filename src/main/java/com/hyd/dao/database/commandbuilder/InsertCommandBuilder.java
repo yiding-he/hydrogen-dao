@@ -18,6 +18,10 @@ import java.util.List;
  */
 public class InsertCommandBuilder {
 
+    private InsertCommandBuilder() {
+
+    }
+
     /**
      * 构造一个批处理命令。注意：批处理命令 SQL 语句中有哪些参数，是根据第一个要插入的记录生成的。
      * 这时候不能因为记录的某个属性值为 null 就不将该属性加入 SQL，因为后面的其他记录的属性值可能不是 null。
@@ -32,7 +36,7 @@ public class InsertCommandBuilder {
      */
     public static BatchCommand buildBatch(Connection conn, String tableName, List objects) throws SQLException {
 
-        if (objects == null || objects.size() == 0) {
+        if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
         }
 
@@ -121,7 +125,7 @@ public class InsertCommandBuilder {
     private static Command buildCommand(String tableName, ColumnInfo[] infos, Object object, Connection conn)
             throws SQLException {
         ArrayList params = CommandBuilderHelper.generateParams(infos, object);
-        ArrayList<Object> finalParams = new ArrayList<Object>();
+        List<Object> finalParams = new ArrayList<Object>();
 
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
 
@@ -168,7 +172,7 @@ public class InsertCommandBuilder {
 
         command += ") values (" + questionMarks + ")";
 
-        ArrayList<Integer> paramTypes = new ArrayList<Integer>();
+        List<Integer> paramTypes = new ArrayList<Integer>();
         for (ColumnInfo info : infos) {
             paramTypes.add(info.getDataType());
         }

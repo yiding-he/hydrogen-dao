@@ -27,7 +27,7 @@ public class BatchCommand {
 
     private String command;
 
-    private ArrayList<List<Object>> params = new ArrayList<List<Object>>();
+    private List<List<Object>> params = new ArrayList<List<Object>>();
 
     private ColumnInfo[] columnInfos;               // 参数对应的字段信息，有助于生成 null 参数，非必须
 

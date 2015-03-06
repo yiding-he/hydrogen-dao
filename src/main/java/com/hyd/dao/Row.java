@@ -43,7 +43,7 @@ public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<S
             Double value = getDoubleObject(key);
             return value == null ? defaultValue : value;
         } catch (Exception e) {
-            LOG.warn(e.getMessage());
+            LOG.warn(e.getMessage(), e);
             return defaultValue;
         }
     }
@@ -83,7 +83,7 @@ public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<S
             Long l = getLongObject(key);
             return l == null ? defaultValue : l;
         } catch (Exception e) {
-            LOG.warn(e.getMessage());
+            LOG.warn(e.getMessage(), e);
             return defaultValue;
         }
     }
@@ -123,7 +123,7 @@ public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<S
             Integer i = getIntegerObject(key);
             return i == null ? defaultValue : i;
         } catch (Exception e) {
-            LOG.warn(e.getMessage());
+            LOG.warn(e.getMessage(), e);
             return defaultValue;
         }
     }

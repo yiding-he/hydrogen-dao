@@ -4,6 +4,7 @@ import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
+import com.hyd.dao.database.commandbuilder.MappedCommand;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
@@ -177,6 +178,45 @@ public class DAO {
     ////////////////////////////////////////////////////////////////
 
     /**
+     * 执行包装成 Command 对象的查询
+     *
+     * @param command 查询
+     *
+     * @return 查询结果
+     */
+    public List<Row> query(Command command) {
+        return query(command.getStatement(), command.getParams());
+    }
+
+    /**
+     * 执行包装成 Command 对象的查询，并将查询结果包装成指定的 Pojo 类对象
+     *
+     * @param clazz   要包装的类
+     * @param command 查询
+     *
+     * @return 查询结果
+     */
+    public <T> List<T> query(Class<T> clazz, Command command) {
+        return query(clazz, command.getStatement(), command.getParams());
+    }
+
+    public List<Row> query(MappedCommand mappedCommand) {
+        return query(mappedCommand.toCommand());
+    }
+
+    public <T> List<T> query(Class<T> clazz, MappedCommand mappedCommand) {
+        return query(clazz, mappedCommand.toCommand());
+    }
+
+    public List<Row> query(SQL.Generatable generatable) {
+        return query(generatable.toCommand());
+    }
+
+    public <T> List<T> query(Class<T> clazz, SQL.Generatable generatable) {
+        return query(clazz, generatable.toCommand());
+    }
+
+    /**
      * 执行带参数的查询
      *
      * @param sql    查询语句
@@ -188,14 +228,6 @@ public class DAO {
      */
     public List<Row> query(String sql, Object... params) throws DAOException {
         return query(null, sql, params);
-    }
-
-    public List<Row> query(Command command) {
-        return query(command.getStatement(), command.getParams());
-    }
-
-    public List<Row> query(SQL.Generatable generatable) {
-        return query(generatable.toCommand());
     }
 
     /**
@@ -213,15 +245,23 @@ public class DAO {
         return queryRange(clazz, sql, -1, -1, params);
     }
 
-    public <T> List<T> query(Class<T> clazz, Command command) {
-        return query(clazz, command.getStatement(), command.getParams());
-    }
-
-    public <T> List<T> query(Class<T> clazz, SQL.Generatable generatable) {
-        return query(clazz, generatable.toCommand());
-    }
-
     ////////////////////////////////////////////////////////////////
+
+    public Row queryFirst(MappedCommand mappedCommand) {
+        return queryFirst(mappedCommand.toCommand());
+    }
+
+    public <T> T queryFirst(Class<T> clazz, MappedCommand mappedCommand) {
+        return queryFirst(clazz, mappedCommand.toCommand());
+    }
+
+    public Row queryFirst(Command command) {
+        return queryFirst(command.getStatement(), command.getParams());
+    }
+
+    public <T> T queryFirst(Class<T> clazz, Command command) {
+        return queryFirst(clazz, command.getStatement(), command.getParams());
+    }
 
     /**
      * 返回第一个查询结果
@@ -238,8 +278,6 @@ public class DAO {
         return list == null || list.isEmpty() ? null : list.get(0);
     }
 
-    /////////////////// UPDATE //////////////////////
-
     /**
      * 返回第一个查询结果
      *
@@ -253,7 +291,7 @@ public class DAO {
      */
     public <T> T queryFirst(Class<T> clazz, String sql, Object... params) throws DAOException {
         List<T> list = queryRange(clazz, sql, 0, 1, params);
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         }
         return list.get(0);
@@ -271,6 +309,23 @@ public class DAO {
 
     ////////////////////////////////////////////////////////////////
 
+    public List<Row> queryRange(Command command, int startPosition, int endPosition) {
+        return queryRange(command.getStatement(), startPosition, endPosition, command.getParams());
+    }
+
+    public <T> List<T> queryRange(Class<T> clazz, Command command, int startPosition, int endPosition) {
+        return queryRange(clazz, command.getStatement(), startPosition, endPosition, command.getParams());
+    }
+
+    public List<Row> queryRange(SQL.Generatable generatable, int startPosition, int endPosition) {
+        return queryRange(generatable.toCommand(), startPosition, endPosition);
+    }
+
+    public <T> List<T> queryRange(Class<T> clazz, SQL.Generatable generatable, int startPosition, int endPosition) {
+        Command command = generatable.toCommand();
+        return queryRange(clazz, command.getStatement(), startPosition, endPosition, command.getParams());
+    }
+
     /**
      * 执行指定位置范围的带参数查询
      *
@@ -286,23 +341,6 @@ public class DAO {
      */
     public List<Row> queryRange(String sql, int startPosition, int endPosition, Object... params) throws DAOException {
         return queryRange(null, sql, startPosition, endPosition, params);
-    }
-
-    public List<Row> queryRange(Command command, int startPosition, int endPosition) {
-        return queryRange(command.getStatement(), startPosition, endPosition, command.getParams());
-    }
-
-    public List<Row> queryRange(SQL.Generatable generatable, int startPosition, int endPosition) {
-        return queryRange(generatable.toCommand(), startPosition, endPosition);
-    }
-
-    public <T> List<T> queryRange(Class<T> clazz, Command command, int startPosition, int endPosition) {
-        return queryRange(clazz, command.getStatement(), startPosition, endPosition, command.getParams());
-    }
-
-    public <T> List<T> queryRange(Class<T> clazz, SQL.Generatable generatable, int startPosition, int endPosition) {
-        Command command = generatable.toCommand();
-        return queryRange(clazz, command.getStatement(), startPosition, endPosition, command.getParams());
     }
 
     /**
@@ -325,10 +363,10 @@ public class DAO {
             return queryRange(clazz, sql, startPosition, endPosition, list.toArray(new Object[list.size()]));
         }
 
-        sql = fixSql(sql);
+        String fixedSql = fixSql(sql);
         Executor executor = getExecutor();
         try {
-            return executor.query(clazz, sql, Arrays.asList(params), startPosition, endPosition);
+            return executor.query(clazz, fixedSql, Arrays.asList(params), startPosition, endPosition);
         } finally {
             executor.finish();
         }
@@ -341,9 +379,9 @@ public class DAO {
         return queryPage(null, command.getStatement(), pageSize, pageIndex, command.getParams());
     }
 
-    public <T> Page<T> queryPage(Class<T> wrappingClass, SQL.Generatable generatable, int pageSize, int pageIndex) {
+    public <T> Page<T> queryPage(Class<T> clazz, SQL.Generatable generatable, int pageSize, int pageIndex) {
         Command command = generatable.toCommand();
-        return queryPage(wrappingClass, command.getStatement(), pageSize, pageIndex, command.getParams());
+        return queryPage(clazz, command.getStatement(), pageSize, pageIndex, command.getParams());
     }
 
     /**
@@ -383,10 +421,10 @@ public class DAO {
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[list.size()]));
         }
 
-        sql = fixSql(sql);
+        String fixedSql = fixSql(sql);
         Executor executor = getExecutor();
         try {
-            return executor.queryPage(wrappingClass, sql, Arrays.asList(params), pageSize, pageIndex);
+            return executor.queryPage(wrappingClass, fixedSql, Arrays.asList(params), pageSize, pageIndex);
         } finally {
             executor.finish();
         }
@@ -417,23 +455,23 @@ public class DAO {
             List list = (List) params[0];
             return queryIterator(sql, list.toArray(new Object[list.size()]));
         }
-        sql = fixSql(sql);
+        String fixedSql = fixSql(sql);
         Executor executor = getExecutor(true);
-        return executor.queryIterator(sql, Arrays.asList(params));
+        return executor.queryIterator(fixedSql, Arrays.asList(params));
         // 数据库连接此时必须保持开启，所以不能调用 closeExecutor() 方法。
     }
 
     /**
      * 获取指定 sequence 的下一个值。注意，本方法仅用于 Oracle 数据库。
      *
-     * @param sequence_name sequence 的名称
+     * @param sequenceName sequence 的名称
      *
      * @return 值
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public Long next(final String sequence_name) throws DAOException {
-        Row row = queryFirst("select " + sequence_name + ".nextval val from dual");
+    public Long next(final String sequenceName) throws DAOException {
+        Row row = queryFirst("select " + sequenceName + ".nextval val from dual");
         return row.getLongObject("val");
     }
 
@@ -498,7 +536,7 @@ public class DAO {
         return ((BigDecimal) iterator.next()).intValue();
     }
 
-    ////////////////////////////////////////////////////////////////
+    /////////////////// UPDATE //////////////////////
 
     /**
      * 删除指定的一条记录
@@ -542,15 +580,15 @@ public class DAO {
         if (sql == null) {
             return 0;
         }
-        sql = fixSql(sql);
+        String fixedSql = fixSql(sql);
 
         Executor executor = getExecutor();
         try {
             if (params.length == 1 && params[0] instanceof List) {
                 List list = (List) params[0];
-                return executor.execute(sql, list);
+                return executor.execute(fixedSql, list);
             } else {
-                return executor.execute(sql, Arrays.asList(params));
+                return executor.execute(fixedSql, Arrays.asList(params));
             }
         } finally {
             executor.finish();
@@ -663,7 +701,7 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public void insert(List objects, String tableName) throws DAOException {
-        if (objects == null || objects.size() == 0) {
+        if (objects == null || objects.isEmpty()) {
             return;
         }
 

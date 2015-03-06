@@ -13,6 +13,10 @@ import java.util.List;
  */
 public class DeleteCommandBuilder {
 
+    private DeleteCommandBuilder() {
+
+    }
+
     public static Command build(Connection conn, String tableName, Object object) throws SQLException {
         FQN fqn = new FQN(conn, tableName);
         ColumnInfo[] infos = CommandBuilderHelper.getHelper(conn).getColumnInfos(fqn.getSchema("%"), fqn.getName());
@@ -25,14 +29,14 @@ public class DeleteCommandBuilder {
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
         String command = "delete from " + tableName;
         String whereMarks = "";
-        ArrayList<Object> whereParams = new ArrayList<Object>();
+        List<Object> whereParams = new ArrayList<Object>();
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
                 whereMarks += helper.getColumnName(info.getColumnName()) + "=? and";
                 whereParams.add(CommandBuilderHelper.generateParamValue(object, info));
             }
         }
-        if (whereMarks.equals("")) {
+        if ("".equals(whereMarks)) {
             throw new NoPrimaryKeyException("no primary key found in table \"" + tableName + "\"");
         }
 
@@ -42,7 +46,7 @@ public class DeleteCommandBuilder {
 
         command += " where " + whereMarks;
 
-        ArrayList<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<Object>();
         params.addAll(whereParams);
         return new Command(command, params);
 

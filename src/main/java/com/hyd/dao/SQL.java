@@ -13,6 +13,10 @@ import java.util.*;
  */
 public class SQL {
 
+    private SQL() {
+
+    }
+
     private static boolean isEmpty(Object obj) {
         if (obj == null) {
             return true;
