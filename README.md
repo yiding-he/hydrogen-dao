@@ -2,6 +2,8 @@
 
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。下面是一个使用例子：
 
+### 查询记录
+
 ~~~Java
 DAO dao = getDAO();
 
@@ -15,7 +17,7 @@ for (User user: userList) {
 }
 ~~~
 
-执行事务：
+### 执行事务
 
 ~~~Java
 final DAO dao = getDAO();
