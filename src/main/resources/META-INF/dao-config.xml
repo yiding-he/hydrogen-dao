@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dao-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="https://hydrogen-dao.googlecode.com/svn/trunk/java/src/main/resources/dao-config.xsd">
+
+    <config name="show_batch_params" value="false"/>
+
+    <datasource name="oracle" connection="localhost" default="true">
+        <connection name="localhost" type="dbcp">
+            <property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
+            <property name="url" value="jdbc:oracle:thin:@192.168.39.102:1521:ora10"/>
+            <property name="username" value="scott"/>
+            <property name="password" value="tiger"/>
+        </connection>
+    </datasource>
+
+    <datasource name="oracle2" connection="localhost" default="true">
+        <connection name="localhost" type="dbcp">
+            <property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
+            <property name="url" value="jdbc:oracle:thin:@192.168.39.102:1521:ora10"/>
+            <property name="username" value="scott"/>
+            <property name="password" value="tiger"/>
+        </connection>
+    </datasource>
+
+    <datasource name="mysql" connection="another-default">
+        <connection name="another-default" type="dbcp">
+            <property name="driver" value="com.mysql.jdbc.Driver"/>
+            <property name="url" value="jdbc:mysql://localhost/test?useUnicode=true&amp;characterEncoding=utf8"/>
+            <property name="username" value="test"/>
+            <property name="password" value="test"/>
+            <property name="removeAbandoned" value="true"/>
+            <property name="removeAbandonedTimeout" value="60"/>
+        </connection>
+    </datasource>
+
+    <statements>
+        <sql id="query_all_users">select * from USERS where</sql>
+    </statements>
+</dao-config>

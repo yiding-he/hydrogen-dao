@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- logback 日志框架。配置文件说明：http://logback.qos.ch/manual/index.html -->
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- 控制台输出配置 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%-5level] %logger{20}:%line - %msg%n</pattern>
+            <!--<charset>GB18030</charset>-->
+        </encoder>
+    </appender>
+
+    <!--////////////////////////////////////////////////////////////-->
+
+    <!-- 配置全局缺省的输出渠道 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- 包输出级别 -->
+    <logger name="com.google" level="ERROR"/>
+    <logger name="java.io.mina" level="ERROR"/>
+    <logger name="org" level="ERROR"/>
+    <logger name="net" level="ERROR"/>
+
+    <logger name="com.hyd" level="DEBUG"/>
+    <logger name="other" level="DEBUG"/>
+
+</configuration>
