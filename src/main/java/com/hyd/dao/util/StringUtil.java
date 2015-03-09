@@ -43,6 +43,7 @@ public class StringUtil extends StringUtils {
 
         if (columnName.equalsIgnoreCase("abstract")
                 || columnName.equalsIgnoreCase("private")
+                || columnName.equalsIgnoreCase("protected")
                 || columnName.equalsIgnoreCase("static")
                 || columnName.equalsIgnoreCase("void")
                 || columnName.equalsIgnoreCase("interface")
