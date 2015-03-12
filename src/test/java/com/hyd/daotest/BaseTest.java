@@ -10,7 +10,7 @@ import org.junit.Before;
  */
 public abstract class BaseTest {
 
-    public static String DB_TYPE = "hsqldb";   // oracle, mysql, hsqldb
+    public static String DB_TYPE = "mysql";   // oracle, mysql, hsqldb
 
     protected DataSources dataSources = new DataSources();
 
