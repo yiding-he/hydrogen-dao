@@ -8,7 +8,6 @@ import com.hyd.dao.database.commandbuilder.MappedCommand;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.LogbackFixer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,9 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class DAO {
 
+    // initialization
     static {
-        LogbackFixer.fix();
+        HydrogenDAOInitializer.init();
     }
 
     public static final Date SYSDATE = new Date(0) {

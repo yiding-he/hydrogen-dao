@@ -5,7 +5,7 @@ import ch.qos.logback.classic.pattern.LineOfCallerConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * (description)
+ * 修改 logback 的输出方式
  * created at 2014/12/25
  *
  * @author Yiding
@@ -31,7 +31,7 @@ public class LogbackFixer {
         @Override
         public String convert(ILoggingEvent le) {
 
-            // 来自内部的日志取实际的行数
+            // hydrogen-dao 内部的日志取实际的行数
             if (le.getLoggerName().startsWith("com.hyd.dao.")) {
                 return super.convert(le);
             }
