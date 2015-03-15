@@ -26,7 +26,7 @@ for (User user: userList) {
 }
 ~~~
 
-### 执行带参数名的 SQL（方法之一）
+### 执行带参数名的 SQL
 
 ~~~Java
 MappedCommand cmd = 
