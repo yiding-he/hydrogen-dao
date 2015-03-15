@@ -26,7 +26,7 @@ for (User user: userList) {
 }
 ~~~
 
-### 执行带参数的 SQL（方法之一）
+### 执行带参数名的 SQL（方法之一）
 
 ~~~Java
 MappedCommand cmd = 
@@ -34,6 +34,17 @@ MappedCommand cmd =
         .setParam("role", "admin")
         .setParam("userid", 1, 2, 3, 4);
 dao.execute(cmd);
+~~~
+
+### 构造动态查询条件
+
+~~~Java
+dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
+        .From("USERS")
+        .Where("ID in ?", new int[]{10, 22, 135})      // 会自动扩展为 "ID in (?,?,?)"
+        .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会按照该条件查询
+        .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
+);
 ~~~
 
 ### 执行事务
