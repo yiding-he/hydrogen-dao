@@ -75,7 +75,9 @@ public class ResultSetUtil {
      *
      * @throws java.sql.SQLException 如果查询失败
      */
-    public static List<Object> readResultSet(ResultSet rs, Class clazz, int startPosition, int endPosition) throws Exception {
+    public static List<Object> readResultSet(
+            ResultSet rs, Class clazz, int startPosition, int endPosition) throws Exception { // NOSONAR
+
         ArrayList<Object> result = new ArrayList<Object>();
 
         // startPosition 是指向要读取的第一条记录之前的位置
@@ -120,7 +122,9 @@ public class ResultSetUtil {
      *
      * @throws java.sql.SQLException 如果查询失败
      */
-    public static Page readPageResultSet(ResultSet rs, Class clazz, int pageSize, int pageIndex) throws Exception {
+    public static Page readPageResultSet(
+            ResultSet rs, Class clazz, int pageSize, int pageIndex) throws Exception { // NOSONAR
+
         Page result = new Page();
 
         int startPos = pageSize < 0 ? -1 : pageIndex * pageSize;
@@ -131,7 +135,7 @@ public class ResultSetUtil {
         return result;
     }
 
-    public static HashMap[] readResultSet(ResultSet rs) throws Exception {
+    public static HashMap[] readResultSet(ResultSet rs) throws Exception { // NOSONAR
         List list = readResultSet(rs, null, -1, -1);
         return (HashMap[]) list.toArray(new HashMap[list.size()]);
     }

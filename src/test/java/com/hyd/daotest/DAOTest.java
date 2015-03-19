@@ -35,7 +35,7 @@ public class DAOTest extends BaseTest {
     public void testParameterizedQuery() throws Exception {
         DAO dao = dataSources.getDAO("test");
 
-        List<Row> users = dao.query("select * from USERS where USERNAME=?", "user1");
+        List<Row> users = dao.query("select * from USERS where USERNAME=?", "user001");
         assertFalse(users.isEmpty());
         assertEquals(1, users.size());
 
@@ -43,7 +43,7 @@ public class DAOTest extends BaseTest {
         assertFalse(users.isEmpty());
         assertEquals(INITIAL_ROWS_COUNT, users.size());
 
-        users = dao.query("select * from USERS where PASSWORD between ? and ?", "pass2", "pass7");
+        users = dao.query("select * from USERS where USERNAME between ? and ?", "user002", "user007");
         assertFalse(users.isEmpty());
         assertEquals(6, users.size());
     }
@@ -58,7 +58,7 @@ public class DAOTest extends BaseTest {
 
         User user = users.get(0);
         assertNotNull(user);
-        assertEquals("user1", user.getUsername());
+        assertEquals("user001", user.getUsername());
         assertEquals("pass1", user.getPassword());
         assertNotNull(user.getRegisterTime());
     }
@@ -110,7 +110,7 @@ public class DAOTest extends BaseTest {
     @Test
     public void testDelete() throws Exception {
         DAO dao = getDAO();
-        String username = "user" + (INITIAL_ROWS_COUNT - 1);
+        String username = String.format("user%03d", INITIAL_ROWS_COUNT - 1);
 
         List<Row> rows = dao.query("select * from USERS where username=?", username);
         assertEquals(1, rows.size());

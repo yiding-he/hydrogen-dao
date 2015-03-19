@@ -21,15 +21,15 @@ import java.util.*;
 @SuppressWarnings({"unchecked"})
 public class TypeConverter {
 
-    static final Logger log = LoggerFactory.getLogger(TypeConverter.class);
+    static final Logger LOG = LoggerFactory.getLogger(TypeConverter.class);
 
-    private static HashMap<String, String> convertBuffer = new HashMap<String, String>();
+    private static Map<String, String> convertBuffer = new HashMap<String, String>();
 
     private static ThreadLocal<List<String>> warnedMsgs = new ThreadLocal<List<String>>();
 
-    static Hashtable<Class, Class> primitiveToWrapper = new Hashtable<Class, Class>();
+    static Map<Class, Class> primitiveToWrapper = new HashMap<Class, Class>();
 
-    static Hashtable<Class, Class> wrapperToPrimitive = new Hashtable<Class, Class>();
+    static Map<Class, Class> wrapperToPrimitive = new HashMap<Class, Class>();
 
     static {
         primitiveToWrapper.put(Boolean.TYPE, Boolean.class);
@@ -48,6 +48,10 @@ public class TypeConverter {
         wrapperToPrimitive.put(Long.class, Long.TYPE);
         wrapperToPrimitive.put(Float.class, Float.TYPE);
         wrapperToPrimitive.put(Double.class, Double.TYPE);
+    }
+
+    private TypeConverter() {
+
     }
 
     public static Class getPrimitive(Class wrapperClass) {
@@ -69,8 +73,7 @@ public class TypeConverter {
      * @throws Exception 如果封装失败
      */
     @SuppressWarnings({"unchecked"})
-    public static List<Object> convert(Class clazz, List<Object> simpleResult)
-            throws Exception {
+    public static List<Object> convert(Class clazz, List<Object> simpleResult) throws Exception { // NOSONAR
         ArrayList<Object> result = new ArrayList<Object>();
 
         for (Object obj : simpleResult) {
@@ -116,7 +119,7 @@ public class TypeConverter {
             try {
                 fieldType = getFieldType(clazz, fieldName);
             } catch (IllegalAccessException e) {
-                // JavaBean 中找不到对应的属性
+                warn(clazz + " 中没有属性 '" + fieldName + "'", e);
                 continue;
             }
 
@@ -133,15 +136,17 @@ public class TypeConverter {
     }
 
     private static Class getFieldType(Class clazz, String fieldName) throws IllegalAccessException {
-        while (clazz != null && clazz != Object.class) {
+        Class tracingType = clazz;
+
+        while (tracingType != null && tracingType != Object.class) {
             try {
-                Field field = clazz.getDeclaredField(fieldName);
+                Field field = tracingType.getDeclaredField(fieldName);
                 if (field == null) {
                     throw new IllegalAccessException("找不到 " + clazz + " 的成员：" + fieldName);
                 }
                 return field.getType();
             } catch (NoSuchFieldException e) {
-                clazz = clazz.getSuperclass();
+                tracingType = tracingType.getSuperclass();
             }
         }
         throw new IllegalAccessException("找不到 " + clazz + " 的成员：" + fieldName);
@@ -162,33 +167,25 @@ public class TypeConverter {
      * @throws IOException  如果从流中读取内容失败
      */
     private static Object convertProperty(Object o, Class fieldType) throws SQLException, IOException {
+
         if (fieldType == Boolean.TYPE) {
             String str = String.valueOf(o);
             if (str.matches("^\\-?\\d+\\.?\\d+$")) {    // 如果该字段存储的是数字
-                return !str.equals("0");
+                return !"0".equals(str);
             } else {
-                return str.equalsIgnoreCase("true") || str.equalsIgnoreCase("yes");
+                return "true".equalsIgnoreCase(str) || "yes".equalsIgnoreCase(str);
             }
-        }
-
-        if (o == null) {
+        } else if (o == null) {
             return null;
-        }
-
-        // 转换 java.sql.Timestamp 对象
-        if (o instanceof Timestamp) {
+        } else if (o instanceof Timestamp) {
             return new Date(((Timestamp) o).getTime());
-        }
-
-        if (fieldType == String.class) {
+        } else if (fieldType == String.class) {
             return convertToString(o);
-        }
-
-        if (fieldType.isEnum() && o instanceof String) {
+        } else if (fieldType.isEnum() && o instanceof String) {
             return Enum.valueOf(fieldType, (String) o);
+        } else {
+            return o;
         }
-
-        return o;
     }
 
     private static String convertToString(Object o) {
@@ -215,7 +212,7 @@ public class TypeConverter {
         } else if (lob instanceof Blob) {
             return BlobReader.readString((Blob) lob, "Unicode");
         } else {
-            log.warn("参数不是 lob 对象：" + lob.getClass());
+            LOG.warn("参数不是 lob 对象：" + lob.getClass());
             return "";
         }
     }
@@ -233,7 +230,7 @@ public class TypeConverter {
             warnedMsgs.set(list);
         }
         if (!list.contains(msg)) {
-            log.warn(msg, e);
+            LOG.warn(msg, e);
             list.add(msg);
         }
     }
@@ -243,16 +240,16 @@ public class TypeConverter {
      * {@link com.hyd.dao.util.StringUtil#columnToProperty(String)}
      * 方法获取属性名，并放入缓存。
      *
-     * @param column_name 字段名
+     * @param columnName 字段名
      *
      * @return 属性名
      */
-    public static String getFieldName(String column_name) {
-        if (convertBuffer.get(column_name) == null) {
-            String fieldName = StringUtil.columnToProperty(column_name);
-            convertBuffer.put(column_name, fieldName);
+    public static String getFieldName(String columnName) {
+        if (convertBuffer.get(columnName) == null) {
+            String fieldName = StringUtil.columnToProperty(columnName);
+            convertBuffer.put(columnName, fieldName);
         }
-        return convertBuffer.get(column_name);
+        return convertBuffer.get(columnName);
     }
 
 }

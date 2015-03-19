@@ -37,11 +37,11 @@ import java.util.Map;
  */
 public class DefaultExecutor extends Executor {
 
-    static final Logger log = LoggerFactory.getLogger(DefaultExecutor.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultExecutor.class);
 
-    static final Logger batchLog = LoggerFactory.getLogger(DefaultExecutor.class.getName() + ".batch");
+    static final Logger BATCH_LOG = LoggerFactory.getLogger(DefaultExecutor.class.getName() + ".batch");
 
-    static final int timeout = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
+    static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
     private Statement st;
 
@@ -92,7 +92,7 @@ public class DefaultExecutor extends Executor {
             findLogger().debug("Query result：{}/{} records.", result.size(), result.getTotal());
             return result;
         } catch (Exception e) {
-            throw new DAOException("Query failed:", e, (rangedSql == null ? sql : rangedSql), params);
+            throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
         } finally {
             closeButConnection();
         }
@@ -121,9 +121,9 @@ public class DefaultExecutor extends Executor {
      */
     @SuppressWarnings("unchecked")
     private int queryCount(String sql, List params) {
-        String count_sql = getCountSql(sql);
-        List<Row> list = query(null, count_sql, params, -1, -1);
-        if (list.size() > 0) {
+        String countSql = getCountSql(sql);
+        List<Row> list = query(null, countSql, params, -1, -1);
+        if (!list.isEmpty()) {
             Row map = list.get(0);
             return map.getInteger("cnt", 0);
         } else {
@@ -179,7 +179,7 @@ public class DefaultExecutor extends Executor {
             findLogger().debug("Query result: {} records.", result.size());
             return result;
         } catch (Exception e) {
-            throw new DAOException("Query failed:", e, (rangedSql == null ? sql : rangedSql), params);
+            throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
         } finally {
             closeButConnection();
         }
@@ -190,7 +190,7 @@ public class DefaultExecutor extends Executor {
         try {
             Command command = QueryCommandBuilder.buildByKey(connection, tableName, key);
             List list = query(wrapperClass, command.getStatement(), command.getParams(), 0, 1);
-            return (T) (list.size() == 0 ? null : list.get(0));
+            return (T) (list.isEmpty() ? null : list.get(0));
         } catch (SQLException e) {
             throw new DAOException("Query failed:", e);
         }
@@ -209,18 +209,18 @@ public class DefaultExecutor extends Executor {
     private void executeQuery(String sql, List params) throws SQLException {
 
         // PreparerdStatement 可以不用就不用，以免占用过多 Oracle 的指针。
-        if (params == null || params.size() == 0) {
+        if (params == null || params.isEmpty()) {
             st = createNormalStatement();
-            if (timeout != -1) {
-                st.setQueryTimeout(timeout);
+            if (TIMEOUT != -1) {
+                st.setQueryTimeout(TIMEOUT);
             }
             rs = st.executeQuery(sql);
         } else {
             PreparedStatement ps = createPreparedStatement(sql);
             st = ps;
             insertParams(params);
-            if (timeout != -1) {
-                ps.setQueryTimeout(timeout);
+            if (TIMEOUT != -1) {
+                ps.setQueryTimeout(TIMEOUT);
             }
             rs = ps.executeQuery();
         }
@@ -294,18 +294,18 @@ public class DefaultExecutor extends Executor {
         printCommand(sql, params);
         try {
             // 执行语句
-            if (params == null || params.size() == 0) {
+            if (params == null || params.isEmpty()) {
                 st = createNormalStatement();
-                if (timeout != -1) {
-                    st.setQueryTimeout(timeout);
+                if (TIMEOUT != -1) {
+                    st.setQueryTimeout(TIMEOUT);
                 }
                 st.executeUpdate(sql);
             } else {
                 PreparedStatement ps = createPreparedStatement(sql);
                 st = ps;
                 insertParams(params, paramTypes);
-                if (timeout != -1) {
-                    ps.setQueryTimeout(timeout);
+                if (TIMEOUT != -1) {
+                    ps.setQueryTimeout(TIMEOUT);
                 }
                 ps.executeUpdate();
             }
@@ -393,14 +393,14 @@ public class DefaultExecutor extends Executor {
 
     public List call(String name, Object[] params) {
         try {
-            SpParam[] sp_params = StorageProsedureHelper.createSpParams(name, params, connection);
-            findLogger().debug("Calling procedure " + name + Arrays.asList(sp_params));
-            CallableStatement cs = StorageProsedureHelper.createCallableStatement(name, sp_params, connection);
-            if (timeout != -1) {
-                cs.setQueryTimeout(timeout);
+            SpParam[] spParams = StorageProsedureHelper.createSpParams(name, params, connection);
+            findLogger().debug("Calling procedure " + name + Arrays.asList(spParams));
+            CallableStatement cs = StorageProsedureHelper.createCallableStatement(name, spParams, connection);
+            if (TIMEOUT != -1) {
+                cs.setQueryTimeout(TIMEOUT);
             }
             cs.executeQuery();
-            return readResult(sp_params, cs);
+            return readResult(spParams, cs);
         } catch (IOException e) {
             throw new DAOException("Procedure failed: " + e.getMessage(), e, name, Arrays.asList(params));
         } catch (SQLException e) {
@@ -416,18 +416,18 @@ public class DefaultExecutor extends Executor {
             }
 
             findLogger().debug("Calling function " + name + Arrays.asList(params));
-            SpParam[] sp_params = FunctionHelper.createFunctionParams(name, params, connection);
-            int resultType = sp_params[0].getSqlType();
+            SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, connection);
+            int resultType = spParams[0].getSqlType();
 
             // 去掉第一个
-            sp_params = (SpParam[]) ArrayUtils.subarray(sp_params, 1, sp_params.length);
+            spParams = (SpParam[]) ArrayUtils.subarray(spParams, 1, spParams.length);
 
-            CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, sp_params, connection);
-            if (timeout != -1) {
-                cs.setQueryTimeout(timeout);
+            CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, connection);
+            if (TIMEOUT != -1) {
+                cs.setQueryTimeout(TIMEOUT);
             }
             cs.executeQuery();
-            return readResult(createOutputParams(resultType, sp_params), cs);
+            return readResult(createOutputParams(resultType, spParams), cs);
         } catch (DAOException e) {
             throw e;
         } catch (Exception e) {
@@ -513,7 +513,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private Logger findLogger() {
-        Logger logger = log;
+        Logger l = LOG;
 
         StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
         boolean daostarted = false;
@@ -526,12 +526,12 @@ public class DefaultExecutor extends Executor {
                 }
             } else {
                 if (!className.startsWith("com.hyd.dao.")) {
-                    logger = LoggerFactory.getLogger(className);
+                    l = LoggerFactory.getLogger(className);
                     break;
                 }
             }
         }
-        return logger;
+        return l;
     }
 
     private void printBatchCommand(BatchCommand command) {
@@ -541,16 +541,16 @@ public class DefaultExecutor extends Executor {
 
         List<List<Object>> params = command.getParams() == null ? new ArrayList<List<Object>>() : command.getParams();
 
-        if (batchLog.isDebugEnabled()) {
-            batchLog.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
+        if (BATCH_LOG.isDebugEnabled()) {
+            BATCH_LOG.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
             for (List<Object> param : params) {
-                batchLog.debug(param.toString());
+                BATCH_LOG.debug(param.toString());
             }
 
         } else {
-            Logger _log = findLogger();
-            if (_log.isDebugEnabled()) {
-                _log.debug("Execute batch:" + sql.replaceAll("\n", " ") + "[" + params.size() + " groups]");
+            Logger l = findLogger();
+            if (l.isDebugEnabled()) {
+                l.debug("Execute batch:" + sql.replaceAll("\n", " ") + "[" + params.size() + " groups]");
             }
         }
     }
@@ -563,7 +563,7 @@ public class DefaultExecutor extends Executor {
             try {
                 rs.close();
             } catch (SQLException e) {
-                // do nothing.
+                LOG.error("", e);
             }
         }
 
@@ -571,7 +571,7 @@ public class DefaultExecutor extends Executor {
             try {
                 st.close();
             } catch (SQLException e) {
-                //do nothing.
+                LOG.error("", e);
             }
         }
     }
@@ -582,7 +582,7 @@ public class DefaultExecutor extends Executor {
                 connection.close();
             }
         } catch (SQLException e) {
-            log.error("", e);
+            LOG.error("", e);
         }
     }
 
@@ -593,7 +593,7 @@ public class DefaultExecutor extends Executor {
                     connection.commit();
                 }
             } catch (SQLException e) {
-                log.error("", e);
+                LOG.error("", e);
             }
 
             closeConnection();
@@ -605,7 +605,7 @@ public class DefaultExecutor extends Executor {
         try {
             return connection == null || connection.isClosed();
         } catch (SQLException e) {
-            log.error("Error checking connection: " + e.getMessage(), e);
+            LOG.error("Error checking connection: " + e.getMessage(), e);
             return true;
         }
     }
@@ -617,7 +617,7 @@ public class DefaultExecutor extends Executor {
                     connection.rollback();
                 }
             } catch (SQLException e) {
-                log.error("", e);
+                LOG.error("", e);
             }
             closeConnection();
         }

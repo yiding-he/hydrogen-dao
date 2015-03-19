@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,9 +26,9 @@ public class CommandBuilderHelper {
 
     // 缓存已经生成的字段info
 
-    private static HashMap<String, ColumnInfo[]> cache = new HashMap<String, ColumnInfo[]>();
+    private static Map<String, ColumnInfo[]> cache = new HashMap<String, ColumnInfo[]>();
 
-    static final Logger log = LoggerFactory.getLogger(CommandBuilderHelper.class);
+    static final Logger LOG = LoggerFactory.getLogger(CommandBuilderHelper.class);
 
     protected Connection connection;
 
@@ -101,23 +102,23 @@ public class CommandBuilderHelper {
             return cache.get(fullTableName);
         }
 
-        log.debug("Reading columns of table {}...", fullTableName);
+        LOG.debug("Reading columns of table {}...", fullTableName);
 
-        schema = schema.toUpperCase();
-        tableName = fixTableName(tableName);
+        String fixedSchema = schema.toUpperCase();
+        String fixedTableName = fixTableName(tableName);
 
         DatabaseMetaData dbMeta = connection.getMetaData();
-        ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(schema), getTableName(tableName), "%");
-        ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(schema), getTableName(tableName));
+        ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), getTableName(fixedTableName), "%");
+        ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), getTableName(fixedTableName));
 
-        ArrayList<String> keyNames = new ArrayList<String>();
+        List<String> keyNames = new ArrayList<String>();
 
         // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
         while (keys.next()) {
             keyNames.add(keys.getString(columnMeta.columnName));
         }
 
-        ArrayList<ColumnInfo> infos = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> infos = new ArrayList<ColumnInfo>();
 
         // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
         while (columns.next()) {
@@ -128,7 +129,7 @@ public class CommandBuilderHelper {
             info.setPrimary(keyNames.contains(columnName));
             info.setComment(columns.getString(columnMeta.remarks));
             info.setSize(Integer.parseInt(columns.getString(columnMeta.columnSize)));
-            info.setNullable(columns.getString(columnMeta.nullable).equals("1"));
+            info.setNullable("1".equals(columns.getString(columnMeta.nullable)));
             infos.add(info);
         }
 
@@ -139,7 +140,7 @@ public class CommandBuilderHelper {
             columns.close();
             keys.close();
         } catch (SQLException e) {
-            // do nothing.
+            LOG.error("", e);
         }
         return result;
     }
@@ -168,8 +169,8 @@ public class CommandBuilderHelper {
      *
      * @return 生成的 SQL 语句参数
      */
-    public static ArrayList generateParams(ColumnInfo[] infos, Object object) {
-        ArrayList<Object> params = new ArrayList<Object>();
+    public static List generateParams(ColumnInfo[] infos, Object object) {
+        List<Object> params = new ArrayList<Object>();
         for (ColumnInfo info : infos) {
             if (info.getDataType() != DAO.SYSDATE_TYPE) {
                 params.add(generateParamValue(object, info));
@@ -189,7 +190,7 @@ public class CommandBuilderHelper {
     public static Object generateParamValue(Object object, ColumnInfo info) {
         String fieldName = StringUtil.columnToProperty(info.getColumnName());
 
-        String string_value;
+        String strValue;
         Object value;
 
         // 如果 object 是一个 Map，则根据字段名取值；否则根据属性名取值。
@@ -202,14 +203,15 @@ public class CommandBuilderHelper {
             if (value == null) {
                 return null;
             }
-            string_value = StringUtil.valueOf(value);
+            strValue = StringUtil.valueOf(value);
         } else {
 
             Field field;
             try {
                 field = object.getClass().getDeclaredField(fieldName);
             } catch (NoSuchFieldException e) {
-                log.debug("Property '" + fieldName + "' not exists for class " + object.getClass().getCanonicalName());
+                String className = object.getClass().getCanonicalName();
+                LOG.debug("Property '" + fieldName + "' not exists for class " + className, e);
                 return null;
             }
 
@@ -227,25 +229,25 @@ public class CommandBuilderHelper {
             if (value == null) {
                 return null;
             }
-            string_value = StringUtil.valueOf(value);
+            strValue = StringUtil.valueOf(value);
         }
 
         // 获取返回值
         switch (info.getDataType()) {
-            case Types.NUMERIC:     // 1. 如果是数字类型的字段，则根据 string_value 进行转换；
+            case Types.NUMERIC:     // 1. 如果是数字类型的字段，则根据 strValue 进行转换；
             case Types.DECIMAL:
             case Types.BIGINT:
             case Types.DOUBLE:
             case Types.FLOAT:
             case Types.INTEGER:
-                if (StringUtil.isEmptyString(string_value)) {
+                if (StringUtil.isEmptyString(strValue)) {
                     return null;
                 } else {
                     try {
-                        return new BigDecimal(string_value);
+                        return new BigDecimal(strValue);
                     } catch (NumberFormatException e) {
                         throw new DataConversionException(
-                                "Conversion from value '" + string_value + "' to column " + info + " failed.", e);
+                                "Conversion from value '" + strValue + "' to column " + info + " failed.", e);
                     }
                 }
 
@@ -263,7 +265,7 @@ public class CommandBuilderHelper {
             case Types.NCLOB:
                 return value;
             default:                // 4. 其他类型则直接使用 string_value。
-                return string_value;
+                return strValue;
         }
     }
 

@@ -79,7 +79,7 @@ public class InsertCommandBuilder {
 
         FQN fqn = new FQN(conn, tableName);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
-        ArrayList list = CommandBuilderHelper.generateParams(infos, sample);
+        List list = CommandBuilderHelper.generateParams(infos, sample);
 
         for (int i = 0, listSize = list.size(); i < listSize; i++) {
             Object propertyValue = list.get(i);
@@ -124,7 +124,7 @@ public class InsertCommandBuilder {
      */
     private static Command buildCommand(String tableName, ColumnInfo[] infos, Object object, Connection conn)
             throws SQLException {
-        ArrayList params = CommandBuilderHelper.generateParams(infos, object);
+        List params = CommandBuilderHelper.generateParams(infos, object);
         List<Object> finalParams = new ArrayList<Object>();
 
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
