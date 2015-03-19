@@ -11,7 +11,6 @@ import java.util.*;
  *
  * @author yiding.he
  */
-@SuppressWarnings("squid:S00100")
 public class SQL {
 
     //在这个类中本人坚持这种“不符合规范”的命名方式，因为考虑到
@@ -32,23 +31,23 @@ public class SQL {
 
     /////////////////////////////////////////////////////////
 
-    public static Select Select(String columns) {
+    public static Select Select(String columns) {  // NOSONAR
         return new Select(columns);
     }
 
-    public static Select Select(String... columns) {
+    public static Select Select(String... columns) {  // NOSONAR
         return new Select(columns);
     }
 
-    public static Update Update(String table) {
+    public static Update Update(String table) {  // NOSONAR
         return new Update(table);
     }
 
-    public static Insert Insert(String table) {
+    public static Insert Insert(String table) {  // NOSONAR
         return new Insert(table);
     }
 
-    public static Delete Delete(String table) {
+    public static Delete Delete(String table) {  // NOSONAR
         return new Delete(table);
     }
 
@@ -166,7 +165,7 @@ public class SQL {
             return result;
         }
 
-        public T Where(String statement) {
+        public T Where(String statement) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -174,7 +173,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(String column, Object value) {
+        public T Where(String column, Object value) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -182,7 +181,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(boolean exp, String statement) {
+        public T Where(boolean exp, String statement) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -192,7 +191,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(boolean exp, String column, Object value) {
+        public T Where(boolean exp, String column, Object value) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -202,80 +201,80 @@ public class SQL {
             return (T) this;
         }
 
-        public T And(String statement) {
+        public T And(String statement) {  // NOSONAR
             this.conditions.add(new StatementPair(Pref.AND, statement));
             return (T) this;
         }
 
-        public T And(String column, Object value) {
+        public T And(String column, Object value) {  // NOSONAR
             this.conditions.add(new Pair(Pref.AND, column, value));
             return (T) this;
         }
 
-        public T And(boolean exp, String statement) {
+        public T And(boolean exp, String statement) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new StatementPair(Pref.AND, statement));
             }
             return (T) this;
         }
 
-        public T And(boolean exp, String column, Object value) {
+        public T And(boolean exp, String column, Object value) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new Pair(Pref.AND, column, value));
             }
             return (T) this;
         }
 
-        public T AndIfNotEmpty(String column, Object value) {
+        public T AndIfNotEmpty(String column, Object value) {  // NOSONAR
             return And(!isEmpty(value), column, value);
         }
 
-        public T Or(String statement) {
+        public T Or(String statement) {  // NOSONAR
             this.conditions.add(new StatementPair(Pref.OR, statement));
             return (T) this;
         }
 
-        public T Or(String column, Object value) {
+        public T Or(String column, Object value) {  // NOSONAR
             this.conditions.add(new Pair(Pref.OR, column, value));
             return (T) this;
         }
 
-        public T Or(boolean exp, String statement) {
+        public T Or(boolean exp, String statement) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new StatementPair(Pref.OR, statement));
             }
             return (T) this;
         }
 
-        public T Or(boolean exp, String column, Object value) {
+        public T Or(boolean exp, String column, Object value) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new Pair(Pref.OR, column, value));
             }
             return (T) this;
         }
 
-        public T OrIfNotEmpty(String column, Object value) {
+        public T OrIfNotEmpty(String column, Object value) {  // NOSONAR
             return Or(!isEmpty(value), column, value);
         }
 
-        public T Append(String statement) {
+        public T Append(String statement) {  // NOSONAR
             this.conditions.add(new StatementPair(statement));
             return (T) this;
         }
 
-        public T Append(String column, Object value) {
+        public T Append(String column, Object value) {  // NOSONAR
             this.conditions.add(new Pair(column, value));
             return (T) this;
         }
 
-        public T Append(boolean exp, String statement) {
+        public T Append(boolean exp, String statement) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new StatementPair(statement));
             }
             return (T) this;
         }
 
-        public T Append(boolean exp, String column, Object value) {
+        public T Append(boolean exp, String column, Object value) {  // NOSONAR
             if (exp) {
                 this.conditions.add(new Pair(column, value));
             }
@@ -352,18 +351,18 @@ public class SQL {
             this.table = table;
         }
 
-        public Insert Values(String column, Object value) {
+        public Insert Values(String column, Object value) {  // NOSONAR
             return Values(!isEmpty(value), column, value);
         }
 
-        public Insert Values(boolean ifTrue, String column, Object value) {
+        public Insert Values(boolean ifTrue, String column, Object value) {  // NOSONAR
             if (ifTrue) {
                 pairs.add(new Pair(column, value));
             }
             return this;
         }
 
-        public Insert Values(Map<String, Object> map) {
+        public Insert Values(Map<String, Object> map) {  // NOSONAR
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 Values(entry.getKey(), entry.getValue());
             }
@@ -427,35 +426,35 @@ public class SQL {
             return statement;
         }
 
-        public Update Set(boolean exp, String column, Object value) {
+        public Update Set(boolean exp, String column, Object value) {  // NOSONAR
             if (exp) {
                 this.updates.add(new Pair(column, value));
             }
             return this;
         }
 
-        public Update Set(String column, Object value) {
+        public Update Set(String column, Object value) {  // NOSONAR
             this.updates.add(new Pair(column, value));
             return this;
         }
 
-        public Update Set(String setStatement) {
+        public Update Set(String setStatement) {  // NOSONAR
             this.updates.add(new StatementPair(setStatement));
             return this;
         }
 
-        public Update Set(boolean exp, String setStatement) {
+        public Update Set(boolean exp, String setStatement) {  // NOSONAR
             if (exp) {
                 this.updates.add(new StatementPair(setStatement));
             }
             return this;
         }
 
-        public Update SetIfNotNull(String column, Object value) {
+        public Update SetIfNotNull(String column, Object value) {  // NOSONAR
             return Set(value != null, column, value);
         }
 
-        public Update SetIfNotEmpty(String column, Object value) {
+        public Update SetIfNotEmpty(String column, Object value) {  // NOSONAR
             return Set(!isEmpty(value), column, value);
         }
     }
@@ -483,22 +482,22 @@ public class SQL {
             this.columns = StringUtil.join(columns, ",");
         }
 
-        public Select From(String from) {
+        public Select From(String from) {  // NOSONAR
             this.from = from;
             return this;
         }
 
-        public Select From(String... from) {
+        public Select From(String... from) {  // NOSONAR
             this.from = StringUtil.join(from, ",");
             return this;
         }
 
-        public Select OrderBy(String orderBy) {
+        public Select OrderBy(String orderBy) {  // NOSONAR
             this.orderBy = orderBy;
             return this;
         }
 
-        public Select GroupBy(String groupBy) {
+        public Select GroupBy(String groupBy) {  // NOSONAR
             this.groupBy = groupBy;
             return this;
         }
@@ -536,8 +535,6 @@ public class SQL {
             return new Command(this.statement, this.params);
         }
     }
-
-    //CHECKSTYLE:ON
 }
 
 
