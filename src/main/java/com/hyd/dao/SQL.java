@@ -11,9 +11,8 @@ import java.util.*;
  *
  * @author yiding.he
  */
+@SuppressWarnings("squid:S00100")
 public class SQL {
-
-    //CHECKSTYLE:OFF
 
     //在这个类中本人坚持这种“不符合规范”的命名方式，因为考虑到
     //SQL 属于不同语种，即使是用 Java 语法来模拟 SQL，也应该保持这种感觉
