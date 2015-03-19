@@ -70,7 +70,7 @@ public abstract class BaseTest {
 
     /////////////////////////////////////////////////////////
 
-    public static final int INITIAL_ROWS_COUNT = 10;
+    public static final int INITIAL_ROWS_COUNT = 100;
 
     @Before
     public void setUp() {
@@ -80,12 +80,14 @@ public abstract class BaseTest {
         dao.execute("delete from USERS");
 
         for (int i = 1; i < INITIAL_ROWS_COUNT + 1; i++) {
+            String username = String.format("user%03d", i);
+
             if (isOracle()) {
                 dao.execute("insert into USERS(ID, USERNAME, PASSWORD, ROLE_ID) " +
-                        "values (SEQ_USER_ID.nextval,?,?,?)", "user" + i, "pass" + i, 1);
+                        "values (SEQ_USER_ID.nextval,?,?,?)", username, "pass" + i, 1);
             } else {
                 dao.execute("insert into USERS(USERNAME, PASSWORD, ROLE_ID) " +
-                        "values (?,?,?)", "user" + i, "pass" + i, 1);
+                        "values (?,?,?)", username, "pass" + i, 1);
             }
         }
 

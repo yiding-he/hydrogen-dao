@@ -24,6 +24,7 @@
     <logger name="net" level="ERROR"/>
 
     <logger name="com.hyd" level="DEBUG"/>
+    <logger name="com.hyd.daotest.BaseTest" level="ERROR"/>
     <logger name="other" level="DEBUG"/>
 
 </configuration>

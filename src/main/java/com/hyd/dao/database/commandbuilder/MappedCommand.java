@@ -63,6 +63,11 @@ public class MappedCommand {
         return this;
     }
 
+    public MappedCommand setParam(String name, Object... values) {
+        this.params.put(name, values);
+        return this;
+    }
+
     public Command toCommand() {
         Command command = new Command();
         Pattern pattern = Pattern.compile("#(\\S+)#");

@@ -95,4 +95,17 @@ public class User {
     public void setLoginCount(int loginCount) {
         this.loginCount = loginCount;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", registerTime=" + registerTime +
+                ", roleId=" + roleId +
+                ", birthday=" + birthday +
+                ", loginCount=" + loginCount +
+                '}';
+    }
 }

@@ -19,4 +19,12 @@ public class MappedCommandTest {
         System.out.println(command.getStatement());
         System.out.println(command.getParams());
     }
+
+    @Test
+    public void testToCommand2() throws Exception {
+        MappedCommand cmd = new MappedCommand(
+                "update USERS set ROLE=#role# where ID=#userid#")
+                .setParam("role", "admin")
+                .setParam("userid", 1);
+    }
 }

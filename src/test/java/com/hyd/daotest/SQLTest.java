@@ -1,7 +1,9 @@
 package com.hyd.daotest;
 
+import com.hyd.dao.DAO;
 import com.hyd.dao.SQL;
 import com.hyd.dao.database.commandbuilder.Command;
+import demo.Demo03_CreateTable;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -98,5 +100,18 @@ public class SQLTest {
         print(
                 SQL.Delete("USER").Where("ID in ?", Arrays.asList(1, 2, 3, 4, 5))
         );
+    }
+
+    @Test
+    public void testDemo() throws Exception {
+        String username = null;
+        String disabled = null;
+        DAO dao = Demo03_CreateTable.getDAO();
+dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
+        .From("USERS")
+        .Where("ID in ?", new int[]{10, 22, 135})
+        .And(disabled != null, "DISABLED=?", disabled)
+        .AndIfNotEmpty("DISABLED=?", disabled)
+);
     }
 }
