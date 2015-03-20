@@ -6,11 +6,10 @@ import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.commandbuilder.MappedCommand;
 import com.hyd.dao.database.executor.Executor;
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,7 +26,7 @@ public class DAO {
 
     // initialization
     static {
-        HydrogenDAOInitializer.init();
+        // HydrogenDAOInitializer.init();
     }
 
     public static final Date SYSDATE = new Date(0) {
@@ -40,7 +39,7 @@ public class DAO {
 
     public static final int SYSDATE_TYPE = 33257679;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DAO.class);
+    private static final Logger LOG = Logger.getLogger(DAO.class);
 
     /////////////////////////////////////////////////////////
 

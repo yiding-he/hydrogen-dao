@@ -2,8 +2,7 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.TransactionException;
 import com.hyd.dao.database.executor.Executor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hyd.dao.log.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,7 +21,7 @@ public class TransactionManager {
 
     public static final int DEFAULT_ISOLATION_LEVEL = Connection.TRANSACTION_READ_COMMITTED;
 
-    static final Logger LOG = LoggerFactory.getLogger(TransactionManager.class);
+    static final Logger LOG = Logger.getLogger(TransactionManager.class);
 
     /////////////////////////////////////////////////////////
 
@@ -140,7 +139,7 @@ public class TransactionManager {
             executor.close();
         }
 
-        LOG.info("Transaction level {} commited.", _level);
+        LOG.info("Transaction level " + _level + " commited.");
         level.set(_level - 1);
     }
 
@@ -158,7 +157,7 @@ public class TransactionManager {
             executor.rollbackAndClose();
         }
 
-        LOG.info("Transaction level {} rollbacked.", _level);
+        LOG.info("Transaction level " + _level + " rollbacked.");
         level.set(_level - 1);
     }
 

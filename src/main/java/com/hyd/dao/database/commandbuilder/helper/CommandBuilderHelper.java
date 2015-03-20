@@ -5,11 +5,10 @@ import com.hyd.dao.DataConversionException;
 import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.connection.ConnectionUtil;
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.LockFactory;
 import com.hyd.dao.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -28,7 +27,7 @@ public class CommandBuilderHelper {
 
     private static Map<String, ColumnInfo[]> cache = new HashMap<String, ColumnInfo[]>();
 
-    static final Logger LOG = LoggerFactory.getLogger(CommandBuilderHelper.class);
+    static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
 
     protected Connection connection;
 
@@ -102,7 +101,7 @@ public class CommandBuilderHelper {
             return cache.get(fullTableName);
         }
 
-        LOG.debug("Reading columns of table {}...", fullTableName);
+        LOG.debug("Reading columns of table " + fullTableName + "...");
 
         String fixedSchema = schema.toUpperCase();
         String fixedTableName = fixTableName(tableName);

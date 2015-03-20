@@ -2,9 +2,8 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.ResultSetUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -36,7 +35,7 @@ import java.sql.Statement;
  */
 public class RowIterator {
 
-    static final Logger LOG = LoggerFactory.getLogger(RowIterator.class);
+    static final Logger LOG = Logger.getLogger(RowIterator.class);
 
     private ResultSet rs;
 

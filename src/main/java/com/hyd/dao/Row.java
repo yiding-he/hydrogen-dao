@@ -1,9 +1,8 @@
 package com.hyd.dao;
 
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.CaseInsensitiveHashMap;
 import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.Map;
  */
 public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<String, Object> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Row.class);
+    private static final Logger LOG = Logger.getLogger(Row.class);
 
     /**
      * 缺省日期格式

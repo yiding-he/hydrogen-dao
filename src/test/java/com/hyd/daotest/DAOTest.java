@@ -3,6 +3,7 @@ package com.hyd.daotest;
 import com.hyd.dao.DAO;
 import com.hyd.dao.Row;
 import com.hyd.dao.database.RowIterator;
+import com.hyd.dao.log.Logger;
 import com.hyd.daotest.bean.LobRecord;
 import com.hyd.daotest.bean.User;
 import org.junit.Test;
@@ -18,6 +19,11 @@ import static junit.framework.Assert.*;
  * @author yiding.he
  */
 public class DAOTest extends BaseTest {
+
+    static {
+        org.apache.log4j.BasicConfigurator.configure();
+        Logger.setLoggerFactory(Logger.LOG4J_FACTORY);
+    }
 
     @Test
     public void testSimpleQuery() throws Exception {

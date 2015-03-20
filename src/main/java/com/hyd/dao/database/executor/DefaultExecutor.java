@@ -11,6 +11,7 @@ import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
 import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.database.function.FunctionHelper;
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProsedureHelper;
@@ -20,8 +21,6 @@ import com.hyd.dao.util.TypeUtil;
 import oracle.jdbc.OracleTypes;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.*;
@@ -37,9 +36,9 @@ import java.util.Map;
  */
 public class DefaultExecutor extends Executor {
 
-    static final Logger LOG = LoggerFactory.getLogger(DefaultExecutor.class);
+    static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
 
-    static final Logger BATCH_LOG = LoggerFactory.getLogger(DefaultExecutor.class.getName() + ".batch");
+    static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
 
     static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
@@ -89,7 +88,7 @@ public class DefaultExecutor extends Executor {
             result.setPageSize(pageSize);
             result.setPageIndex(pageIndex);
 
-            findLogger().debug("Query result：{}/{} records.", result.size(), result.getTotal());
+            LOG.debug(findCaller() + "|Query result：" + result.size() + "/" + result.getTotal() + " records.");
             return result;
         } catch (Exception e) {
             throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
@@ -176,7 +175,7 @@ public class DefaultExecutor extends Executor {
                 result = ResultSetUtil.readResultSet(rs, clazz, startPosition, endPosition);
             }
 
-            findLogger().debug("Query result: {} records.", result.size());
+            LOG.debug(findCaller() + "|Query result: " + result.size() + " records.");
             return result;
         } catch (Exception e) {
             throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
@@ -394,7 +393,7 @@ public class DefaultExecutor extends Executor {
     public List call(String name, Object[] params) {
         try {
             SpParam[] spParams = StorageProsedureHelper.createSpParams(name, params, connection);
-            findLogger().debug("Calling procedure " + name + Arrays.asList(spParams));
+            LOG.debug(findCaller() + "(procedure)" + name + Arrays.asList(spParams));
             CallableStatement cs = StorageProsedureHelper.createCallableStatement(name, spParams, connection);
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
@@ -415,7 +414,7 @@ public class DefaultExecutor extends Executor {
                 throw new DAOException("Target database is not oracle.");
             }
 
-            findLogger().debug("Calling function " + name + Arrays.asList(params));
+            LOG.debug(findCaller() + "(function)" + name + Arrays.asList(params));
             SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, connection);
             int resultType = spParams[0].getSqlType();
 
@@ -508,17 +507,16 @@ public class DefaultExecutor extends Executor {
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 
-        findLogger().debug("Execute SQL({}): {} {}",
-                info.getDsName(), sql.replaceAll("\n", " "), (params == null ? "" : params.toString()));
+        LOG.debug(findCaller() + "(" + info.getDsName() + "): " +
+                sql.replaceAll("\n", " ") + " " + (params == null ? "" : params.toString()));
     }
 
-    private Logger findLogger() {
-        Logger l = LOG;
-
+    private String findCaller() {
         StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
         boolean daostarted = false;
         for (StackTraceElement traceElement : traceElements) {
             String className = traceElement.getClassName();
+            int lineNumber = traceElement.getLineNumber();
 
             if (!daostarted) {
                 if (className.startsWith("com.hyd.dao.")) {
@@ -526,12 +524,11 @@ public class DefaultExecutor extends Executor {
                 }
             } else {
                 if (!className.startsWith("com.hyd.dao.")) {
-                    l = LoggerFactory.getLogger(className);
-                    break;
+                    return className + ":" + lineNumber;
                 }
             }
         }
-        return l;
+        return "";
     }
 
     private void printBatchCommand(BatchCommand command) {
@@ -541,16 +538,15 @@ public class DefaultExecutor extends Executor {
 
         List<List<Object>> params = command.getParams() == null ? new ArrayList<List<Object>>() : command.getParams();
 
-        if (BATCH_LOG.isDebugEnabled()) {
+        if (BATCH_LOG.isEnabled(Logger.Level.Debug)) {
             BATCH_LOG.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
             for (List<Object> param : params) {
                 BATCH_LOG.debug(param.toString());
             }
 
         } else {
-            Logger l = findLogger();
-            if (l.isDebugEnabled()) {
-                l.debug("Execute batch:" + sql.replaceAll("\n", " ") + "[" + params.size() + " groups]");
+            if (LOG.isEnabled(Logger.Level.Debug)) {
+                LOG.debug("Execute batch:" + sql.replaceAll("\n", " ") + "[" + params.size() + " groups]");
             }
         }
     }

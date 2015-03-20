@@ -1,9 +1,8 @@
 package com.hyd.dao.database.type;
 
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -21,7 +20,7 @@ import java.util.*;
 @SuppressWarnings({"unchecked"})
 public class TypeConverter {
 
-    static final Logger LOG = LoggerFactory.getLogger(TypeConverter.class);
+    static final Logger LOG = Logger.getLogger(TypeConverter.class);
 
     private static Map<String, String> convertBuffer = new HashMap<String, String>();
 
