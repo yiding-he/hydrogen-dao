@@ -9,7 +9,14 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
 
-下面是一个使用例子：
+##更新
+
+####2015-03-20: 
+
+* 以自适应的方式支持 logback/log4j/log4j2 三种日志输出框架。使用 hydrogen-dao 的项目可以自行选择。
+* 版本升级到 2.3.0-SNAPSHOT。
+
+##使用例子
 
 ### 查询记录
 
