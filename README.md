@@ -29,9 +29,9 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 DAO dao = getDAO();
 
 List<User> userList = dao.query(
-        User.class,                                         // 包装类
+        User.class,                                         // 包装类（可选）
         "select * from USER where NAME like ? and ROLE=?",  // 语句
-        "admin%", 3);                                       // 参数
+        "admin%", 3);                                       // 参数（可选）
         
 for (User user: userList) {
     System.out.println("user name: " + user.getName());
