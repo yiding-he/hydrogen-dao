@@ -9,6 +9,7 @@ import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
 import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
+import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.log.Logger;
@@ -46,13 +47,8 @@ public class DefaultExecutor extends Executor {
 
     private ResultSet rs;
 
-    /**
-     * 构造函数
-     *
-     * @param connection 数据库连接
-     */
-    public DefaultExecutor(Connection connection) {
-        super(connection);
+    public DefaultExecutor(String dsName, Connection connection) {
+        super(dsName, connection);
     }
 
     @SuppressWarnings("unchecked")
@@ -64,16 +60,11 @@ public class DefaultExecutor extends Executor {
         // endPos 不包含
         int endPos = startPos + pageSize;
 
-        String rangedSql = getRangedSql(sql, startPos, endPos);
-
-        if (rangedSql != null) {
-            printCommand(rangedSql, params);
-        } else {
-            printCommand(sql, params);
-        }
-
+        String rangedSql = null;
         try {
+            rangedSql = getRangedSql(sql, startPos, endPos);
 
+            printCommand(rangedSql == null ? sql : rangedSql, params);
             executeQuery(rangedSql == null ? sql : rangedSql, params);
 
             // 如果生成了分页语句，则读取所有结果，否则读取部分结果。
@@ -106,8 +97,8 @@ public class DefaultExecutor extends Executor {
      *
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
-    protected String getRangedSql(String sql, int startPos, int endPos) {
-        return null;
+    protected String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
+        return CommandBuilderHelper.getHelper(connection).getRangedSql(sql, startPos, endPos);
     }
 
     /**
@@ -120,18 +111,22 @@ public class DefaultExecutor extends Executor {
      */
     @SuppressWarnings("unchecked")
     private int queryCount(String sql, List params) {
-        String countSql = getCountSql(sql);
-        List<Row> list = query(null, countSql, params, -1, -1);
-        if (!list.isEmpty()) {
-            Row map = list.get(0);
-            return map.getInteger("cnt", 0);
-        } else {
-            return 0;
+        try {
+            String countSql = getCountSql(sql);
+            List<Row> list = query(null, countSql, params, -1, -1);
+            if (!list.isEmpty()) {
+                Row map = list.get(0);
+                return map.getInteger("cnt", 0);
+            } else {
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e);
         }
     }
 
-    protected String getCountSql(String sql) {
-        return "select count(*) cnt from (" + sql + ")";
+    protected String getCountSql(String sql) throws SQLException {
+        return CommandBuilderHelper.getHelper(connection).getCountSql(sql);
     }
 
     public RowIterator queryIterator(String sql, List params) {
@@ -156,16 +151,13 @@ public class DefaultExecutor extends Executor {
      * @return 查询结果
      */
     public List query(Class clazz, String sql, List params, int startPosition, int endPosition) {
-        String rangedSql = endPosition <= 0 ?
-                null : getRangedSql(sql, startPosition, endPosition);
 
-        if (rangedSql != null) {
-            printCommand(rangedSql, params);
-        } else {
-            printCommand(sql, params);
-        }
-
+        String rangedSql = null;
         try {
+            rangedSql = endPosition <= 0 ?
+                    null : getRangedSql(sql, startPosition, endPosition);
+
+            printCommand(rangedSql == null ? sql : rangedSql, params);
             executeQuery(rangedSql == null ? sql : rangedSql, params);
 
             List<Object> result;
@@ -597,15 +589,6 @@ public class DefaultExecutor extends Executor {
         info.setClosed(true);
     }
 
-    public boolean isClosed() {
-        try {
-            return connection == null || connection.isClosed();
-        } catch (SQLException e) {
-            LOG.error("Error checking connection: " + e.getMessage(), e);
-            return true;
-        }
-    }
-
     public void rollbackAndClose() {
         if (connection != null) {
             try {
@@ -618,6 +601,15 @@ public class DefaultExecutor extends Executor {
             closeConnection();
         }
         info.setClosed(true);
+    }
+
+    public boolean isClosed() {
+        try {
+            return connection == null || connection.isClosed();
+        } catch (SQLException e) {
+            LOG.error("Error checking connection: " + e.getMessage(), e);
+            return true;
+        }
     }
 
 }

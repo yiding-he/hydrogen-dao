@@ -13,22 +13,27 @@ import java.util.Map;
 
 /**
  * 执行数据库操作的接口
- * 注意：凡是获取 Executor 对象的方法，必须在完成操作之后手动调用 finish 方法。
+ * <p/>
+ * Executor 持有 Connection 对象。如果没有在事务中，Executor 对象是一次性的，
+ * 执行完第一个 SQL 命令后就会关闭连接（或返还给连接池），且不能再被使用；
+ * 而如果在事务中，Executor 对象会被 TransactionManager 缓存起来，直到事务结束。
  *
  * @author <a href="mailto:yiding.he@gmail.com">yiding_he</a>
  */
 public abstract class Executor {
 
-    protected Connection connection;
+    protected Connection connection;    // 数据库连接
 
-    protected ExecutorInfo info;
+    protected ExecutorInfo info;        // 当前状态
 
     /**
      * 构造函数
      *
+     * @param dsName     数据源名称
      * @param connection 数据库连接
      */
-    public Executor(Connection connection) {
+    public Executor(String dsName, Connection connection) {
+        this.info = new ExecutorInfo(dsName);
         this.connection = connection;
     }
 

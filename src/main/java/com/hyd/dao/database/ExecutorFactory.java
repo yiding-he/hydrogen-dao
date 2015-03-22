@@ -1,22 +1,15 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.database.executor.DefaultExecutor;
 import com.hyd.dao.database.executor.Executor;
-import com.hyd.dao.database.executor.MysqlExecutor;
-import com.hyd.dao.database.executor.OracleExecutor;
-import com.hyd.dao.snapshot.ExecutorInfo;
-import com.hyd.dao.snapshot.Snapshot;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * 根据配置文件构造 Executor 对象的工厂。Executor 持有 Connection 对象，
- * 是一次性的，Executor 对象执行完后即可丢弃，除非是在事务当中。在事务当中，
- * TransactionManager 将缓存 Executor 对象，作为事务当中执行下一次语句时用。
+ * 构造 Executor 对象的工厂。
  *
  * @author <a href="mailto:yiding.he@gmail.com">yiding_he</a>
  */
@@ -85,40 +78,10 @@ public class ExecutorFactory {
 
         try {
             Connection connection = getConnection(autoCommit);
-            Executor executor = getExecutorByDatabaseType(connection);
-            ExecutorInfo info = new ExecutorInfo(this.dataSourceName, executor);
-            Snapshot.getInstance(this.dataSourceName).addExecutorInfo(info);
-            executor.setInfo(info);
-            return executor;
+            return new DefaultExecutor(dataSourceName, connection);
         } catch (SQLException e) {
             throw new DAOException(e);
         }
-    }
-
-    /**
-     * 根据数据库类型返回相应的 Executor 子类
-     *
-     * @param connection 数据库连接
-     *
-     * @return 相应的 Executor 子类
-     *
-     * @throws SQLException 如果读取数据库信息失败
-     */
-    private Executor getExecutorByDatabaseType(Connection connection) throws SQLException {
-        Executor executor;
-        String type = ConnectionUtil.getDatabaseType(connection);
-
-        if (type.contains("Oracle")) {
-            executor = new OracleExecutor(connection);
-
-        } else if (type.contains("MySQL")) {
-            executor = new MysqlExecutor(connection);
-
-        } else {
-            executor = new DefaultExecutor(connection);
-        }
-
-        return executor;
     }
 
     /**

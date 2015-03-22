@@ -5,26 +5,25 @@ import com.hyd.dao.database.executor.Executor;
 import java.util.Date;
 
 /**
- * 保存 Executor 执行信息。直接调用 Executor 获取数据可能会遇到阻塞。
+ * 保存 Executor 执行信息。因为直接调用 Executor 获取数据可能会遇到阻塞，因此
+ * 在 Executor 中包含一个 ExecutorInfo 对象以避免阻塞。当
  */
 public class ExecutorInfo {
 
-    private String dsName;
+    private String dsName;          // Executor 属于哪个数据源
 
-    private String lastCommand;
+    private String lastCommand;     // 最近执行的 SQL 语句
 
-    private Date lastExecuteTime;
+    private Date lastExecuteTime;   // 最近执行 SQL 语句的时间
 
-    private boolean closed;
+    private boolean closed;         // Executor 是否已关闭
 
-    private Executor executor;
+    private Snapshot snapshot;      // 关联的快照（用于主动移除自己）
 
-    private Snapshot snapshot;
-
-    public ExecutorInfo(String dsName, Executor executor) {
+    public ExecutorInfo(String dsName) {
         this.dsName = dsName;
-        this.executor = executor;
-        this.executor.setInfo(this);
+        this.snapshot = Snapshot.getInstance(dsName);
+        this.snapshot.addExecutorInfo(this);
     }
 
     public Snapshot getSnapshot() {
@@ -33,10 +32,6 @@ public class ExecutorInfo {
 
     public void setSnapshot(Snapshot snapshot) {
         this.snapshot = snapshot;
-    }
-
-    public Executor getExecutor() {
-        return executor;
     }
 
     public boolean isClosed() {
@@ -78,5 +73,14 @@ public class ExecutorInfo {
                 ", lastCommand='" + lastCommand + '\'' +
                 ", lastExecuteTime=" + lastExecuteTime +
                 '}';
+    }
+
+    public void addToExecutor(Executor executor) {
+        executor.setInfo(this);
+    }
+
+    public void addToSnapshot(Snapshot snapshot) {
+        snapshot.addExecutorInfo(this);
+        this.snapshot = snapshot;
     }
 }

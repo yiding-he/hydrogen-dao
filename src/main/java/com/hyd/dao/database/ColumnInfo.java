@@ -1,24 +1,48 @@
 package com.hyd.dao.database;
 
 /**
- * 用来描述库表字段信息的类。字段信息包括字段名、数据类型以及是否是主键。
+ * 用来描述库表字段信息的类
  */
 public class ColumnInfo {
 
+    /**
+     * 字段名
+     */
     private String columnName;
 
+    /**
+     * 数据类型，参考 {@link java.sql.Types}
+     */
     private int dataType;
 
+    /**
+     * 是否是主键
+     */
     private boolean primary;
 
+    /**
+     * 是否自动增长
+     */
     private boolean autoIncrement;
 
+    /**
+     * 序列名
+     */
     private String sequenceName;
 
+    /**
+     * 注释
+     */
     private String comment;
 
+    /**
+     * 最大大小
+     */
     private int size;
 
+    /**
+     * 是否可以为空
+     */
     private boolean nullable;
 
     public boolean isNullable() {
@@ -54,14 +78,29 @@ public class ColumnInfo {
         return size;
     }
 
+    /**
+     * 设置字段最大长度
+     *
+     * @param size 字段最大长度
+     */
     public void setSize(int size) {
         this.size = size;
     }
 
+    /**
+     * 获取注释
+     *
+     * @return 注释
+     */
     public String getComment() {
         return comment;
     }
 
+    /**
+     * 设置注释
+     *
+     * @param comment 注释
+     */
     public void setComment(String comment) {
         this.comment = comment;
     }
@@ -122,14 +161,15 @@ public class ColumnInfo {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ColumnInfo");
-        sb.append("{columnName='").append(columnName).append('\'');
-        sb.append(", dataType=").append(dataType);
-        sb.append(", primary=").append(primary);
-        sb.append(", comment='").append(comment).append('\'');
-        sb.append(", maxLength=").append(size);
-        sb.append('}');
-        return sb.toString();
+        return "ColumnInfo{" +
+                "columnName='" + columnName + '\'' +
+                ", dataType=" + dataType +
+                ", primary=" + primary +
+                ", autoIncrement=" + autoIncrement +
+                ", sequenceName='" + sequenceName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", size=" + size +
+                ", nullable=" + nullable +
+                '}';
     }
 }

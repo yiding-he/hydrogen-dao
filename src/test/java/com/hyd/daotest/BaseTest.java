@@ -60,7 +60,7 @@ public abstract class BaseTest {
 
     /////////////////////////////////////////////////////////
 
-    public static final int INITIAL_ROWS_COUNT = 100;
+    public static final int INITIAL_ROWS_COUNT = 20;
 
     @Before
     public void setUp() {

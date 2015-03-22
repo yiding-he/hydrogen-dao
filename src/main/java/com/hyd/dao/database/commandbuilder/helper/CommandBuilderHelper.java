@@ -288,4 +288,14 @@ public class CommandBuilderHelper {
     public String getSysdateMark() {
         return "CURRENT_TIMESTAMP";
     }
+
+    // 根据当前的 SQL 语句生成带查询范围的语句
+    public String getRangedSql(String sql, int startPos, int endPos) {
+        return null;
+    }
+
+    // 根据当前的 SQL 语句生成返回查询结果数量的语句
+    public String getCountSql(String sql) {
+        return "select count(*) cnt from (" + sql + ")";
+    }
 }

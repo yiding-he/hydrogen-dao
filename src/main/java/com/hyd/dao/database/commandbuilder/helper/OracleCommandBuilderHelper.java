@@ -1,5 +1,7 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
+import com.hyd.dao.util.ResultSetUtil;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -26,5 +28,16 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
     @Override
     public String getSysdateMark() {
         return "sysdate";
+    }
+
+    @Override
+    public String getRangedSql(String sql, int startPos, int endPos) {
+        startPos += 1;
+
+        String sql_prefix = "select * from ( select pagnation_wrapper.*, rownum " +
+                ResultSetUtil.PAGNATION_WRAPPER_COLUMN_NAME + " from (";
+        String sql_suffix = ") pagnation_wrapper) where " +
+                ResultSetUtil.PAGNATION_WRAPPER_COLUMN_NAME + " between " + startPos + " and " + endPos;
+        return sql_prefix + sql + sql_suffix;
     }
 }

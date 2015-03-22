@@ -54,6 +54,15 @@ public class DAOTest extends BaseTest {
     }
 
     @Test
+    public void testQueryRange() throws Exception {
+        DAO dao = dataSources.getDAO("test");
+        List<Row> users = dao.queryRange("select * from USERS where USERNAME>? order by USERNAME", 5, 15, "user001");
+        assertFalse(users.isEmpty());
+        assertEquals(10, users.size());
+        assertEquals("user007", users.get(0).getString("USERNAME"));
+    }
+
+    @Test
     public void testQueryBean() throws Exception {
         DAO dao = dataSources.getDAO("test");
 
