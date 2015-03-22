@@ -11,15 +11,15 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ##更新
 
-####2015-03-20: 
-
-* 以自适应的方式支持 logback/log4j/log4j2 三种日志输出框架。使用 hydrogen-dao 的项目可以自行选择。
-* 版本升级到 2.3.0-SNAPSHOT。
-
 ####2015-03-22:
 
 * 将数据库差异集中到 CommandBuilderHelper 的子类中去，去掉 DefaultExecutor 的子类。
 * 添加对 HSQLDB 分页查询的支持
+
+####2015-03-20: 
+
+* 以自适应的方式支持 logback/log4j/log4j2 三种日志输出框架。使用 hydrogen-dao 的项目可以自行选择。
+* 版本升级到 2.3.0-SNAPSHOT。
 
 ##使用例子
 
