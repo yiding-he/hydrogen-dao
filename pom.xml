@@ -27,6 +27,7 @@
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
+            <optional>true</optional>
         </dependency>
 
         <!-- Logging -->
@@ -55,16 +56,19 @@
             <version>LATEST</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/local-lib/ojdbc6.jar</systemPath>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.2.8</version>
+            <optional>true</optional>
         </dependency>
 
         <!-- Unit Testing -->

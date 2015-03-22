@@ -2,6 +2,7 @@ package com.hyd.daotest;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
+import com.hyd.dao.util.DBCPDataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.Before;
 
@@ -15,29 +16,18 @@ public abstract class BaseTest {
     protected DataSources dataSources = new DataSources();
 
     protected BasicDataSource createOracleDataSource() {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("oracle.jdbc.OracleDriver");
-        dataSource.setUrl("jdbc:oracle:thin:@192.168.1.200:1521:xfireorc");
-        dataSource.setUsername("DAOTEST");
-        dataSource.setPassword("DAOTEST");
-        return dataSource;
+        return DBCPDataSource.newOracleDataSource(
+                "192.168.1.200", 1521, "xfireorc", "DAOTEST", "DAOTEST");
     }
 
     protected BasicDataSource createMySQLDataSource() {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost/dao-test?useUnicode=true&amp;characterEncoding=utf8");
-        dataSource.setUsername("dao-test");
-        dataSource.setPassword("dao-test");
-        return dataSource;
+        return DBCPDataSource.newMySqlDataSource(
+                "localhost", 3306, "dao-test", "dao-test", "dao-test", true, "utf8");
     }
 
     protected BasicDataSource createHSQLDBTestDataSource() {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-        dataSource.setUrl("jdbc:hsqldb:hsql://localhost/xdb");
-        dataSource.setUsername("SA");
-        return dataSource;
+        return DBCPDataSource.newRemoteHsqldbDataSource(
+                "localhost", 9001, "xdb", "SA", null);
     }
 
     {

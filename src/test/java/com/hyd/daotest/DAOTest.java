@@ -22,7 +22,6 @@ public class DAOTest extends BaseTest {
 
     static {
         org.apache.log4j.BasicConfigurator.configure();
-        Logger.setLoggerFactory(Logger.LOG4J_FACTORY);
     }
 
     @Test
