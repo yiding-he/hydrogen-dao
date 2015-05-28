@@ -11,6 +11,10 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ##更新
 
+####2015-05-28:
+
+* 修复了一个对 SQL.Generatable 对象调用多次 toCommand() 方法返回的内容不一致的 BUG
+
 ####2015-03-22:
 
 * 将数据库差异集中到 CommandBuilderHelper 的子类中去，去掉 DefaultExecutor 的子类。
