@@ -83,7 +83,9 @@ public class DAOTest extends BaseTest {
 
         Map<String, Object> user = new HashMap<String, Object>();
         Long id = 0L;
-        user.put("id", id);
+        if (!isAutoIncrementEnabled()) {
+            user.put("id", id);
+        }
         user.put("username", "admin1");
         user.put("register_time", new Date());
         user.put("other_properties", "blah blah");  // 表中不存在的字段不影响插入
@@ -104,7 +106,9 @@ public class DAOTest extends BaseTest {
         Long id = 0L;
 
         User user = new User();
-        user.setId(id);
+        if (!isAutoIncrementEnabled()) {
+            user.setId(id);
+        }
         user.setPassword("adminpass2");
         user.setUsername("admin2");
         user.setBirthday(new Date());
@@ -158,13 +162,19 @@ public class DAOTest extends BaseTest {
     @Test
     public void testInsertBlob() throws Exception {
         DAO dao = getDAO();
-        dao.execute("insert into LOBTEST(id, BLOB_CONTENT) values(?,?)", 2, "你好".getBytes());
+        if (isAutoIncrementEnabled()) {
+            dao.execute("insert into LOBTEST(BLOB_CONTENT) values(?)", (Object)"你好".getBytes());
+        } else {
+            dao.execute("insert into LOBTEST(id, BLOB_CONTENT) values(?,?)", 2, "你好".getBytes());
+        }
     }
 
     @Test
     public void testUpdateBlob() throws Exception {
         DAO dao = getDAO();
-        dao.execute("update LOBTEST set BLOB_CONTENT=? where ID=?", "111111111111".getBytes(), 1);
+        int id = dao.queryFirst("select ID from LOBTEST").getInteger("id", -1);
+        assertFalse(id == -1);
+        dao.execute("update LOBTEST set BLOB_CONTENT=? where ID=?", "99999999".getBytes(), id);
     }
 
     @Test

@@ -483,14 +483,25 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果创建失败
      */
-    private Statement createNormalStatement() throws SQLException {
-        // 这两个参数的选择是有讲究的，参见：
-        // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
-        return connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    protected Statement createNormalStatement() throws SQLException {
+        return connection.createStatement(getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
-    private PreparedStatement createPreparedStatement(String sql) throws SQLException {
-        return connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    protected PreparedStatement createPreparedStatement(String sql) throws SQLException {
+        return connection.prepareStatement(sql, getResultSetType(), ResultSet.CONCUR_READ_ONLY);
+    }
+
+    protected int getResultSetType() throws SQLException {
+
+        // Oracle 可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
+        // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
+        // 但是 SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
+
+        if (ConnectionUtil.isSqlServer(connection)) {
+            return ResultSet.TYPE_SCROLL_SENSITIVE;
+        } else {
+            return ResultSet.TYPE_FORWARD_ONLY;
+        }
     }
 
     ////////////////////////////////////////////////////////////////

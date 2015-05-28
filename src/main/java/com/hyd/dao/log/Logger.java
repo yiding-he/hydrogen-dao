@@ -101,7 +101,7 @@ public class Logger {
             Field field = type.getField(memberName);
             return field.get(obj);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 

@@ -25,6 +25,10 @@ public class ConnectionUtil {
         return getDatabaseType(connection).contains("HSQL");
     }
 
+    public static boolean isSqlServer(Connection connection) throws SQLException {
+        return getDatabaseType(connection).contains("Microsoft SQL Server");
+    }
+
     public static boolean isSequenceSupported(Connection conn) throws SQLException {
         return isOracle(conn);
     }

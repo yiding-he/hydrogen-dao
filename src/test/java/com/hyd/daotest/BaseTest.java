@@ -2,52 +2,87 @@ package com.hyd.daotest;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
+import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.util.DBCPDataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.Before;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author yiding.he
  */
 public abstract class BaseTest {
 
-    public static String DB_TYPE = "mysql";   // oracle, mysql, hsqldb
+    public static String DB_TYPE = "sqlserver";   // oracle, mysql, hsqldb, sqlserver
 
     protected DataSources dataSources = new DataSources();
 
-    protected BasicDataSource createOracleDataSource() {
+    protected DataSource createOracleDataSource() {
         return DBCPDataSource.newOracleDataSource(
                 "192.168.1.200", 1521, "xfireorc", "DAOTEST", "DAOTEST");
     }
 
-    protected BasicDataSource createMySQLDataSource() {
+    protected DataSource createMySQLDataSource() {
         return DBCPDataSource.newMySqlDataSource(
                 "localhost", 3306, "dao-test", "dao-test", "dao-test", true, "utf8");
     }
 
-    protected BasicDataSource createHSQLDBTestDataSource() {
+    protected DataSource createHSQLDBTestDataSource() {
         return DBCPDataSource.newRemoteHsqldbDataSource(
                 "localhost", 9001, "xdb", "SA", null);
     }
 
+    protected DataSource createSQLServerTestDataSource() {
+        String url = "jdbc:sqlserver://localhost:1433;databaseName=master";
+        String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+        BasicDataSource ds = new BasicDataSource();
+        ds.setUrl(url);
+        ds.setDriverClassName(driver);
+        ds.setUsername("daotest");
+        ds.setPassword("daotest");
+        return ds;
+    }
+
     {
-        BasicDataSource ds;
+        DataSource ds;
         if (DB_TYPE.equals("oracle")) {
             ds = createOracleDataSource();
         } else if (DB_TYPE.equals("mysql")) {
             ds = createMySQLDataSource();
         } else if (DB_TYPE.equals("hsqldb")) {
             ds = createHSQLDBTestDataSource();
+        } else if (DB_TYPE.equals("sqlserver")) {
+            ds = createSQLServerTestDataSource();
         } else {
             throw new IllegalStateException("Unknown DB_TYPE '" + DB_TYPE + "'");
+        }
+
+        try {
+            Connection connection = ds.getConnection();
+            System.out.println("本次测试使用的数据库：" + ConnectionUtil.getDatabaseType(connection));
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         dataSources.getDataSources().put("test", ds);
         dataSources.getDataSources().put("test2", ds);
     }
 
-    protected boolean isOracle() {
+    protected boolean isSequenceEnabled() {
         return "oracle".equals(DB_TYPE);
+    }
+
+    protected boolean isAutoIncrementEnabled() {
+        return "mysql".equals(DB_TYPE) || "hsqldb".equals(DB_TYPE) || "sqlserver".equals(DB_TYPE);
+    }
+
+    protected boolean isLobSupported() {
+        return "oracle".equals(DB_TYPE) || "sqlserver".equals(DB_TYPE);
     }
 
     protected DAO getDAO() {
@@ -69,27 +104,46 @@ public abstract class BaseTest {
         ////////////////////////////////////////////////////////////////
         dao.execute("delete from USERS");
 
+        AtomicInteger id = new AtomicInteger(0);
         for (int i = 1; i < INITIAL_ROWS_COUNT + 1; i++) {
             String username = String.format("user%03d", i);
 
-            if (isOracle()) {
+            if (isSequenceEnabled()) {
                 dao.execute("insert into USERS(ID, USERNAME, PASSWORD, ROLE_ID) " +
                         "values (SEQ_USER_ID.nextval,?,?,?)", username, "pass" + i, 1);
-            } else {
+            } else if (isAutoIncrementEnabled()) {
                 dao.execute("insert into USERS(USERNAME, PASSWORD, ROLE_ID) " +
                         "values (?,?,?)", username, "pass" + i, 1);
+            } else {
+                dao.execute("insert into USERS(ID, USERNAME, PASSWORD, ROLE_ID) " +
+                        "values (?, ?,?,?)", id.incrementAndGet(), username, "pass" + i, 1);
             }
         }
 
         ////////////////////////////////////////////////////////////////
         dao.execute("delete from ROLES");
-        dao.execute("insert into ROLES(ID, NAME) values(?, ?)", 1, "admin");
+        if (isAutoIncrementEnabled()) {
+            dao.execute("insert into ROLES(NAME) values(?)", "admin");
+        } else {
+            dao.execute("insert into ROLES(ID, NAME) values(?, ?)", 1, "admin");
+        }
 
         ////////////////////////////////////////////////////////////////
-        dao.execute("delete from LOBTEST");
 
-        if (isOracle()) {
-            dao.execute("insert into LOBTEST(id, blob_content, clob_content) values(1, empty_blob(), empty_clob())");
+        if (isLobSupported()) {
+            dao.execute("delete from LOBTEST");
+
+            if (isAutoIncrementEnabled()) {
+                if ("sqlserver".equals(DB_TYPE)) {
+                    dao.execute("insert into LOBTEST(blob_content, clob_content) values(" +
+                            " convert(varbinary(max),'111111你好'), '222222你好'" +
+                            ")");
+                } else {
+                    dao.execute("insert into LOBTEST(blob_content, clob_content) values('111111你好', '222222你好')");
+                }
+            } else {
+                dao.execute("insert into LOBTEST(id, blob_content, clob_content) values(1, empty_blob(), empty_clob())");
+            }
         }
     }
 

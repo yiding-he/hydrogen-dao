@@ -397,6 +397,7 @@ public class SQL {
 
         @Override
         public Command toCommand() {
+            this.params.clear();
             this.statement = "update " + table +
                     " set " + generateSetBlock() + " " + generateWhereBlock();
 
@@ -504,6 +505,7 @@ public class SQL {
 
         @Override
         public Command toCommand() {
+            this.params.clear();
             this.statement = "select " + this.columns + " from " + this.from + " ";
 
             this.statement += generateWhereBlock();
@@ -531,6 +533,7 @@ public class SQL {
 
         @Override
         public Command toCommand() {
+            this.params.clear();
             this.statement = "delete from " + table + generateWhereBlock();
             return new Command(this.statement, this.params);
         }

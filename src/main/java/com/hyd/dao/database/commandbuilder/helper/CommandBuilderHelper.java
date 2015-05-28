@@ -59,6 +59,8 @@ public class CommandBuilderHelper {
             return new MySqlCommandBuilderHelper(conn);
         } else if (ConnectionUtil.isHsqlDB(conn)) {
             return new HSQLDBCommandBuildHelper(conn);
+        } else if (ConnectionUtil.isSqlServer(conn)) {
+            return new SQLServerCommandBuilderHelper(conn);
         } else {
             return new CommandBuilderHelper(conn);
         }
@@ -121,11 +123,14 @@ public class CommandBuilderHelper {
 
         // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
         while (columns.next()) {
-            ColumnInfo info = new ColumnInfo();
+
             String columnName = columns.getString(columnMeta.columnName);
+            boolean primaryKey = isPrimaryKey(columns.getString("TYPE_NAME"), keyNames, columnName);
+
+            ColumnInfo info = new ColumnInfo();
             info.setColumnName(columnName);
             info.setDataType(Integer.parseInt(columns.getString(columnMeta.dataType)));
-            info.setPrimary(keyNames.contains(columnName));
+            info.setPrimary(primaryKey);
             info.setComment(columns.getString(columnMeta.remarks));
             info.setSize(Integer.parseInt(columns.getString(columnMeta.columnSize)));
             info.setNullable("1".equals(columns.getString(columnMeta.nullable)));
@@ -142,6 +147,11 @@ public class CommandBuilderHelper {
             LOG.error("", e);
         }
         return result;
+    }
+
+    private boolean isPrimaryKey(String typeName, List<String> keyNames, String columnName) {
+        return (typeName != null && typeName.toLowerCase().contains("identity"))
+                || keyNames.contains(columnName);
     }
 
     protected String getTableName(String tableName) {
