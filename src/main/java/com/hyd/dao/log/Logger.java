@@ -2,6 +2,7 @@ package com.hyd.dao.log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * 支持 logback, log4j 和 log4j2 的日志框架
@@ -91,6 +92,8 @@ public class Logger {
             Method method = type.getMethod(methodName, types);
             return method.invoke(obj, args);
         } catch (Exception e) {
+            System.err.println(obj + ", " + className + ", " + methodName + ", "
+                    + Arrays.toString(args) + ", " + Arrays.toString(types));
             throw new RuntimeException(e);
         }
     }

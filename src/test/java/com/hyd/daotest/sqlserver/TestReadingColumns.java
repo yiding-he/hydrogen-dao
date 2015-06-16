@@ -1,6 +1,5 @@
 package com.hyd.daotest.sqlserver;
 
-import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.daotest.BaseTest;
 import org.junit.Test;
@@ -8,7 +7,6 @@ import org.junit.Test;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
@@ -29,6 +27,15 @@ public class TestReadingColumns extends BaseTest {
         DataSource dataSource = dataSources.getDataSources().get("test");
         readCatalogs(dataSource);
         readTableColumns(dataSource, "master", "%", "USERS", "%");
+    }
+
+    @Test
+    public void testListTables() throws Exception {
+        DataSource dataSource = dataSources.getDataSources().get("test");
+        Connection connection = dataSource.getConnection();
+        ResultSet tables = connection.getMetaData().getTables("exam", "exam", "%", null);
+        outputResultset(tables);
+        connection.close();
     }
 
     private void readCatalogs(DataSource dataSource) throws Exception {
@@ -56,7 +63,7 @@ public class TestReadingColumns extends BaseTest {
         connection.close();
     }
 
-    private static void outputResultset(ResultSet rs) throws Exception {
+    public static void outputResultset(ResultSet rs) throws Exception {
         HashMap[] maps = ResultSetUtil.readResultSet(rs);
         for (HashMap map : maps) {
             System.out.println(map);

@@ -37,13 +37,13 @@ public abstract class BaseTest {
     }
 
     protected DataSource createSQLServerTestDataSource() {
-        String url = "jdbc:sqlserver://localhost:1433;databaseName=master";
+        String url = "jdbc:sqlserver://localhost:1433;databaseName=exam";
         String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         BasicDataSource ds = new BasicDataSource();
         ds.setUrl(url);
         ds.setDriverClassName(driver);
-        ds.setUsername("daotest");
-        ds.setPassword("daotest");
+        ds.setUsername("exam");
+        ds.setPassword("exam");
         return ds;
     }
 

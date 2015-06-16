@@ -5,6 +5,7 @@ import com.hyd.dao.Row;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.ResultSetUtil;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -33,7 +34,7 @@ import java.sql.Statement;
  * }
  * </code></p>
  */
-public class RowIterator {
+public class RowIterator implements Closeable {
 
     static final Logger LOG = Logger.getLogger(RowIterator.class);
 
@@ -71,6 +72,7 @@ public class RowIterator {
         }
     }
 
+    @Override
     public void close() {
         if (rs != null) {
             Statement st;

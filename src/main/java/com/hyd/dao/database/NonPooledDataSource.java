@@ -4,10 +4,8 @@ import com.hyd.dao.DAOException;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.logging.Logger;
 
 /**
  * 实现一个最简单的数据源
@@ -107,6 +105,10 @@ public class NonPooledDataSource implements DataSource {
 
     public int getLoginTimeout() throws SQLException {
         throw new UnsupportedOperationException("Not supported by NonPooledDataSource");
+    }
+
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
     }
 
     public void setLoginTimeout(int seconds) throws SQLException {
