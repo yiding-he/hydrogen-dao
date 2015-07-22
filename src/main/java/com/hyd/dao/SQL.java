@@ -117,6 +117,10 @@ public class SQL {
 
         public abstract Command toCommand();
 
+        public String getTable() {
+            return table;
+        }
+
         protected String joinNames(List<Pair> pairs) {
             if (pairs.isEmpty()) {
                 return "";
@@ -342,8 +346,6 @@ public class SQL {
     /////////////////////////////////////////////////////////
 
     public static class Insert extends Generatable<Insert> {
-
-        private String table;
 
         private List<Pair> pairs = new ArrayList<Pair>();
 

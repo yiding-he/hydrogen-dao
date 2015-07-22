@@ -38,6 +38,10 @@ public class DataSources {
         this.dataSources.put(dataSourceName, dataSource);
     }
 
+    public boolean contains(String dsName) {
+        return this.dataSources.containsKey(dsName);
+    }
+
     /**
      * 操作数据库连接。使用本方法无需在 ConnectionExecutor 中手动关闭连接。即使出现异常，连接也会关闭。
      *
@@ -80,6 +84,11 @@ public class DataSources {
      * @return DAO 对象
      */
     public DAO getDAO(String dsName, boolean standAlone) {
+
+        if (!contains(dsName)) {
+            return null;
+        }
+
         DAO dao = new DAO(dsName, standAlone);
         dao.setExecutorFactory(getExecutorFactory(dsName));
         return dao;
@@ -95,6 +104,11 @@ public class DataSources {
      * @return DAO 对象
      */
     public <T extends DAO> T getDAO(String dsName, boolean standAlone, Class<T> subclassType) {
+
+        if (!contains(dsName)) {
+            return null;
+        }
+
         try {
             T dao = subclassType.getConstructor(String.class, Boolean.TYPE).newInstance(dsName, standAlone);
             dao.setExecutorFactory(getExecutorFactory(dsName));
