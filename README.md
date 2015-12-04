@@ -54,6 +54,8 @@ dao.execute(cmd);
 
 ### 构造动态查询条件
 
+_不用写恶心的 `where 1=1` 了_
+
 ~~~Java
 dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
         .From("USERS")
@@ -71,7 +73,7 @@ final DAO dao = getDAO();
 DAO.runTransactionWithException(new Runnable() {  // 所有事务都以 Runnable 的方式执行，简单明了
     public void run() {
         dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
-        throw new Exception();    // 之前的 insert 将会回滚，同时异常抛出
+        throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
     }
 });
 ~~~
