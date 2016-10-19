@@ -22,7 +22,8 @@ public class ConnectionUtil {
     }
 
     public static boolean isHsqlDB(Connection connection) throws SQLException {
-        return getDatabaseType(connection).contains("HSQL");
+        String databaseType = getDatabaseType(connection);
+        return databaseType.contains("HSQL") || databaseType.contains("H2");
     }
 
     public static boolean isSqlServer(Connection connection) throws SQLException {

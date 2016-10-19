@@ -5,6 +5,7 @@ import com.hyd.dao.DataSources;
 import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.util.DBCPDataSource;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 
 import javax.sql.DataSource;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class BaseTest {
 
-    public static String DB_TYPE = "sqlserver";   // oracle, mysql, hsqldb, sqlserver
+    public static String DB_TYPE = "h2";   // oracle, mysql, hsqldb, sqlserver, h2
 
     protected DataSources dataSources = new DataSources();
 
@@ -47,6 +48,10 @@ public abstract class BaseTest {
         return ds;
     }
 
+    protected DataSource createH2DataSource() {
+        return JdbcConnectionPool.create("jdbc:h2:mem:db1", "sa", "");
+    }
+
     {
         DataSource ds;
         if (DB_TYPE.equals("oracle")) {
@@ -57,6 +62,8 @@ public abstract class BaseTest {
             ds = createHSQLDBTestDataSource();
         } else if (DB_TYPE.equals("sqlserver")) {
             ds = createSQLServerTestDataSource();
+        } else if (DB_TYPE.equals("h2")) {
+            ds = createH2DataSource();
         } else {
             throw new IllegalStateException("Unknown DB_TYPE '" + DB_TYPE + "'");
         }
