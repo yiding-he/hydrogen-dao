@@ -12,11 +12,11 @@ import java.util.Map;
  *
  * @author Yiding
  */
-public class Demo04_InsertData {
+public class Demo04_InsertData extends DemoBase {
 
     // 本示例介绍如何向表中插入记录
     public static void main(String[] args) {
-        DAO dao = Demo03_CreateTable.getDAO();
+        DAO dao = getDAO();
 
         createTable(dao);
 

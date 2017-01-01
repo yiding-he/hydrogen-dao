@@ -2,12 +2,9 @@ package demo;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
-import com.hyd.dao.DataSources;
 import com.hyd.daotest.hsqldb.TestReadingColumns;
-import org.apache.commons.dbcp.BasicDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 
 /**
  * (description)
@@ -15,9 +12,7 @@ import java.sql.Connection;
  *
  * @author Yiding
  */
-public class Demo03_CreateTable {
-
-    private static DataSources dataSources;
+public class Demo03_CreateTable extends DemoBase {
 
     public static void main(String[] args) {
         DAO dao = getDAO();
@@ -49,16 +44,5 @@ public class Demo03_CreateTable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static DAO getDAO() {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-        dataSource.setUrl("jdbc:hsqldb:mem:demodb");
-        dataSource.setUsername("SA");
-
-        dataSources = new DataSources();
-        dataSources.setDataSource("demodb1", dataSource);
-        return dataSources.getDAO("demodb1");
     }
 }

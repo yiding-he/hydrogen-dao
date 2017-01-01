@@ -4,7 +4,6 @@ import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.util.DBCPDataSource;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 
@@ -38,14 +37,7 @@ public abstract class BaseTest {
     }
 
     protected DataSource createSQLServerTestDataSource() {
-        String url = "jdbc:sqlserver://localhost:1433;databaseName=exam";
-        String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-        BasicDataSource ds = new BasicDataSource();
-        ds.setUrl(url);
-        ds.setDriverClassName(driver);
-        ds.setUsername("exam");
-        ds.setPassword("exam");
-        return ds;
+        return DBCPDataSource.newSqlServerDataSource("localhost", 1433, "exam", "exam", "exam");
     }
 
     protected DataSource createH2DataSource() {

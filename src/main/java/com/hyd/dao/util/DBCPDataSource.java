@@ -1,6 +1,9 @@
 package com.hyd.dao.util;
 
-import org.apache.commons.dbcp.BasicDataSource;
+
+import org.apache.commons.dbcp2.BasicDataSource;
+
+import javax.sql.DataSource;
 
 /**
  * 创建基于 DBCP 的 DataSource 对象
@@ -45,6 +48,15 @@ public class DBCPDataSource {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
         ds.setUrl("jdbc:hsqldb:hsql://" + host + ":" + port + "/" + database);
+        ds.setUsername(username);
+        ds.setPassword(password);
+        return ds;
+    }
+
+    public static DataSource newSqlServerDataSource(String host, int port, String database, String username, String password) {
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        ds.setUrl("jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + database);
         ds.setUsername(username);
         ds.setPassword(password);
         return ds;

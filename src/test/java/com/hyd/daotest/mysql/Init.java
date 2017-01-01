@@ -1,7 +1,7 @@
 package com.hyd.daotest.mysql;
 
 import com.hyd.dao.DataSources;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.util.HashMap;

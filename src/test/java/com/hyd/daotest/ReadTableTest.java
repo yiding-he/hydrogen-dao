@@ -6,12 +6,11 @@ import com.hyd.dao.Row;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.util.DBCPDataSource;
-import org.apache.commons.dbcp.BasicDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * (description)
@@ -22,7 +21,7 @@ import java.util.Map;
 public class ReadTableTest {
 
     public static void main(String[] args) throws Exception {
-        BasicDataSource dataSource =
+        DataSource dataSource =
                 DBCPDataSource.newOracleDataSource("192.168.102.2", 1521, "hnancrm", "ucr_cen1", "123");
 
         DataSources dataSources = new DataSources();
