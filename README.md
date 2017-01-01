@@ -14,6 +14,8 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 #### 2017-01-01:
 
 * commons-lang 依赖关系升级到 commons-lang3
+* commons-dbcp 依赖关系升级到 commons-dbcp2
+* Java 最低要求升级到 1.7
 * 版本号升级到 2.5.0-SNAPSHOT
 
 ####2016-10-19:
