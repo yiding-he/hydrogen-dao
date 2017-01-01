@@ -3,7 +3,7 @@ package com.hyd.dao.util;
 import org.apache.commons.dbcp.BasicDataSource;
 
 /**
- * 创建 Oracle 和 MySQL 的 DataSource 对象
+ * 创建基于 DBCP 的 DataSource 对象
  * created at 2014/12/26
  *
  * @author Yiding

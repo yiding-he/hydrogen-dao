@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class BaseTest {
 
-    public static String DB_TYPE = "h2";   // oracle, mysql, hsqldb, sqlserver, h2
+    public static String DB_TYPE = "mysql";   // oracle, mysql, hsqldb, sqlserver, h2
 
     protected DataSources dataSources = new DataSources();
 
@@ -51,6 +51,8 @@ public abstract class BaseTest {
     protected DataSource createH2DataSource() {
         return JdbcConnectionPool.create("jdbc:h2:mem:db1", "sa", "");
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     {
         DataSource ds;

@@ -20,8 +20,8 @@ import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.StringUtil;
 import com.hyd.dao.util.TypeUtil;
 import oracle.jdbc.OracleTypes;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.sql.*;

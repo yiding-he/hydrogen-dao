@@ -2,7 +2,7 @@ package com.hyd.dao;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.CaseInsensitiveHashMap;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -15,12 +15,12 @@ import java.util.Map;
  */
 public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<String, Object> {
 
-    private static final Logger LOG = Logger.getLogger(Row.class);
-
     /**
      * 缺省日期格式
      */
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    private static final Logger LOG = Logger.getLogger(Row.class);
 
     public Double getDoubleObject(String key) {
         Object value = get(key);
@@ -162,7 +162,7 @@ public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<S
             return null;
         } else if (value instanceof String) {
             try {
-                return DateUtils.parseDate((String) value, new String[]{pattern});
+                return DateUtils.parseDate((String) value, pattern);
             } catch (ParseException e) {
                 throw new DAOException(e);
             }
@@ -172,7 +172,7 @@ public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<S
             return (Date) value;
         } else {
             try {
-                return DateUtils.parseDate(value.toString(), new String[]{pattern});
+                return DateUtils.parseDate(value.toString(), pattern);
             } catch (ParseException e) {
                 throw new DAOException(e);
             }

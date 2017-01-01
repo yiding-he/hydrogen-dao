@@ -18,6 +18,10 @@ import java.util.HashMap;
  */
 public class TestReadingColumns extends BaseTest {
 
+    static {
+        DB_TYPE = "h2";
+    }
+
     @Override
     public void setUp() {
         dataSources.getDAO("test")

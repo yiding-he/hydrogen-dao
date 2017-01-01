@@ -4,7 +4,7 @@ import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.Row;
 import com.hyd.daotest.bean.Order;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.junit.Test;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.hyd.dao.sql;
 
 import com.hyd.dao.database.commandbuilder.Command;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

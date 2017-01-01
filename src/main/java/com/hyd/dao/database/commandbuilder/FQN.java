@@ -1,6 +1,6 @@
 package com.hyd.dao.database.commandbuilder;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;

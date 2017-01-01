@@ -9,7 +9,7 @@ import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
