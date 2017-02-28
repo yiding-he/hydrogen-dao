@@ -25,11 +25,6 @@ public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
     }
 
     @Override
-    protected String getTableName(String tableName) {
-        return tableName.toUpperCase();
-    }
-
-    @Override
     public String getSysdateMark() {
         return "CURRENT_DATE";
     }

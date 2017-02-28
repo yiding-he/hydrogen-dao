@@ -22,7 +22,7 @@ public class DemoBase {
     }
 
 
-    protected static DAO getDAO() {
+    public static DAO getDAO() {
         DataSource dataSource = createDataSource();
 
         dataSources = new DataSources();

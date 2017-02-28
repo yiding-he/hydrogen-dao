@@ -16,7 +16,7 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    protected String fixTableName(String tableName) {
+    protected String getTableNameForMeta(String tableName) {
         return tableName.toUpperCase();
     }
 

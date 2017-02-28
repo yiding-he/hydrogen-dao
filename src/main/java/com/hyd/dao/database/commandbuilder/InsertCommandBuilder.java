@@ -43,7 +43,7 @@ public class InsertCommandBuilder {
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
         ColumnInfo[] infos = getBatchColumnInfo(conn, tableName, helper, objects.get(0));
 
-        String statement = "insert into " + tableName + "(";
+        String statement = "insert into " + helper.getTableNameForSql(tableName) + "(";
         String values = "";
         for (ColumnInfo info : infos) {
             String columnName;

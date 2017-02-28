@@ -106,11 +106,11 @@ public class CommandBuilderHelper {
         LOG.debug("Reading columns of table " + fullTableName + "...");
 
         String fixedSchema = schema.toUpperCase();
-        String fixedTableName = fixTableName(tableName);
+        String fixedTableName = getTableNameForMeta(tableName);
 
         DatabaseMetaData dbMeta = connection.getMetaData();
-        ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), getTableName(fixedTableName), "%");
-        ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), getTableName(fixedTableName));
+        ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), fixedTableName, "%");
+        ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName);
 
         List<String> keyNames = new ArrayList<String>();
 
@@ -154,10 +154,6 @@ public class CommandBuilderHelper {
                 || keyNames.contains(columnName);
     }
 
-    protected String getTableName(String tableName) {
-        return tableName;
-    }
-
     protected String getSchema(String schema) {
         return schema;
     }
@@ -166,7 +162,13 @@ public class CommandBuilderHelper {
         return connection.getCatalog();
     }
 
-    protected String fixTableName(String tableName) {
+    // 当查询 meta 数据需要时，修正表名
+    protected String getTableNameForMeta(String tableName) {
+        return tableName;
+    }
+
+    // 当组合 SQL 语句需要时，修正表名
+    public String getTableNameForSql(String tableName) {
         return tableName;
     }
 
