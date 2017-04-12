@@ -26,6 +26,11 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
+    public String getColumnNameForSql(String colName) {
+        return "`" + colName + "`";
+    }
+
+    @Override
     public String getCountSql(String sql) {
         return "select count(*) cnt from (" + sql + ") count_sql_wrapper";
     }

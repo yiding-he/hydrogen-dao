@@ -173,6 +173,19 @@ public class CommandBuilderHelper {
     }
 
     /**
+     * Fix column name in the sql statement.
+     *
+     * @param column column name
+     *
+     * @return fixed column name
+     *
+     * @throws SQLException when fails
+     */
+    public String getColumnNameForSql(String column) throws SQLException {
+        return column;
+    }
+
+    /**
      * 生成 SQL 语句参数
      *
      * @param infos  字段信息
@@ -282,19 +295,6 @@ public class CommandBuilderHelper {
 
     private static boolean isAnnotatedWithSequencce(Field field) {
         return field.isAnnotationPresent(Sequence.class);
-    }
-
-    /**
-     * Fix column name in the sql statement.
-     *
-     * @param column column name
-     *
-     * @return fixed column name
-     *
-     * @throws SQLException when fails
-     */
-    public String getColumnName(String column) throws SQLException {
-        return column;
     }
 
     public String getSysdateMark() {

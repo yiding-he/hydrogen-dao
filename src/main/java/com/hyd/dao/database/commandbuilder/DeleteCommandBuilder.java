@@ -32,7 +32,7 @@ public class DeleteCommandBuilder {
         List<Object> whereParams = new ArrayList<Object>();
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                whereMarks += helper.getColumnName(info.getColumnName()) + "=? and";
+                whereMarks += helper.getColumnNameForSql(info.getColumnName()) + "=? and";
                 whereParams.add(CommandBuilderHelper.generateParamValue(object, info));
             }
         }
@@ -61,7 +61,7 @@ public class DeleteCommandBuilder {
         String statement = "delete from " + tableName + " where ";
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getColumnName(info.getColumnName()) + "=?";
+                statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
                 break;
             }
         }

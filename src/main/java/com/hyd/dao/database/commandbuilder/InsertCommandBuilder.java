@@ -52,7 +52,7 @@ public class InsertCommandBuilder {
             if (isUsingSysdate) {
                 columnName = helper.getSysdateMark();
             } else {
-                columnName = helper.getColumnName(info.getColumnName());
+                columnName = helper.getColumnNameForSql(info.getColumnName());
             }
 
             statement += columnName + ",";
@@ -139,7 +139,7 @@ public class InsertCommandBuilder {
                 continue;
             }
 
-            String columnName = helper.getColumnName(infos[i].getColumnName());
+            String columnName = helper.getColumnNameForSql(infos[i].getColumnName());
             command += columnName + ",";
 
             // 属性值是一个 sysdate 占位符

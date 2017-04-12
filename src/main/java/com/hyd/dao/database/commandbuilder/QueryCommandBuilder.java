@@ -39,7 +39,7 @@ public class QueryCommandBuilder {
 
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += CommandBuilderHelper.getHelper(connection).getColumnName(info.getColumnName()) + "=?";
+                statement += CommandBuilderHelper.getHelper(connection).getColumnNameForSql(info.getColumnName()) + "=?";
                 primaryFound = true;
                 break;
             }
@@ -62,7 +62,7 @@ public class QueryCommandBuilder {
         String statement = "select * from " + tableName + " where ";
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getColumnName(info.getColumnName()) + "=?";
+                statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
                 values.add(BeanUtil.getValue(obj, TypeConverter.getFieldName(info.getColumnName())));
                 break;
             }

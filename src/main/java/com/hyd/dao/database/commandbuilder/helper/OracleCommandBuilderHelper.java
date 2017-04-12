@@ -21,7 +21,7 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    public String getColumnName(String column) throws SQLException {
+    public String getColumnNameForSql(String column) throws SQLException {
         return "\"" + column.toUpperCase() + "\"";
     }
 
