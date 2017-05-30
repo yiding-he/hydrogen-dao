@@ -128,7 +128,7 @@
         <repository>
             <id>mynexus</id>
             <name>public</name>
-            <url>http://120.25.145.102/:8081/nexus/content/repositories/releases/</url>
+            <url>http://120.25.145.102:8081/nexus/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>mynexus</id>
