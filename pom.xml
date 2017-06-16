@@ -6,7 +6,7 @@
 
     <groupId>com.hyd</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -128,12 +128,12 @@
         <repository>
             <id>heyiding.com</id>
             <name>public</name>
-            <url>http://heyiding.com:8081/nexus/content/repositories/releases/</url>
+            <url>https://heyiding.com/nexus/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>heyiding.com</id>
             <name>Snapshots</name>
-            <url>http://heyiding.com:8081/nexus/content/repositories/snapshots/</url>
+            <url>https://heyiding.com/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 

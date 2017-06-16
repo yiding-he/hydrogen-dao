@@ -234,8 +234,7 @@ public class CommandBuilderHelper {
             try {
                 field = object.getClass().getDeclaredField(fieldName);
             } catch (NoSuchFieldException e) {
-                String className = object.getClass().getCanonicalName();
-                LOG.debug("Property '" + fieldName + "' not exists for class " + className, e);
+                // 从表字段名查询对象属性失败
                 return null;
             }
 
