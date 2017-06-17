@@ -5,7 +5,9 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.log.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,12 +31,28 @@ public class ScriptExecutor {
     }
 
     public static void execute(File file, DAO dao, Charset charset) throws IOException {
-
         if (!file.exists() || !file.isFile()) {
             throw new DAOException("Invalid file '" + file.getAbsolutePath() + "'");
+        } else {
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+                execute(inputStream, dao, charset);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        }
+    }
+
+    public static void execute(InputStream is, DAO dao, Charset charset) throws IOException {
+
+        if (is == null) {
+            throw new DAOException("Invalid input stream");
         }
 
-        Scanner scanner = new Scanner(file, charset.name());
+        Scanner scanner = new Scanner(is, charset.name());
         String line;
         StringBuilder statement = new StringBuilder();
         AtomicInteger counter = new AtomicInteger();
