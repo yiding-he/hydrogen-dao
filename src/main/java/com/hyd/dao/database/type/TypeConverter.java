@@ -110,7 +110,7 @@ public class TypeConverter {
         for (String colName : row.keySet()) {
             String fieldName = getFieldName(colName);
             if (fieldName == null) {
-                warn("无法获取字段" + colName + "的属性名", null);
+                warn("无法获取字段" + colName + "的属性名");
                 continue;
             }
 
@@ -118,7 +118,7 @@ public class TypeConverter {
             try {
                 fieldType = getFieldType(clazz, fieldName);
             } catch (IllegalAccessException e) {
-                warn(clazz + " 中没有属性 '" + fieldName + "'", e);
+                warn(clazz + " 中没有属性 '" + fieldName + "'");
                 continue;
             }
 
@@ -127,7 +127,8 @@ public class TypeConverter {
                 try {
                     BeanUtil.setValue(result, fieldName, value);
                 } catch (Exception e) {
-                    warn("设置" + clazz + " 的属性 \"" + fieldName + "\"(" + value.getClass().getName() + ")失败", e);
+                    warn("设置" + clazz + " 的属性 \"" + fieldName
+                            + "\"(" + value.getClass().getName() + ")失败: " + e.toString());
                 }
             }
         }
@@ -220,16 +221,15 @@ public class TypeConverter {
      * 打印警告信息。相同的警告只会打印一次。
      *
      * @param msg 警告信息
-     * @param e   异常信息
      */
-    private static void warn(String msg, Exception e) {
+    private static void warn(String msg) {
         List<String> list = warnedMsgs.get();
         if (list == null) {
-            list = new ArrayList<String>();
+            list = new ArrayList<>();
             warnedMsgs.set(list);
         }
         if (!list.contains(msg)) {
-            LOG.warn(msg, e);
+            LOG.warn(msg);
             list.add(msg);
         }
     }
