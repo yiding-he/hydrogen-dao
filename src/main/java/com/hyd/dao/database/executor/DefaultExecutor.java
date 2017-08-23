@@ -37,11 +37,11 @@ import java.util.Map;
  */
 public class DefaultExecutor extends Executor {
 
-    static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
+    private static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
 
-    static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
+    private static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
 
-    static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
+    private static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
     private Statement st;
 
@@ -267,7 +267,7 @@ public class DefaultExecutor extends Executor {
     private void insertBatchParams(BatchCommand command, List params) throws SQLException {
         int length = StringUtil.count(command.getCommand(), "\\?");
 
-        List<Integer> paramTypes = new ArrayList<Integer>();
+        List<Integer> paramTypes = new ArrayList<>();
         if (command.getColumnInfos() != null) {
             for (int i = 0; i < length; i++) {
                 paramTypes.add(command.getColumnInfos()[i].getDataType());
@@ -392,9 +392,7 @@ public class DefaultExecutor extends Executor {
             }
             cs.executeQuery();
             return readResult(spParams, cs);
-        } catch (IOException e) {
-            throw new DAOException("Procedure failed: " + e.getMessage(), e, name, Arrays.asList(params));
-        } catch (SQLException e) {
+        } catch (IOException | SQLException e) {
             throw new DAOException("Procedure failed: " + e.getMessage(), e, name, Arrays.asList(params));
         }
     }
@@ -411,7 +409,7 @@ public class DefaultExecutor extends Executor {
             int resultType = spParams[0].getSqlType();
 
             // 去掉第一个
-            spParams = (SpParam[]) ArrayUtils.subarray(spParams, 1, spParams.length);
+            spParams = ArrayUtils.subarray(spParams, 1, spParams.length);
 
             CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, connection);
             if (TIMEOUT != -1) {
@@ -453,7 +451,7 @@ public class DefaultExecutor extends Executor {
      * @throws java.io.IOException 如果读取 LOB 对象失败
      */
     private List readResult(SpParam[] params, CallableStatement cs) throws SQLException, IOException {
-        List<Object> result = new ArrayList<Object>();
+        List<Object> result = new ArrayList<>();
         try {
             for (int i = 0; i < params.length; i++) {
                 SpParam param = params[i];

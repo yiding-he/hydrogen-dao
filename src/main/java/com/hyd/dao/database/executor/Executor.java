@@ -135,6 +135,12 @@ public abstract class Executor {
     public abstract List call(String name, Object[] params);
 
     /**
+     * 调用 Oracle 存储过程
+     * 参见 {@link com.hyd.dao.DAO#callFunction}
+     */
+    public abstract List callFunction(String name, Object[] params);
+
+    /**
      * 删除指定的数据库记录
      *
      * @param obj       用于指定记录的对象，只要主键有值即可。
@@ -157,11 +163,6 @@ public abstract class Executor {
     public void setInfo(ExecutorInfo info) {
         this.info = info;
     }
-
-    /**
-     * 参见 {@link com.hyd.dao.DAO#callFunction}
-     */
-    public abstract List callFunction(String name, Object[] params);
 
     public void setTransactionIsolation(int level) throws SQLException {
         connection.setTransactionIsolation(level);
