@@ -3,7 +3,7 @@ package com.hyd.dao.sp;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.ResultSetUtil;
-import com.hyd.dao.util.StringUtil;
+import com.hyd.dao.util.Str;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -59,7 +59,7 @@ public class StorageProsedureHelper {
                 cs.setObject(i + 1, param.getValue());
             }
             if (param.getType() == SpParamType.OUT || param.getType() == SpParamType.IN_OUT) {
-                if (StringUtil.isEmptyString(param.getName())) {
+                if (Str.isEmptyString(param.getName())) {
                     cs.registerOutParameter(i + 1, param.getSqlType());
                 } else {
                     cs.registerOutParameter(i + 1, param.getSqlType(), param.getName());

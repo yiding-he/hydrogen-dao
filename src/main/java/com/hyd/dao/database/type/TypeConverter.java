@@ -2,7 +2,7 @@ package com.hyd.dao.database.type;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.StringUtil;
+import com.hyd.dao.util.Str;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -236,7 +236,7 @@ public class TypeConverter {
 
     /**
      * 将字段名转换成属性名。该方法首先从缓存中取相应的属性名。如果取不到，则调用
-     * {@link com.hyd.dao.util.StringUtil#columnToProperty(String)}
+     * {@link Str#columnToProperty(String)}
      * 方法获取属性名，并放入缓存。
      *
      * @param columnName 字段名
@@ -245,7 +245,7 @@ public class TypeConverter {
      */
     public static String getFieldName(String columnName) {
         if (convertBuffer.get(columnName) == null) {
-            String fieldName = StringUtil.columnToProperty(columnName);
+            String fieldName = Str.columnToProperty(columnName);
             convertBuffer.put(columnName, fieldName);
         }
         return convertBuffer.get(columnName);

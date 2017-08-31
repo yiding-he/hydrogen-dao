@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * 处理字符串的类
  */
-public class StringUtil extends StringUtils {
+public class Str extends StringUtils {
 
     /**
      * 查找指定字符串中包含匹配指定正则表达式的次数
@@ -35,7 +35,7 @@ public class StringUtil extends StringUtils {
     /**
      * 将字段名转换为属性名
      *
-     * @param columnName 字段名，如："name", "parent_node"
+     * @param columnName 字段名，如："name", "parent_node"。如果字段名属于 Java 关键字，则属性名为对应的全大写
      *
      * @return 属性名，如："name", "parentNode"
      */

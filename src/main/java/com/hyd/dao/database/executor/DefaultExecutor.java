@@ -17,7 +17,7 @@ import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProsedureHelper;
 import com.hyd.dao.util.ResultSetUtil;
-import com.hyd.dao.util.StringUtil;
+import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
 import oracle.jdbc.OracleTypes;
 import org.apache.commons.lang3.ArrayUtils;
@@ -265,7 +265,7 @@ public class DefaultExecutor extends Executor {
      * @throws SQLException 如果填入参数失败
      */
     private void insertBatchParams(BatchCommand command, List params) throws SQLException {
-        int length = StringUtil.count(command.getCommand(), "\\?");
+        int length = Str.count(command.getCommand(), "\\?");
 
         List<Integer> paramTypes = new ArrayList<>();
         if (command.getColumnInfos() != null) {
@@ -533,7 +533,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private void printBatchCommand(BatchCommand command) {
-        String sql = StringUtil.n(command.getCommand());
+        String sql = Str.n(command.getCommand());
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 

@@ -8,7 +8,7 @@ import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.LockFactory;
-import com.hyd.dao.util.StringUtil;
+import com.hyd.dao.util.Str;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -212,7 +212,7 @@ public class CommandBuilderHelper {
      * @return 属性值。如果获取失败或需要跳过该字段则返回 null
      */
     public static Object generateParamValue(Object object, ColumnInfo info) {
-        String fieldName = StringUtil.columnToProperty(info.getColumnName());
+        String fieldName = Str.columnToProperty(info.getColumnName());
 
         String strValue;
         Object value;
@@ -227,7 +227,7 @@ public class CommandBuilderHelper {
             if (value == null) {
                 return null;
             }
-            strValue = StringUtil.valueOf(value);
+            strValue = Str.valueOf(value);
         } else {
 
             Field field;
@@ -252,7 +252,7 @@ public class CommandBuilderHelper {
             if (value == null) {
                 return null;
             }
-            strValue = StringUtil.valueOf(value);
+            strValue = Str.valueOf(value);
         }
 
         // 获取返回值
@@ -263,7 +263,7 @@ public class CommandBuilderHelper {
             case Types.DOUBLE:
             case Types.FLOAT:
             case Types.INTEGER:
-                if (StringUtil.isEmptyString(strValue)) {
+                if (Str.isEmptyString(strValue)) {
                     return null;
                 } else {
                     try {
