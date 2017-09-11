@@ -53,52 +53,44 @@ public class SQL {
 
     /////////////////////////////////////////////////////////
 
-    public static enum Pref {
+    public static enum Joint {
         AND, OR
     }
 
     public static class Pair {
 
-        private Pref pref = null;
+        private Joint joint = null;  // AND/OR
 
-        private String name;
+        private String statement;
 
-        private Object value;
+        private Object[] args;
 
-        public Pair(String name, Object value) {
-            this.name = name;
-            this.value = value;
-
-            fixArrValue();
+        public Pair(String statement) {
+            this.statement = statement;
         }
 
-        public Pair(Pref pref, String name, Object value) {
-            this.pref = pref;
-            this.name = name;
-            this.value = value;
-
-            fixArrValue();
+        public Pair(Joint joint, String statement) {
+            this.joint = joint;
+            this.statement = statement;
         }
 
-        private void fixArrValue() {
-            if (value == null) {
-                return;
-            }
-
-            if (value.getClass().isArray()) {
-                value = Arrays.asList((Object[]) value);
-            }
-        }
-    }
-
-    public static class StatementPair extends Pair {
-
-        public StatementPair(String statement) {
-            super(statement, null);
+        public Pair(String statement, Object... args) {
+            this.statement = statement;
+            this.args = args;
         }
 
-        public StatementPair(Pref pref, String statement) {
-            super(pref, statement, null);
+        public Pair(Joint joint, String statement, Object... args) {
+            this.joint = joint;
+            this.statement = statement;
+            this.args = args;
+        }
+
+        public Object firstArg() {
+            return this.args == null || this.args.length == 0 ? null : this.args[0];
+        }
+
+        public boolean hasArg() {
+            return this.args != null && this.args.length > 0;
         }
     }
 
@@ -111,9 +103,9 @@ public class SQL {
 
         protected String statement;
 
-        protected List<Object> params = new ArrayList<Object>();
+        protected List<Object> params = new ArrayList<>();
 
-        protected List<Pair> conditions = new ArrayList<Pair>();
+        protected List<Pair> conditions = new ArrayList<>();
 
         public abstract Command toCommand();
 
@@ -127,7 +119,7 @@ public class SQL {
             } else {
                 String result = "";
                 for (Pair pair : pairs) {
-                    result += pair.name + ",";
+                    result += pair.statement + ",";
                 }
                 result = result.substring(0, result.length() - 1);
                 return result;
@@ -140,7 +132,7 @@ public class SQL {
             for (int size = pairs.size(), i = 0; i < size; i++) {
                 Pair pair = pairs.get(i);
 
-                if (pair.value == DAO.SYSDATE) {
+                if (DAO.SYSDATE == pair.firstArg()) {
                     s.append("sysdate");
                 } else {
                     s.append("?");
@@ -156,14 +148,14 @@ public class SQL {
                 return Collections.emptyList();
             }
 
-            List<Object> result = new ArrayList<Object>();
+            List<Object> result = new ArrayList<>();
             for (Pair pair : pairs) {
 
-                if (pair.value == DAO.SYSDATE) {
+                if (DAO.SYSDATE == pair.firstArg()) {
                     continue;
                 }
 
-                result.add(pair.value);
+                result.add(pair.args);
             }
 
             return result;
@@ -173,15 +165,15 @@ public class SQL {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
-            this.conditions.add(new StatementPair(statement));
+            this.conditions.add(new Pair(statement));
             return (T) this;
         }
 
-        public T Where(String column, Object value) {  // NOSONAR
+        public T Where(String statement, Object... args) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
-            this.conditions.add(new Pair(column, value));
+            this.conditions.add(new Pair(statement, args));
             return (T) this;
         }
 
@@ -190,69 +182,69 @@ public class SQL {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
             if (exp) {
-                this.conditions.add(new StatementPair(statement));
+                this.conditions.add(new Pair(statement));
             }
             return (T) this;
         }
 
-        public T Where(boolean exp, String column, Object value) {  // NOSONAR
+        public T Where(boolean exp, String statement, Object... args) {  // NOSONAR
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
             if (exp) {
-                this.conditions.add(new Pair(column, value));
+                this.conditions.add(new Pair(statement, args));
             }
             return (T) this;
         }
 
         public T And(String statement) {  // NOSONAR
-            this.conditions.add(new StatementPair(Pref.AND, statement));
+            this.conditions.add(new Pair(Joint.AND, statement));
             return (T) this;
         }
 
-        public T And(String column, Object value) {  // NOSONAR
-            this.conditions.add(new Pair(Pref.AND, column, value));
+        public T And(String statement, Object... args) {  // NOSONAR
+            this.conditions.add(new Pair(Joint.AND, statement, args));
             return (T) this;
         }
 
         public T And(boolean exp, String statement) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new StatementPair(Pref.AND, statement));
+                this.conditions.add(new Pair(Joint.AND, statement));
             }
             return (T) this;
         }
 
-        public T And(boolean exp, String column, Object value) {  // NOSONAR
+        public T And(boolean exp, String statement, Object... args) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new Pair(Pref.AND, column, value));
+                this.conditions.add(new Pair(Joint.AND, statement, args));
             }
             return (T) this;
         }
 
-        public T AndIfNotEmpty(String column, Object value) {  // NOSONAR
-            return And(!isEmpty(value), column, value);
+        public T AndIfNotEmpty(String statement, Object value) {  // NOSONAR
+            return And(!isEmpty(value), statement, value);
         }
 
         public T Or(String statement) {  // NOSONAR
-            this.conditions.add(new StatementPair(Pref.OR, statement));
+            this.conditions.add(new Pair(Joint.OR, statement));
             return (T) this;
         }
 
-        public T Or(String column, Object value) {  // NOSONAR
-            this.conditions.add(new Pair(Pref.OR, column, value));
+        public T Or(String statement, Object... args) {  // NOSONAR
+            this.conditions.add(new Pair(Joint.OR, statement, args));
             return (T) this;
         }
 
         public T Or(boolean exp, String statement) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new StatementPair(Pref.OR, statement));
+                this.conditions.add(new Pair(Joint.OR, statement));
             }
             return (T) this;
         }
 
-        public T Or(boolean exp, String column, Object value) {  // NOSONAR
+        public T Or(boolean exp, String statement, Object... args) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new Pair(Pref.OR, column, value));
+                this.conditions.add(new Pair(Joint.OR, statement, args));
             }
             return (T) this;
         }
@@ -262,25 +254,25 @@ public class SQL {
         }
 
         public T Append(String statement) {  // NOSONAR
-            this.conditions.add(new StatementPair(statement));
+            this.conditions.add(new Pair(statement));
             return (T) this;
         }
 
-        public T Append(String column, Object value) {  // NOSONAR
-            this.conditions.add(new Pair(column, value));
+        public T Append(String column, Object... args) {  // NOSONAR
+            this.conditions.add(new Pair(column, args));
             return (T) this;
         }
 
         public T Append(boolean exp, String statement) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new StatementPair(statement));
+                this.conditions.add(new Pair(statement));
             }
             return (T) this;
         }
 
-        public T Append(boolean exp, String column, Object value) {  // NOSONAR
+        public T Append(boolean exp, String statement, Object... args) {  // NOSONAR
             if (exp) {
-                this.conditions.add(new Pair(column, value));
+                this.conditions.add(new Pair(statement, args));
             }
             return (T) this;
         }
@@ -307,22 +299,22 @@ public class SQL {
 
             // 第一个条件不能加 and 和 or 前缀
             if (index > 0 && !where.endsWith("(")) {
-                if (condition.pref == Pref.AND) {
+                if (condition.joint == Joint.AND) {
                     where += " and ";
-                } else if (condition.pref == Pref.OR) {
+                } else if (condition.joint == Joint.OR) {
                     where += " or ";
                 }
             }
 
             where += " ";
 
-            if (condition instanceof StatementPair) {       // 不带参数的条件
-                where += condition.name;
+            if (!condition.hasArg()) {       // 不带参数的条件
+                where += condition.statement;
 
-            } else if (condition.value instanceof List) {   // 参数为 List 的条件（即 in 条件）
+            } else if (condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
                 String marks = "(";
 
-                for (Object o : (List) condition.value) {
+                for (Object o : (List) condition.firstArg()) {
                     marks += "?,";
                     this.params.add(o);
                 }
@@ -332,11 +324,11 @@ public class SQL {
                 }
                 marks += ")";                                 // marks = "(?,?,?,...,?)"
 
-                where += condition.name.replace("?", marks);  // "A in ?" -> "A in (?,?,?)"
+                where += condition.statement.replace("?", marks);  // "A in ?" -> "A in (?,?,?)"
 
             } else {
-                where += condition.name;
-                this.params.add(condition.value);
+                where += condition.statement;
+                this.params.addAll(Arrays.asList(condition.args));
             }
 
             return where;
@@ -347,7 +339,7 @@ public class SQL {
 
     public static class Insert extends Generatable<Insert> {
 
-        private List<Pair> pairs = new ArrayList<Pair>();
+        private List<Pair> pairs = new ArrayList<>();
 
         public Insert(String table) {
             this.table = table;
@@ -387,7 +379,7 @@ public class SQL {
      */
     public static class Update extends Generatable<Update> {
 
-        private List<Pair> updates = new ArrayList<Pair>();
+        private List<Pair> updates = new ArrayList<>();
 
         public Update(String table) {
             this.table = table;
@@ -411,14 +403,14 @@ public class SQL {
 
             for (int i = 0, updatesSize = updates.size(); i < updatesSize; i++) {
                 Pair pair = updates.get(i);
-                if (pair instanceof StatementPair) {
-                    statement += pair.name;
-                } else if (pair.name.contains("?")) {
-                    this.params.add(pair.value);
-                    statement += pair.name;
+                if (!pair.hasArg()) {
+                    statement += pair.statement;
+                } else if (pair.statement.contains("?")) {
+                    this.params.add(pair.args);
+                    statement += pair.statement;
                 } else {
-                    this.params.add(pair.value);
-                    statement += pair.name + "=?";
+                    this.params.add(pair.args);
+                    statement += pair.statement + "=?";
                 }
 
                 if (i < updatesSize - 1) {
@@ -442,13 +434,13 @@ public class SQL {
         }
 
         public Update Set(String setStatement) {  // NOSONAR
-            this.updates.add(new StatementPair(setStatement));
+            this.updates.add(new Pair(setStatement));
             return this;
         }
 
         public Update Set(boolean exp, String setStatement) {  // NOSONAR
             if (exp) {
-                this.updates.add(new StatementPair(setStatement));
+                this.updates.add(new Pair(setStatement));
             }
             return this;
         }
