@@ -155,7 +155,7 @@ public class SQL {
                     continue;
                 }
 
-                result.add(pair.args);
+                result.addAll(Arrays.asList(pair.args));
             }
 
             return result;
@@ -406,10 +406,10 @@ public class SQL {
                 if (!pair.hasArg()) {
                     statement += pair.statement;
                 } else if (pair.statement.contains("?")) {
-                    this.params.add(pair.args);
+                    this.params.addAll(Arrays.asList(pair.args));
                     statement += pair.statement;
                 } else {
-                    this.params.add(pair.args);
+                    this.params.addAll(Arrays.asList(pair.args));
                     statement += pair.statement + "=?";
                 }
 
