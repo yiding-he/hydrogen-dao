@@ -11,8 +11,9 @@ import com.hyd.dao.log.Logger;
 public class TestLogger {
 
     public static void main(String[] args) {
-        Logger.setLoggerFactory(Logger.LOGBACK_FACTORY);
+        // Logger.setLoggerFactory(Logger.LOGBACK_FACTORY);
         Logger logger = Logger.getLogger("test");
         logger.info("你好");
+        logger.info("Current log framework: " + Logger.getLoggerType());
     }
 }

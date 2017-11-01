@@ -357,6 +357,10 @@ public class DAO {
      */
     public <T> List<T> queryRange(Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
 
+        if (startPosition < 0 || startPosition >= endPosition) {
+            return new ArrayList<>();
+        }
+
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
             return queryRange(clazz, sql, startPosition, endPosition, list.toArray(new Object[list.size()]));
@@ -415,6 +419,9 @@ public class DAO {
      */
     public <T> Page<T> queryPage(Class<T> wrappingClass, String sql,
                                  int pageSize, int pageIndex, Object... params) throws DAOException {
+
+        pageIndex = Math.max(0, pageIndex);  // Negative value not allowed.
+
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[list.size()]));

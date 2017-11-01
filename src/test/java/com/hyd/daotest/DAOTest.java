@@ -3,7 +3,6 @@ package com.hyd.daotest;
 import com.hyd.dao.DAO;
 import com.hyd.dao.Row;
 import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.log.Logger;
 import com.hyd.daotest.bean.LobRecord;
 import com.hyd.daotest.bean.User;
 import org.junit.Test;
@@ -13,16 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
+
 
 /**
  * @author yiding.he
  */
 public class DAOTest extends BaseTest {
-
-    static {
-        org.apache.log4j.BasicConfigurator.configure();
-    }
 
     @Test
     public void testSimpleQuery() throws Exception {

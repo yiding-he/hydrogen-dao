@@ -23,15 +23,12 @@ import java.util.Map;
  */
 public class CommandBuilderHelper {
 
-    // 缓存已经生成的字段info
+    private static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
 
+    // 缓存已经生成的字段info
     private static Map<String, ColumnInfo[]> cache = new HashMap<String, ColumnInfo[]>();
 
-    static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
-
     protected Connection connection;
-
-    protected ColumnMeta columnMeta;
 
     /**
      * 构造函数
@@ -40,7 +37,6 @@ public class CommandBuilderHelper {
      */
     protected CommandBuilderHelper(Connection connection) {
         this.connection = connection;
-        this.columnMeta = ColumnMeta.Oracle;
     }
 
     /**
@@ -95,7 +91,6 @@ public class CommandBuilderHelper {
         }
     }
 
-    // TODO 对不同的数据库读取方式可能不一样
     private ColumnInfo[] getColumnInfos(
             String schema, String tableName, String fullTableName) throws SQLException {
 
@@ -108,24 +103,19 @@ public class CommandBuilderHelper {
         String fixedSchema = schema.toUpperCase();
         String fixedTableName = getTableNameForMeta(tableName);
 
+        ColumnMeta columnMeta = getColumnMeta();
         DatabaseMetaData dbMeta = connection.getMetaData();
         ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), fixedTableName, "%");
-        ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName);
 
-        List<String> keyNames = new ArrayList<String>();
-
-        // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
-        while (keys.next()) {
-            keyNames.add(keys.getString(columnMeta.columnName));
-        }
+        List<String> keyNames = getPrimaryKeyColumns(fixedSchema, fixedTableName, dbMeta);
 
         List<ColumnInfo> infos = new ArrayList<ColumnInfo>();
 
-        // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
         while (columns.next()) {
 
             String columnName = columns.getString(columnMeta.columnName);
-            boolean primaryKey = isPrimaryKey(columns.getString("TYPE_NAME"), keyNames, columnName);
+            String typeName = columns.getString(columnMeta.typeName);
+            boolean primaryKey = isPrimaryKey(typeName, keyNames, columnName);
 
             ColumnInfo info = new ColumnInfo();
             info.setColumnName(columnName);
@@ -142,11 +132,29 @@ public class CommandBuilderHelper {
 
         try {
             columns.close();
-            keys.close();
         } catch (SQLException e) {
             LOG.error("", e);
         }
         return result;
+    }
+
+    private List<String> getPrimaryKeyColumns(
+            String fixedSchema, String fixedTableName, DatabaseMetaData dbMeta) throws SQLException {
+
+        ColumnMeta columnMeta = getColumnMeta();
+        List<String> keyNames = new ArrayList<>();
+
+        try(ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName)) {
+            while (keys.next()) {
+                keyNames.add(keys.getString(columnMeta.columnName));
+            }
+        }
+
+        return keyNames;
+    }
+
+    protected ColumnMeta getColumnMeta() {
+        return ColumnMeta.Oracle;
     }
 
     private boolean isPrimaryKey(String typeName, List<String> keyNames, String columnName) {
@@ -238,7 +246,7 @@ public class CommandBuilderHelper {
                 return null;
             }
 
-            // 判断属性是否被标记了 @Sequencce
+            // 判断属性是否被标记了 @Sequence
             if (isAnnotatedWithSequencce(field)) {
                 info.setAutoIncrement(true);
 

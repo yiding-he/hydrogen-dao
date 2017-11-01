@@ -7,8 +7,8 @@ package com.hyd.dao.database.commandbuilder.helper;
  */
 public enum ColumnMeta {
 
-    Oracle("COLUMN_NAME", "COLUMN_SIZE", "NULLABLE", "DATA_TYPE", "REMARKS"),
-    MySQL("COLUMN_NAME", "COLUMN_SIZE", "NULLABLE", "DATA_TYPE", "REMARKS"),;
+    Oracle("COLUMN_NAME", "COLUMN_SIZE", "NULLABLE", "DATA_TYPE", "TYPE_NAME", "REMARKS"),
+    MySQL( "COLUMN_NAME", "COLUMN_SIZE", "NULLABLE", "DATA_TYPE", "TYPE_NAME", "REMARKS"),;
 
     /////////////////////////////////////////////////////////
 
@@ -20,13 +20,16 @@ public enum ColumnMeta {
 
     public final String dataType;
 
+    public final String typeName;
+
     public final String remarks;
 
-    ColumnMeta(String columnName, String columnSize, String nullable, String dataType, String remarks) {
+    ColumnMeta(String columnName, String columnSize, String nullable, String dataType, String typeName, String remarks) {
         this.columnName = columnName;
         this.columnSize = columnSize;
         this.nullable = nullable;
         this.dataType = dataType;
+        this.typeName = typeName;
         this.remarks = remarks;
     }
 

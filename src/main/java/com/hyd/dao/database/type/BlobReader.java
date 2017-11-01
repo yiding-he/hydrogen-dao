@@ -23,7 +23,7 @@ public class BlobReader {
      */
     public static String readString(Blob blob, String charset) throws SQLException, IOException {
         byte[] result = readBytes(blob);
-        return new String(result);
+        return new String(result, charset);
     }
 
     /**

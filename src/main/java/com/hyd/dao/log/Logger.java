@@ -12,16 +12,18 @@ import java.util.Arrays;
  *     LOG.debug("Hello!");
  * </pre>
  * 本类会自动检测是否存在三个日志框架之一，如果检测到则使用该框架来记录日志。
- * 如果有多个框架同时存在，则需要先指定使用哪一个。以 logback 为例，方法是：
+ * 如果有多个框架同时存在，可以指定使用哪一个。以 logback 为例，方法是：
  * <pre>
  *     Logger.setLoggerFactory(Logger.LOGBACK_FACTORY);
  * </pre>
+ * 如果没有指定使用哪个框架，则按照 logback, log4j, log4j2 的顺序检测。
+ * 如果没有外部框架，则使用 java.util.logging。
  *
  * @author Yiding
  */
 public class Logger {
 
-    public static interface LoggerFactory {
+    public interface LoggerFactory {
 
         Object getLogger(String loggerName);
 
@@ -119,11 +121,11 @@ public class Logger {
 
     ////////////////////////////////////////////////////////////////
 
-    public static enum Level {
+    public enum Level {
         Trace, Debug, Info, Warn, Error,;
     }
 
-    public static enum LoggerType {
+    public enum LoggerType {
         LOGBACK("ch.qos.logback.classic.Logger", new Object[]{0, 10, 20, 30, 40}),
         LOG4J(
                 "org.apache.log4j.Logger", new Object[]{
@@ -203,8 +205,13 @@ public class Logger {
 
     private static LoggerFactory loggerFactory;
 
+    // 设置自定义的 LoggerFactory
     public static void setLoggerFactory(LoggerFactory loggerFactory) {
         Logger.loggerFactory = loggerFactory;
+    }
+
+    public static LoggerType getLoggerType() {
+        return loggerFactory == null ? null : loggerFactory.getLoggerType();
     }
 
     public static Logger getLogger(String loggerName) {

@@ -11,7 +11,11 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
 
     public MySqlCommandBuilderHelper(Connection conn) {
         super(conn);
-        this.columnMeta = ColumnMeta.MySQL;
+    }
+
+    @Override
+    protected ColumnMeta getColumnMeta() {
+        return ColumnMeta.MySQL;
     }
 
     @Override

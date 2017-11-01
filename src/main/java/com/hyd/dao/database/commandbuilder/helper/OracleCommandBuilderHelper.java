@@ -12,7 +12,6 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
 
     public OracleCommandBuilderHelper(Connection connection) {
         super(connection);
-        this.columnMeta = ColumnMeta.Oracle;
     }
 
     @Override
