@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author yiding.he
  */
-public class Row extends CaseInsensitiveHashMap<String, Object> implements Map<String, Object> {
+public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, Object> {
 
     /**
      * 缺省日期格式

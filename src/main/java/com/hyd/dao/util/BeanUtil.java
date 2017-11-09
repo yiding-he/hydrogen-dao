@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,30 +24,35 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class BeanUtil {
 
+    private static Map<Class, Map<String, PropertyDescriptor>>
+            propertyDescriptorMap = MapCacheUtils.newLRUCache(100, true);
+
     /**
      * 设置一个对象的属性
      *
      * @param obj       要设置的对象
-     * @param fieldname 属性名
+     * @param fieldName 属性名
      * @param value     值
      */
-    public static void setValue(Object obj, String fieldname, Object value) {
+    public static void setValue(Object obj, String fieldName, Object value) {
         if (value == null) {
             return;
         }
 
         try {
-            Class<?> fieldType = getPropertyDescriptor(obj.getClass(), fieldname).getPropertyType();
+            Class<?> fieldType = getPropertyDescriptor(obj.getClass(), fieldName).getPropertyType();
             value = convertValue(value, fieldType);
-            Method writeMethod = getPropertyMethod(obj.getClass(), fieldname, false);
+            Method writeMethod = getPropertyMethod(obj.getClass(), fieldName, false);
             if (writeMethod != null) {
                 writeMethod.invoke(obj, value);
             } else {
-                throw new NoSuchMethodException(
-                        "no writer method for " + obj.getClass().getName() + "#" + fieldname);
+                throw new DAOException(
+                        "Missing write method for " + obj.getClass().getCanonicalName() + "#" + fieldName);
             }
+        } catch (DAOException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DAOException("设置 " + obj.getClass().getName() + " 对象的'" + fieldname + "'属性值失败", e);
+            throw new DAOException("Cannot set property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
         }
     }
 
@@ -54,30 +60,37 @@ public class BeanUtil {
      * 获得一个属性的 getter 或 setter 方法
      *
      * @param clazz     包含属性的类
-     * @param fieldname 属性名
+     * @param fieldName 属性名
      * @param getter    是否取 getter 方法。如果是 false，则表示取 setter 方法。
      *
      * @return 方法对象
      *
      * @throws IntrospectionException 如果分析 JavaBean 失败
      */
-    private static Method getPropertyMethod(Class clazz, String fieldname, boolean getter)
+    private static Method getPropertyMethod(Class clazz, String fieldName, boolean getter)
             throws IntrospectionException {
-        PropertyDescriptor descriptor = getPropertyDescriptor(clazz, fieldname);
+        PropertyDescriptor descriptor = getPropertyDescriptor(clazz, fieldName);
         return descriptor == null ? null :
                 getter ? descriptor.getReadMethod() : descriptor.getWriteMethod();
     }
 
-    private static PropertyDescriptor getPropertyDescriptor(Class clazz, String fieldname) throws IntrospectionException {
-        PropertyDescriptor descriptor = null;
-        BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-        for (int i = 0; i < beanInfo.getPropertyDescriptors().length; i++) {
-            PropertyDescriptor d = beanInfo.getPropertyDescriptors()[i];
-            if (d.getName().equals(fieldname)) {
-                descriptor = d;
+    private static PropertyDescriptor getPropertyDescriptor(
+            Class clazz, String fieldname) throws IntrospectionException {
+
+        Map<String, PropertyDescriptor> pdMap = BeanUtil.propertyDescriptorMap.computeIfAbsent(clazz, __ -> {
+            try {
+                Map<String, PropertyDescriptor> map = new HashMap<>();
+                BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+                for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+                    map.put(descriptor.getName(), descriptor);
+                }
+                return map;
+            } catch (IntrospectionException e) {
+                throw new BeanException("Error parsing class '" + clazz.getCanonicalName() + "'", e);
             }
-        }
-        return descriptor;
+        });
+
+        return pdMap.get(fieldname);
     }
 
     /**
@@ -125,7 +138,7 @@ public class BeanUtil {
 
             } catch (InvocationTargetException e) {
                 if (e.getTargetException() instanceof NumberFormatException) {
-                    throw new DAOException("值 " + value + " (" + value.getClass() + ")无法转换成 " + clazz);
+                    throw new DAOException("Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz);
                 }
             }
         } else if (clazz == Boolean.TYPE) {
@@ -138,42 +151,42 @@ public class BeanUtil {
             if (clazz == Integer.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Integer.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 int。");
+                    throw new DAOException("Value " + bdValue + " is too large for integer");
                 }
                 return bdValue.intValue();
 
             } else if (clazz == Long.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Long.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 long。");
+                    throw new DAOException("Value " + bdValue + " is too large for long");
                 }
                 return bdValue.longValue();
 
             } else if (clazz == Double.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Double.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 double。");
+                    throw new DAOException("Value " + bdValue + " is too large for double");
                 }
                 return bdValue.doubleValue();
 
             } else if (clazz == Byte.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Byte.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 byte。");
+                    throw new DAOException("Value " + bdValue + " is too large for byte");
                 }
                 return bdValue.byteValue();
 
             } else if (clazz == Short.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Short.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 short。");
+                    throw new DAOException("Value " + bdValue + " is too large for short");
                 }
                 return bdValue.shortValue();
 
             } else if (clazz == Float.TYPE) {
 
                 if (bdValue.compareTo(new BigDecimal(Float.MAX_VALUE)) > 0) {
-                    throw new DAOException("查询结果的值" + bdValue + "太大，无法转换成 float。");
+                    throw new DAOException("Value " + bdValue + " is too large for float");
                 }
                 return bdValue.floatValue();
             }
@@ -186,20 +199,20 @@ public class BeanUtil {
      * 获得一个对象的属性
      *
      * @param obj       要获取的对象
-     * @param fieldname 属性名
+     * @param fieldName 属性名
      *
      * @return 值。如果对象中没有该属性或该属性不可读，则返回null
      */
-    public static Object getValue(Object obj, String fieldname) {
+    public static Object getValue(Object obj, String fieldName) {
         try {
-            Method getter = getPropertyMethod(obj.getClass(), fieldname, true);
+            Method getter = getPropertyMethod(obj.getClass(), fieldName, true);
             if (getter != null) {
                 return getter.invoke(obj);
             } else {
                 return null;
             }
         } catch (Exception e) {
-            throw new DAOException("读取属性值失败", e);
+            throw new DAOException("Error getting property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
         }
     }
 

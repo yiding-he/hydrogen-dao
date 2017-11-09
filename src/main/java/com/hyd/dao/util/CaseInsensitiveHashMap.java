@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * 对 key 忽略大小写的 HashMap
  */
-public class CaseInsensitiveHashMap<K, V> extends HashMap<K, V> {
+public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
 
     /**
      * 根据 key 获取值
@@ -16,12 +16,8 @@ public class CaseInsensitiveHashMap<K, V> extends HashMap<K, V> {
      *
      * @throws IllegalArgumentException 如果 key 不是一个字符串
      */
-    public V get(Object key) {
-        if (!(key instanceof String)) {
-            throw new IllegalArgumentException("参数必须是字符串。");
-        }
-        String strkey = ((String) key).toLowerCase();
-        return super.get(strkey);
+    public V get(String key) {
+        return super.get(key.toLowerCase());
     }
 
     /**
@@ -33,11 +29,8 @@ public class CaseInsensitiveHashMap<K, V> extends HashMap<K, V> {
      * @throws IllegalArgumentException 如果 key 不是一个字符串
      */
     @SuppressWarnings({"unchecked"})
-    public V put(K key, V value) {
-        if (!(key instanceof String)) {
-            throw new IllegalArgumentException("参数必须是字符串。");
-        }
-        key = (K) ((String) key).toLowerCase();
+    public V put(String key, V value) {
+        key = key.toLowerCase();
         return super.put(key, value);
     }
 
@@ -51,7 +44,7 @@ public class CaseInsensitiveHashMap<K, V> extends HashMap<K, V> {
     @Override
     public boolean containsKey(Object key) {
         if (!(key instanceof String)) {
-            throw new IllegalArgumentException("参数必须是字符串。");
+            throw new IllegalArgumentException("Key must be a string.");
         }
 
         key = ((String) key).toLowerCase();
