@@ -19,16 +19,13 @@ public class Str extends StringUtils {
      * @return 字符串中包含匹配指定正则表达式的次数
      */
     public static int count(String str, String regex) {
-        if (isEmpty(regex)) {
+        if (isEmpty(regex) || isEmpty(str)) {
             return 0;
         }
-        int count = 0;
 
-        String string = str;
-        while (!string.equals(string.replaceFirst(regex, ""))) {
-            count++;
-            string = string.replaceFirst(regex, "");
-        }
+        int count = 0;
+        Matcher matcher = Pattern.compile(regex).matcher(str);
+        while (matcher.find()) count++;
         return count;
     }
 

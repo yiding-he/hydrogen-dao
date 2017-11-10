@@ -7,7 +7,7 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.LockFactory;
+import com.hyd.dao.util.Locker;
 import com.hyd.dao.util.Str;
 
 import java.lang.reflect.Field;
@@ -26,7 +26,7 @@ public class CommandBuilderHelper {
     private static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
 
     // 缓存已经生成的字段info
-    private static Map<String, ColumnInfo[]> cache = new HashMap<String, ColumnInfo[]>();
+    private static Map<String, ColumnInfo[]> cache = new HashMap<>();
 
     protected Connection connection;
 
@@ -85,9 +85,9 @@ public class CommandBuilderHelper {
         if (cache.get(fullTableName) != null) {
             return cache.get(fullTableName);
         } else {
-            synchronized (LockFactory.getLock(fullTableName)) {
+            return Locker.lockAndRun(fullTableName, () -> {
                 return getColumnInfos(schema, tableName, fullTableName);
-            }
+            });
         }
     }
 

@@ -9,7 +9,7 @@ public class MapCacheUtils {
     public MapCacheUtils() {
     }
 
-    public static Map newLRUCache(final int size, boolean threadSafe) {
+    public static <K, V> Map<K, V> newLRUCache(final int size, boolean threadSafe) {
         LinkedHashMap cache = new LinkedHashMap(size + 1, 0.75F, true) {
 
             public boolean removeEldestEntry(Map.Entry eldest) {

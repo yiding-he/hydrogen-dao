@@ -1,7 +1,7 @@
 package com.hyd.dao;
 
 import com.hyd.dao.database.ExecutorFactory;
-import com.hyd.dao.util.LockFactory;
+import com.hyd.dao.util.Locker;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -127,11 +127,11 @@ public class DataSources {
      */
     private ExecutorFactory getExecutorFactory(String dsName) {
 
-        synchronized (LockFactory.getLock("ds:" + dsName)) {
-            if (dsName == null) {
-                return null;
-            }
+        if (dsName == null) {
+            return null;
+        }
 
+        return Locker.lockAndRun("ds:" + dsName, () -> {
             if (!dataSources.containsKey(dsName)) {
                 throw new IllegalArgumentException("Unknown data source '" + dsName + "'");
             }
@@ -145,6 +145,6 @@ public class DataSources {
 
             executorFactories.put(dsName, factory);
             return factory;
-        }
+        });
     }
 }

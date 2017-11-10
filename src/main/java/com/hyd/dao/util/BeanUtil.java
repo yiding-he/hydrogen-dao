@@ -206,11 +206,7 @@ public class BeanUtil {
     public static Object getValue(Object obj, String fieldName) {
         try {
             Method getter = getPropertyMethod(obj.getClass(), fieldName, true);
-            if (getter != null) {
-                return getter.invoke(obj);
-            } else {
-                return null;
-            }
+            return getter != null ? getter.invoke(obj) : null;
         } catch (Exception e) {
             throw new DAOException("Error getting property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
         }
@@ -229,7 +225,7 @@ public class BeanUtil {
     public static Object getStaticValue(Class clazz, String fieldName) throws Exception {
         try {
             Field field = clazz.getDeclaredField(fieldName);
-            if ((field.getModifiers() & Modifier.STATIC) == 0) {
+            if (Modifier.isStatic(field.getModifiers())) {
                 return null;
             }
             return field.get(null);

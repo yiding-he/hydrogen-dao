@@ -265,7 +265,7 @@ public class DefaultExecutor extends Executor {
      * @throws SQLException 如果填入参数失败
      */
     private void insertBatchParams(BatchCommand command, List params) throws SQLException {
-        int length = Str.count(command.getCommand(), "\\?");
+        int length = Str.countMatches(command.getCommand(), "?");
 
         List<Integer> paramTypes = new ArrayList<>();
         if (command.getColumnInfos() != null) {
