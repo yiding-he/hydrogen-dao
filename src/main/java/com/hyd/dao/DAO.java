@@ -431,6 +431,14 @@ public class DAO {
 
     ////////////////////////////////////////////////////////////////
 
+    public RowIterator queryIterator(Command command) throws DAOException {
+        return queryIterator(command.getStatement(), command.getParams());
+    }
+
+    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable) throws DAOException {
+        return queryIterator(generatable.toCommand());
+    }
+
     /**
      * 执行查询，返回迭代器
      * <p/>
