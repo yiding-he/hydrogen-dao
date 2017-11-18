@@ -1,6 +1,7 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
 import com.hyd.dao.DAO;
+import com.hyd.dao.DAOException;
 import com.hyd.dao.DataConversionException;
 import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
@@ -85,13 +86,20 @@ public class CommandBuilderHelper {
         if (cache.get(fullTableName) != null) {
             return cache.get(fullTableName);
         } else {
-            return Locker.lockAndRun(fullTableName, () -> {
-                return getColumnInfos(schema, tableName, fullTableName);
-            });
+            return Locker.lockAndRun(fullTableName, () -> getColumnInfos(schema, tableName, fullTableName));
         }
     }
 
     private ColumnInfo[] getColumnInfos(
+            String schema, String tableName, String fullTableName) {
+        try {
+            return getColumnInfos0(schema, tableName, fullTableName);
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+
+    private ColumnInfo[] getColumnInfos0(
             String schema, String tableName, String fullTableName) throws SQLException {
 
         if (cache.get(fullTableName) != null) {
@@ -144,7 +152,7 @@ public class CommandBuilderHelper {
         ColumnMeta columnMeta = getColumnMeta();
         List<String> keyNames = new ArrayList<>();
 
-        try(ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName)) {
+        try (ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName)) {
             while (keys.next()) {
                 keyNames.add(keys.getString(columnMeta.columnName));
             }

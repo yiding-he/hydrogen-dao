@@ -123,7 +123,7 @@ public class DataSources {
      *
      * @param dsName 数据源名称
      *
-     * @return ExecutorFactoty 对象
+     * @return ExecutorFactory 对象
      */
     private ExecutorFactory getExecutorFactory(String dsName) {
 

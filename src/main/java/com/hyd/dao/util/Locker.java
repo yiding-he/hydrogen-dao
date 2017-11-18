@@ -6,8 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
- * (description)
- * created at 2017/11/10
+ * Lock and synchronization by string key.
  *
  * @author yidin
  */
