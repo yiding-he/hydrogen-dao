@@ -355,7 +355,8 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public <T> List<T> queryRange(Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
+    public <T> List<T> queryRange(
+            Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
 
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
@@ -395,8 +396,9 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public Page<Row> queryPage(String sql,
-                               int pageSize, int pageIndex, Object... params) throws DAOException {
+    public Page<Row> queryPage(
+            String sql,
+            int pageSize, int pageIndex, Object... params) throws DAOException {
         return queryPage(null, sql, pageSize, pageIndex, params);
     }
 
@@ -413,8 +415,9 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public <T> Page<T> queryPage(Class<T> wrappingClass, String sql,
-                                 int pageSize, int pageIndex, Object... params) throws DAOException {
+    public <T> Page<T> queryPage(
+            Class<T> wrappingClass, String sql,
+            int pageSize, int pageIndex, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[list.size()]));
@@ -514,6 +517,19 @@ public class DAO {
      */
     public <T> T find(Class<T> clazz, Object key) throws DAOException {
         return find(clazz, BeanUtil.getTableName(clazz), key);
+    }
+
+    /**
+     * 执行 select count 语句，并直接返回结果内容
+     *
+     * @param command 查询命令
+     *
+     * @return 结果中的数字
+     */
+    public int count(Command command) {
+        Row row = queryFirst(command);
+        Iterator<Object> iterator = row.values().iterator();
+        return ((BigDecimal) iterator.next()).intValue();
     }
 
     /**
