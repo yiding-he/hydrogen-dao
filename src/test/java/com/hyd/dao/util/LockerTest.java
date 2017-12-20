@@ -3,6 +3,8 @@ package com.hyd.dao.util;
 import org.junit.Test;
 
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * (description)
@@ -11,6 +13,22 @@ import java.util.Random;
  * @author yidin
  */
 public class LockerTest {
+
+    @Test
+    public void testLock() throws Exception {
+        Lock lock = new ReentrantLock();
+
+        lock.lock();
+        lock.lock();
+        lock.lock();
+
+        System.out.println("Hello!");
+
+        lock.unlock();
+        lock.unlock();
+        lock.unlock();
+        lock.unlock();  // error
+    }
 
     @Test
     public void lockAndRun() throws Exception {
@@ -34,4 +52,27 @@ public class LockerTest {
         Thread.sleep(60000);
     }
 
+    @Test
+    public void testLockMultipleTimes() throws Exception {
+        String key1 = "lockKey";
+        String key2 = "lockKey";
+
+        Locker.lockAndRun(key1, () -> {
+            Locker.lockAndRun(key2, () -> {
+                Locker.lockAndRun(key1, () -> {
+                    Locker.lockAndRun(key2, () -> {
+                        Locker.lockAndRun(key1, () -> {
+                            Locker.lockAndRun(key2, () -> {
+                                Locker.lockAndRun(key1, () -> {
+                                    Locker.lockAndRun(key2, () -> {
+                                        System.out.println("Hey!");
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
 }
