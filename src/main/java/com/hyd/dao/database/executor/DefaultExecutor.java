@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of Executor
@@ -51,6 +52,7 @@ public class DefaultExecutor extends Executor {
         super(dsName, connection);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Page queryPage(Class clazz, String sql, List params, int pageSize, int pageIndex) {
 
@@ -129,14 +131,15 @@ public class DefaultExecutor extends Executor {
         return CommandBuilderHelper.getHelper(connection).getCountSql(sql);
     }
 
-    public RowIterator queryIterator(String sql, List params) {
+    @Override
+    public RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor) {
         printCommand(sql, params);
         try {
             executeQuery(sql, params);
         } catch (SQLException e) {
             throw new DAOException("Query failed:", e, sql, params);
         }
-        return new RowIterator(rs);
+        return new RowIterator(rs, preProcessor);
     }
 
     /**
@@ -150,6 +153,7 @@ public class DefaultExecutor extends Executor {
      *
      * @return 查询结果
      */
+    @Override
     public List query(Class clazz, String sql, List params, int startPosition, int endPosition) {
 
         String rangedSql = null;
@@ -176,6 +180,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     @SuppressWarnings({"unchecked"})
     public <T> T find(Class<T> wrapperClass, Object key, String tableName) {
         try {
@@ -187,6 +192,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public boolean exists(Object obj, String tableName) {
         try {
             Command command = QueryCommandBuilder.build(connection, tableName, obj);
@@ -219,6 +225,7 @@ public class DefaultExecutor extends Executor {
 
     ////////////////////////////////////////////////////////////////
 
+    @Override
     public int execute(BatchCommand command) {
 
         if (command == BatchCommand.EMPTY) {
@@ -277,6 +284,7 @@ public class DefaultExecutor extends Executor {
         insertParams(params, paramTypes);
     }
 
+    @Override
     public int execute(String sql, List params) {
         return execute(sql, params, null);
     }
@@ -339,6 +347,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public void insert(Object object, String tableName) {
         Command command = new Command();
         try {
@@ -349,6 +358,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public void insertList(List list, String table) {
         try {
             execute(InsertCommandBuilder.buildBatch(connection, table, list));
@@ -357,10 +367,12 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public void insertMap(Map row, String tableName) {
         insert(row, tableName);
     }
 
+    @Override
     public int delete(Object obj, String tableName) {
         Command command = new Command();
         try {
@@ -371,6 +383,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public int deleteByKey(Object key, String tableName) {
         try {
             Command command = DeleteCommandBuilder.buildByKey(connection, tableName, key);
@@ -382,6 +395,7 @@ public class DefaultExecutor extends Executor {
 
     ////////////////////////////////////////////////////////////////
 
+    @Override
     public List call(String name, Object[] params) {
         try {
             SpParam[] spParams = StorageProsedureHelper.createSpParams(name, params, connection);
@@ -397,6 +411,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public List callFunction(String name, Object[] params) {
 
         try {
@@ -583,6 +598,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
     public void close() {
         if (connection != null) {
             try {
@@ -598,6 +614,7 @@ public class DefaultExecutor extends Executor {
         info.setClosed(true);
     }
 
+    @Override
     public void rollbackAndClose() {
         if (connection != null) {
             try {
@@ -612,6 +629,7 @@ public class DefaultExecutor extends Executor {
         info.setClosed(true);
     }
 
+    @Override
     public boolean isClosed() {
         try {
             return connection == null || connection.isClosed();

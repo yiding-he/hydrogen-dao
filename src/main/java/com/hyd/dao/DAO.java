@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Main facade of hydrogen-dao.
@@ -434,12 +435,24 @@ public class DAO {
 
     ////////////////////////////////////////////////////////////////
 
+    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable) throws DAOException {
+        return queryIterator(generatable.toCommand());
+    }
+
     public RowIterator queryIterator(Command command) throws DAOException {
         return queryIterator(command.getStatement(), command.getParams());
     }
 
-    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable) throws DAOException {
-        return queryIterator(generatable.toCommand());
+    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable, Consumer<Row> preProcessor) throws DAOException {
+        return queryIterator(generatable.toCommand(), preProcessor);
+    }
+
+    public RowIterator queryIterator(Command command, Consumer<Row> preProcessor) throws DAOException {
+        return queryIterator(command.getStatement(), preProcessor, command.getParams());
+    }
+
+    public RowIterator queryIterator(String sql, Object... params) throws DAOException {
+        return queryIterator(sql, null, params);
     }
 
     /**
@@ -455,7 +468,7 @@ public class DAO {
      * @throws IllegalArgumentException 如果 sql 为 null
      * @throws DAOException             如果查询失败
      */
-    public RowIterator queryIterator(String sql, Object... params) throws DAOException {
+    public RowIterator queryIterator(String sql, Consumer<Row> preProcessor, Object... params) throws DAOException {
 
         if (sql == null) {
             throw new IllegalArgumentException("SQL is null");
@@ -465,9 +478,10 @@ public class DAO {
             List list = (List) params[0];
             return queryIterator(sql, list.toArray(new Object[list.size()]));
         }
+
         String fixedSql = fixSql(sql);
         Executor executor = getExecutor(true);
-        return executor.queryIterator(fixedSql, Arrays.asList(params));
+        return executor.queryIterator(fixedSql, Arrays.asList(params), preProcessor);
         // 数据库连接此时必须保持开启，所以不能调用 closeExecutor() 方法。
     }
 

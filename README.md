@@ -11,6 +11,13 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ##更新
 
+#### 2017-12-20:
+
+* 版本号升级到 2.6.0-SNAPSHOT
+* Java 依赖版本更新到 8.0
+* RowIterator 新增 setRowPreProcessor() 方法，用于返回 Row 对象前进行预处理。
+* DAO.queryIterator() 方法新增 Consumer<Row> 类型的参数。
+
 #### 2017-04-12:
 
 * 修复了 MySQL 下插入对象时表的字段名如果是 MySQL 保留关键字的话会执行失败的问题
@@ -67,7 +74,7 @@ for (User user: userList) {
 MappedCommand cmd = 
         new MappedCommand("update USERS set ROLE=#role# where ID in(#userid#)")
         .setParam("role", "admin")
-        .setParam("userid", 1, 2, 3, 4);
+        .setParam("userid", 1, 2, 3, 4);  // 数组或 List 都可以
 dao.execute(cmd);
 ~~~
 
@@ -78,7 +85,7 @@ _不用写恶心的 `where 1=1` 了_
 ~~~Java
 dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
         .From("USERS")
-        .Where("ID in ?", new int[]{10, 22, 135})      // 会自动扩展为 "ID in (?,?,?)"
+        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"
         .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会按照该条件查询
         .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
 );
