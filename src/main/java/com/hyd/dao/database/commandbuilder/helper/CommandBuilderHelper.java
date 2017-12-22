@@ -295,7 +295,7 @@ public class CommandBuilderHelper {
 
         while (field == null && type != null) {
             try {
-                field = object.getClass().getDeclaredField(fieldName);
+                field = type.getDeclaredField(fieldName);
             } catch (Exception e) {
                 type = type.getSuperclass();
             }
