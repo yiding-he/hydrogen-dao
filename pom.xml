@@ -96,6 +96,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>1.5.9.RELEASE</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>

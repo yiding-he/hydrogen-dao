@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public class DataSources {
 
+    public static final String DEFAULT_DATA_SOURCE_NAME = "default";
+
     /**
      * 持有 {@link javax.sql.DataSource} 对象的集合
      */
