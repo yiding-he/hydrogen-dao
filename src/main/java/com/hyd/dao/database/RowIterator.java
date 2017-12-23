@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.function.Consumer;
 
 /**
  * <p>查询结果迭代器。当查询返回大量结果，又没有足够的内存进行缓存时，可以使用 DAO.queryIterator
@@ -36,12 +37,23 @@ import java.sql.Statement;
  */
 public class RowIterator implements Closeable {
 
-    static final Logger LOG = Logger.getLogger(RowIterator.class);
+    private static final Logger LOG = Logger.getLogger(RowIterator.class);
 
     private ResultSet rs;
 
+    private Consumer<Row> rowPreProcessor;
+
     public RowIterator(ResultSet rs) {
         this.rs = rs;
+    }
+
+    public RowIterator(ResultSet rs, Consumer<Row> rowPreProcessor) {
+        this.rs = rs;
+        this.rowPreProcessor = rowPreProcessor;
+    }
+
+    public void setRowPreProcessor(Consumer<Row> rowPreProcessor) {
+        this.rowPreProcessor = rowPreProcessor;
     }
 
     /**
@@ -64,10 +76,12 @@ public class RowIterator implements Closeable {
      */
     public Row getRow() {
         try {
-            return ResultSetUtil.readRow(rs);
-        } catch (IOException e) {
-            throw new DAOException("failed to read record", e);
-        } catch (SQLException e) {
+            Row row = ResultSetUtil.readRow(rs);
+            if (this.rowPreProcessor != null) {
+                this.rowPreProcessor.accept(row);
+            }
+            return row;
+        } catch (IOException | SQLException e) {
             throw new DAOException("failed to read record", e);
         }
     }

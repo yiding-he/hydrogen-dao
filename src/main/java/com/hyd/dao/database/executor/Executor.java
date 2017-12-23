@@ -2,6 +2,7 @@ package com.hyd.dao.database.executor;
 
 import com.hyd.dao.BatchCommand;
 import com.hyd.dao.Page;
+import com.hyd.dao.Row;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.snapshot.ExecutorInfo;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 执行数据库操作的接口
@@ -153,12 +155,13 @@ public abstract class Executor {
     /**
      * 执行查询，返回迭代器
      *
-     * @param sql    要执行的查询语句
-     * @param params 查询参数
+     * @param sql          要执行的查询语句
+     * @param params       查询参数
+     * @param preProcessor 对 Row 对象的预处理
      *
      * @return 用于获得查询结果的迭代器
      */
-    public abstract RowIterator queryIterator(String sql, List params);
+    public abstract RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor);
 
     public void setInfo(ExecutorInfo info) {
         this.info = info;

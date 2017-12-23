@@ -70,18 +70,16 @@ public class SQL {
         }
 
         public Pair(Joint joint, String statement) {
-            this.joint = joint;
-            this.statement = statement;
+            this(joint, statement, (Object[]) null);
         }
 
         public Pair(String statement, Object... args) {
-            this.statement = statement;
-            this.args = args;
+            this(null, statement, args);
         }
 
         public Pair(Joint joint, String statement, Object... args) {
             this.joint = joint;
-            this.statement = statement;
+            this.statement = statement.trim();
             this.args = args;
         }
 
@@ -315,6 +313,21 @@ public class SQL {
                 String marks = "(";
 
                 for (Object o : (List) condition.firstArg()) {
+                    marks += "?,";
+                    this.params.add(o);
+                }
+
+                if (marks.endsWith(",")) {
+                    marks = marks.substring(0, marks.length() - 1);
+                }
+                marks += ")";                                 // marks = "(?,?,?,...,?)"
+
+                where += condition.statement.replace("?", marks);  // "A in ?" -> "A in (?,?,?)"
+
+            } else if (condition.statement.endsWith("in ?")) {
+                String marks = "(";
+
+                for (Object o : condition.args) {
                     marks += "?,";
                     this.params.add(o);
                 }

@@ -246,11 +246,8 @@ public class CommandBuilderHelper {
             strValue = Str.valueOf(value);
         } else {
 
-            Field field;
-            try {
-                field = object.getClass().getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                // 从表字段名查询对象属性失败
+            Field field = getObjectField(object, fieldName);
+            if (field == null) {
                 return null;
             }
 
@@ -306,6 +303,21 @@ public class CommandBuilderHelper {
             default:                // 4. 其他类型则直接使用 string_value。
                 return strValue;
         }
+    }
+
+    private static Field getObjectField(Object object, String fieldName) {
+        Field field = null;
+        Class type = object.getClass();
+
+        while (field == null && type != null) {
+            try {
+                field = type.getDeclaredField(fieldName);
+            } catch (Exception e) {
+                type = type.getSuperclass();
+            }
+        }
+
+        return field;
     }
 
     private static boolean isAnnotatedWithSequencce(Field field) {

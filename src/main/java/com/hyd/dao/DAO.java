@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Main facade of hydrogen-dao.
@@ -355,11 +356,8 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public <T> List<T> queryRange(Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
-
-        if (startPosition < 0 || startPosition >= endPosition) {
-            return new ArrayList<>();
-        }
+    public <T> List<T> queryRange(
+            Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
 
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
@@ -399,8 +397,9 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public Page<Row> queryPage(String sql,
-                               int pageSize, int pageIndex, Object... params) throws DAOException {
+    public Page<Row> queryPage(
+            String sql,
+            int pageSize, int pageIndex, Object... params) throws DAOException {
         return queryPage(null, sql, pageSize, pageIndex, params);
     }
 
@@ -417,11 +416,9 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public <T> Page<T> queryPage(Class<T> wrappingClass, String sql,
-                                 int pageSize, int pageIndex, Object... params) throws DAOException {
-
-        pageIndex = Math.max(0, pageIndex);  // Negative value not allowed.
-
+    public <T> Page<T> queryPage(
+            Class<T> wrappingClass, String sql,
+            int pageSize, int pageIndex, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[list.size()]));
@@ -438,6 +435,26 @@ public class DAO {
 
     ////////////////////////////////////////////////////////////////
 
+    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable) throws DAOException {
+        return queryIterator(generatable.toCommand());
+    }
+
+    public RowIterator queryIterator(Command command) throws DAOException {
+        return queryIterator(command.getStatement(), command.getParams());
+    }
+
+    public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable, Consumer<Row> preProcessor) throws DAOException {
+        return queryIterator(generatable.toCommand(), preProcessor);
+    }
+
+    public RowIterator queryIterator(Command command, Consumer<Row> preProcessor) throws DAOException {
+        return queryIterator(command.getStatement(), preProcessor, command.getParams());
+    }
+
+    public RowIterator queryIterator(String sql, Object... params) throws DAOException {
+        return queryIterator(sql, null, params);
+    }
+
     /**
      * 执行查询，返回迭代器
      * <p/>
@@ -451,7 +468,7 @@ public class DAO {
      * @throws IllegalArgumentException 如果 sql 为 null
      * @throws DAOException             如果查询失败
      */
-    public RowIterator queryIterator(String sql, Object... params) throws DAOException {
+    public RowIterator queryIterator(String sql, Consumer<Row> preProcessor, Object... params) throws DAOException {
 
         if (sql == null) {
             throw new IllegalArgumentException("SQL is null");
@@ -461,9 +478,10 @@ public class DAO {
             List list = (List) params[0];
             return queryIterator(sql, list.toArray(new Object[list.size()]));
         }
+
         String fixedSql = fixSql(sql);
         Executor executor = getExecutor(true);
-        return executor.queryIterator(fixedSql, Arrays.asList(params));
+        return executor.queryIterator(fixedSql, Arrays.asList(params), preProcessor);
         // 数据库连接此时必须保持开启，所以不能调用 closeExecutor() 方法。
     }
 
@@ -513,6 +531,19 @@ public class DAO {
      */
     public <T> T find(Class<T> clazz, Object key) throws DAOException {
         return find(clazz, BeanUtil.getTableName(clazz), key);
+    }
+
+    /**
+     * 执行 select count 语句，并直接返回结果内容
+     *
+     * @param command 查询命令
+     *
+     * @return 结果中的数字
+     */
+    public int count(Command command) {
+        Row row = queryFirst(command);
+        Iterator<Object> iterator = row.values().iterator();
+        return ((BigDecimal) iterator.next()).intValue();
     }
 
     /**
