@@ -1,19 +1,19 @@
 package com.hyd.dao.spring;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
+
 import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * @author yidin
@@ -21,6 +21,7 @@ import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 @SuppressWarnings("SpringFacetCodeInspection")
 @Configuration
 @AutoConfigureOrder()
+@ConditionalOnMissingBean(DAO.class)
 @ConditionalOnClass(value = {javax.sql.DataSource.class})
 @EnableConfigurationProperties(value = DataSourceProperties.class)
 public class SpringAutoConfiguration {
@@ -32,36 +33,22 @@ public class SpringAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingClass
-    @ConditionalOnClass(BasicDataSource.class)
+    @ConditionalOnClass(name = "org.apache.commons.dbcp2.BasicDataSource")
     public DAO daoFromDBCP(
-            @Autowired DataSourceProperties dataSourceProperties,
-            @Autowired DataSources dataSources
+            DataSourceProperties dataSourceProperties,
+            DataSources dataSources
     ) {
-        BasicDataSource basicDataSource = new BasicDataSource();
-        basicDataSource.setDriverClassName(dataSourceProperties.getDriverClassName());
-        basicDataSource.setUrl(dataSourceProperties.getUrl());
-        basicDataSource.setUsername(dataSourceProperties.getUsername());
-        basicDataSource.setPassword(dataSourceProperties.getPassword());
+
+        if (!hasText(dataSourceProperties.getDriverClassName()) ||
+                !hasText(dataSourceProperties.getUrl()) ||
+                !hasText(dataSourceProperties.getUsername())) {
+            return null;
+        }
+
+        DataSource basicDataSource = BasicDataSourceCreator.createDataSource(dataSourceProperties);
 
         dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, basicDataSource);
         return dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
     }
 
-    @Bean
-    @ConditionalOnMissingClass
-    @ConditionalOnClass(DruidDataSource.class)
-    public DAO daoFromDruid(
-            @Autowired DataSourceProperties dataSourceProperties,
-            @Autowired DataSources dataSources
-    ) {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName(dataSourceProperties.getDriverClassName());
-        druidDataSource.setUrl(dataSourceProperties.getUrl());
-        druidDataSource.setUsername(dataSourceProperties.getUsername());
-        druidDataSource.setPassword(dataSourceProperties.getPassword());
-
-        dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, druidDataSource);
-        return dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
-    }
 }
