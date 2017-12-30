@@ -24,7 +24,6 @@
     <logger name="net" level="ERROR"/>
 
     <logger name="com.hyd" level="DEBUG"/>
-    <logger name="com.hyd.daotest.BaseTest" level="ERROR"/>
-    <logger name="other" level="DEBUG"/>
+    <logger name="com.hyd.dao.database.executor.DefaultExecutor.batch" level="ERROR"/>
 
 </configuration>
