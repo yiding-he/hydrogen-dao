@@ -119,7 +119,7 @@ public class CommandBuilderHelper {
             keyNames.add(keys.getString(columnMeta.columnName));
         }
 
-        List<ColumnInfo> infos = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> infos = new ArrayList<>();
 
         // COLUMN_NAME, DATA_TYPE, COLUMN_SIZE, NULLABLE, REMARKS 可以用于 Oracle 和 MySQL
         while (columns.next()) {

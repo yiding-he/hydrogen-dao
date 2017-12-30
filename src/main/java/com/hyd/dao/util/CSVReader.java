@@ -2,10 +2,8 @@ package com.hyd.dao.util;
 
 import com.hyd.dao.Row;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +23,17 @@ public class CSVReader {
      * @throws IOException 如果读取失败
      */
     public static List<Row> read(String path, String charset) throws IOException {
+        return read(new FileInputStream(path), charset);
+    }
 
-        InputStream inputStream = CSVReader.class.getResourceAsStream(path);
+    public static List<Row> read(InputStream inputStream, String charset) throws IOException {
+        return read(inputStream, Charset.forName(charset));
+    }
+
+    public static List<Row> read(InputStream inputStream, Charset charset) throws IOException {
+
         if (inputStream == null) {
-            throw new IllegalStateException("Cannot reach resource '" + path + "'");
+            throw new NullPointerException("input stream is null");
         }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));

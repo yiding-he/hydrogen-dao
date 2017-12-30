@@ -1,6 +1,7 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * (description)
@@ -22,6 +23,16 @@ public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
     @Override
     protected String getSchema(String schema) {
         return "PUBLIC";
+    }
+
+    @Override
+    protected String getTableNameForMeta(String tableName) {
+        return tableName.toUpperCase();
+    }
+
+    @Override
+    protected String getCatalog() {
+        return null;
     }
 
     @Override

@@ -17,6 +17,20 @@ public class DBCPDataSource {
 
     }
 
+    public static BasicDataSource newH2MemDataSource() {
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("org.h2.Driver");
+        ds.setUrl("jdbc:h2:mem:db1");
+        return ds;
+    }
+
+    public static BasicDataSource newH2FileDataSource(String filePath, boolean onlyIfExists) {
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("org.h2.Driver");
+        ds.setUrl("jdbc:h2:" + filePath + (onlyIfExists? ";IFEXISTS=TRUE": ""));
+        return ds;
+    }
+
     public static BasicDataSource newOracleDataSource(
             String host, int port, String sid, String username, String password) {
 
