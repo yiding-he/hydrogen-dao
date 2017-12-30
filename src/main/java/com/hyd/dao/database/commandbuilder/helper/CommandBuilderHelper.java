@@ -117,7 +117,7 @@ public class CommandBuilderHelper {
 
         List<String> keyNames = getPrimaryKeyColumns(fixedSchema, fixedTableName, dbMeta);
 
-        List<ColumnInfo> infos = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> infos = new ArrayList<>();
 
         while (columns.next()) {
 
