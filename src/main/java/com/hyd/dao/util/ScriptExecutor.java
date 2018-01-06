@@ -46,7 +46,15 @@ public class ScriptExecutor {
         }
     }
 
-    public static void execute(InputStream is, DAO dao, Charset charset) throws IOException {
+    public static void execute(String resourcePath, DAO dao) {
+        execute(ScriptExecutor.class.getResourceAsStream(resourcePath), dao, Charset.forName("UTF-8"));
+    }
+
+    public static void execute(String resourcePath, DAO dao, String charset) {
+        execute(ScriptExecutor.class.getResourceAsStream(resourcePath), dao, Charset.forName(charset));
+    }
+
+    public static void execute(InputStream is, DAO dao, Charset charset) {
 
         if (is == null) {
             throw new DAOException("Invalid input stream");

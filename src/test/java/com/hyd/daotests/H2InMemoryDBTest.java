@@ -1,5 +1,8 @@
-package com.hyd.dao;
+package com.hyd.daotests;
 
+import com.hyd.dao.DAO;
+import com.hyd.dao.DataSources;
+import com.hyd.dao.Row;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.util.DBCPDataSource;
