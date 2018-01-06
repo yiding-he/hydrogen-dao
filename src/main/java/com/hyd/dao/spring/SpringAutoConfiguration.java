@@ -18,7 +18,6 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * @author yidin
  */
-@SuppressWarnings("SpringFacetCodeInspection")
 @Configuration
 @AutoConfigureOrder()
 @ConditionalOnMissingBean(DAO.class)
