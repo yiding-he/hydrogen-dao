@@ -6,7 +6,7 @@ import com.hyd.dao.log.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Scanner;
@@ -26,32 +26,44 @@ public class ScriptExecutor {
 
     private static final Logger LOG = Logger.getLogger(ScriptExecutor.class);
 
-    public static void execute(String filePath, DAO dao, Charset charset) throws IOException {
-        execute(new File(filePath), dao, charset);
-    }
+    private static final String CLASSPATH = "classpath:";
 
-    public static void execute(File file, DAO dao, Charset charset) throws IOException {
+    public static void execute(File file, DAO dao, Charset charset) {
         if (!file.exists() || !file.isFile()) {
             throw new DAOException("Invalid file '" + file.getAbsolutePath() + "'");
         } else {
-            InputStream inputStream = null;
             try {
-                inputStream = new FileInputStream(file);
+                InputStream inputStream = new FileInputStream(file);
                 execute(inputStream, dao, charset);
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
+            } catch (FileNotFoundException e) {
+                throw new DAOException(e);
             }
         }
     }
 
     public static void execute(String resourcePath, DAO dao) {
-        execute(ScriptExecutor.class.getResourceAsStream(resourcePath), dao, Charset.forName("UTF-8"));
+        execute(resourcePath, dao, Charset.forName("UTF-8"));
     }
 
     public static void execute(String resourcePath, DAO dao, String charset) {
-        execute(ScriptExecutor.class.getResourceAsStream(resourcePath), dao, Charset.forName(charset));
+        execute(resourcePath, dao, Charset.forName(charset));
+    }
+
+    public static void execute(String path, DAO dao, Charset charset) {
+
+        InputStream inputStream;
+        if (path.startsWith(CLASSPATH)) {
+            inputStream = ScriptExecutor.class
+                    .getResourceAsStream(path.substring(CLASSPATH.length()));
+        } else {
+            try {
+                inputStream = new FileInputStream(path);
+            } catch (FileNotFoundException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        execute(inputStream, dao, charset);
     }
 
     public static void execute(InputStream is, DAO dao, Charset charset) {
@@ -60,23 +72,24 @@ public class ScriptExecutor {
             throw new DAOException("Invalid input stream");
         }
 
-        Scanner scanner = new Scanner(is, charset.name());
         String line;
         StringBuilder statement = new StringBuilder();
         AtomicInteger counter = new AtomicInteger();
 
-        while (scanner.hasNextLine()) {
-            line = scanner.nextLine().trim();
+        try (Scanner scanner = new Scanner(is, charset.name())) {
+            while (scanner.hasNextLine()) {
+                line = scanner.nextLine().trim();
 
-            if (line.startsWith("//") || line.startsWith("--")) {
-                continue;
-            }
+                if (line.startsWith("//") || line.startsWith("--")) {
+                    continue;
+                }
 
-            statement.append(line);
+                statement.append(line);
 
-            if (line.endsWith(";")) {
-                executeStatement(dao, statement.toString(), counter);
-                statement = new StringBuilder();
+                if (line.endsWith(";")) {
+                    executeStatement(dao, statement.toString(), counter);
+                    statement = new StringBuilder();
+                }
             }
         }
 

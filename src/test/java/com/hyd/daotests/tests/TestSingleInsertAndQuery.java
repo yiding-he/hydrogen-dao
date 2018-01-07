@@ -1,8 +1,11 @@
 package com.hyd.daotests.tests;
 
+import com.hyd.dao.util.ScriptExecutor;
 import com.hyd.daotests.Blog;
 import com.hyd.daotests.DAOBaseTest;
 import com.hyd.dao.Row;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
@@ -18,6 +21,16 @@ public class TestSingleInsertAndQuery extends DAOBaseTest {
 
     private int getBlogCount() {
         return dao.count("select count(*) from blog");
+    }
+
+    @BeforeClass
+    public static void initClass () {
+        ScriptExecutor.execute("classpath:/hydrogen-scripts/tables.sql", dao);
+    }
+
+    @Before
+    public void init() {
+        dao.execute("truncate table blog");
     }
 
     @Test

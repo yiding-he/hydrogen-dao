@@ -1,5 +1,6 @@
 package com.hyd.dao.util;
 
+import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
 
 import java.io.*;
@@ -20,34 +21,57 @@ public class CSVReader {
      *
      * @return 读取结果
      *
-     * @throws IOException 如果读取失败
+     * @throws DAOException 如果读取失败
      */
-    public static List<Row> read(String path, String charset) throws IOException {
-        return read(new FileInputStream(path), charset);
+    public static List<Row> read(String path, String charset) throws DAOException {
+
+        InputStream inputStream;
+        if (path.startsWith("classpath:")) {
+            inputStream = CSVReader.class.getResourceAsStream(path.substring("classpath:".length()));
+        } else {
+            try {
+                inputStream = new FileInputStream(path);
+            } catch (FileNotFoundException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        return read(inputStream, charset);
     }
 
-    public static List<Row> read(InputStream inputStream, String charset) throws IOException {
+    public static List<Row> read(File file, String charset) throws DAOException {
+        try {
+            return read(new FileInputStream(file), Charset.forName(charset));
+        } catch (FileNotFoundException e) {
+            throw new DAOException(e);
+        }
+    }
+
+    public static List<Row> read(InputStream inputStream, String charset) throws DAOException {
         return read(inputStream, Charset.forName(charset));
     }
 
-    public static List<Row> read(InputStream inputStream, Charset charset) throws IOException {
+    public static List<Row> read(InputStream inputStream, Charset charset) throws DAOException {
 
         if (inputStream == null) {
             throw new NullPointerException("input stream is null");
         }
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));
-
-        List<String> lines = new ArrayList<String>();
-
+        List<String> lines = new ArrayList<>();
         String line;
-        try {
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             while ((line = reader.readLine()) != null) {
                 lines.add(line);
             }
+        } catch (IOException e) {
+            throw new DAOException(e);
         } finally {
-            reader.close();
-            inputStream.close();
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // nothing to do
+            }
         }
 
         return convertLines(lines);
