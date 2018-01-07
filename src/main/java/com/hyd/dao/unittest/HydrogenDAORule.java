@@ -21,13 +21,23 @@ import java.util.function.Supplier;
  */
 public class HydrogenDAORule implements TestRule {
 
+    private static final String SCRIPT_FOLDER = "hydrogen-scripts";
+
     private final Supplier<DAO> daoSupplier;
+
+    private final String scriptFolder;
 
     private Map<String, List<Row>> prepareData = new HashMap<>();
 
     public HydrogenDAORule(Supplier<DAO> daoSupplier) {
         this.daoSupplier = daoSupplier;
+        this.scriptFolder = SCRIPT_FOLDER;
+        init();
+    }
 
+    public HydrogenDAORule(Supplier<DAO> daoSupplier, String scriptFolder) {
+        this.daoSupplier = daoSupplier;
+        this.scriptFolder = scriptFolder;
         init();
     }
 
@@ -50,7 +60,7 @@ public class HydrogenDAORule implements TestRule {
         for (String pathElement : classPathElements) {
             File file = new File(pathElement);
             if (file.exists() && file.isDirectory()) {
-                File csvFolder = new File(file, "hydrogen-scripts");
+                File csvFolder = new File(file, scriptFolder);
                 if (csvFolder.exists() && csvFolder.isDirectory()) {
                     File[] files = csvFolder.listFiles(f -> f.getName().toLowerCase().endsWith(".csv"));
                     if (files != null) {
@@ -70,9 +80,9 @@ public class HydrogenDAORule implements TestRule {
     private void before() {
         DAO dao = daoSupplier.get();
 
-        ScriptExecutor.execute("classpath:/hydrogen-scripts/tables.sql", dao);
+        ScriptExecutor.execute("classpath:/" + scriptFolder + "/tables.sql", dao);
         insertData(dao);
-        ScriptExecutor.execute("classpath:/hydrogen-scripts/before.sql", dao);
+        ScriptExecutor.execute("classpath:/" + scriptFolder + "/before.sql", dao);
     }
 
     @Override
@@ -89,6 +99,6 @@ public class HydrogenDAORule implements TestRule {
 
     private void after() {
         DAO dao = daoSupplier.get();
-        ScriptExecutor.execute("classpath:/hydrogen-scripts/after.sql", dao);
+        ScriptExecutor.execute("classpath:/" + scriptFolder + "/after.sql", dao);
     }
 }
