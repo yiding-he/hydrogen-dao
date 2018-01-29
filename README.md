@@ -1,10 +1,8 @@
-#hydrogen-dao
+# hydrogen-dao
 
-```
-声明：本项目于 2018-01 月开始终止开发，因为 MyBatis 和 SpringBoot 
-配合使用，其易用性已经达到作者的期望，没有必要再花精力在本项目上。各位
-朋友若想 fork，请随意。
-```
+> **声明**：原作者于 2018-01 月开始终止开发，因为 MyBatis 和 SpringBoot 
+> 配合使用，其易用性已经达到作者的期望，没有必要再花精力在本项目上。各位
+> 朋友若想 fork，请随意。
 
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
@@ -15,7 +13,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
 
-##更新
+## 更新
 
 #### 2017-12-22:
 
