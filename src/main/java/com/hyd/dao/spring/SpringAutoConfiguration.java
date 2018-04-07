@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import static org.springframework.util.StringUtils.hasText;
 @AutoConfigureOrder()
 @ConditionalOnMissingBean(DAO.class)
 @ConditionalOnClass(value = {javax.sql.DataSource.class})
+@ConditionalOnProperty("spring.datasource.url")
 @EnableConfigurationProperties(value = DataSourceProperties.class)
 public class SpringAutoConfiguration {
 

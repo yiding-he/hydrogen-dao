@@ -47,7 +47,7 @@ public class DAO {
     /**
      * data source name
      */
-    protected String dsName;
+    private String dsName;
 
     private ExecutorFactory executorFactory;
 
@@ -70,9 +70,32 @@ public class DAO {
 
     /////////////////////////// TRANSACTION //////////////////////////////
 
-    public static void runTransactionWithException(Runnable runnable) {
+    /**
+     * Runs a transaction.
+     *
+     * @param runnable Transaction procedure.
+     */
+    public static void runTransaction(Runnable runnable) throws TransactionException {
+        runTransaction(TransactionManager.DEFAULT_ISOLATION_LEVEL, runnable);
+    }
+
+    /**
+     * Runs a transaction with specified isolation level.
+     *
+     * @param isolation One of the following values, default is
+     *                  {@link TransactionManager#DEFAULT_ISOLATION_LEVEL}：
+     *                  <ul>
+     *                  <li>{@link java.sql.Connection#TRANSACTION_NONE}</li>
+     *                  <li>{@link java.sql.Connection#TRANSACTION_READ_COMMITTED}</li>
+     *                  <li>{@link java.sql.Connection#TRANSACTION_READ_UNCOMMITTED}</li>
+     *                  <li>{@link java.sql.Connection#TRANSACTION_REPEATABLE_READ}</li>
+     *                  <li>{@link java.sql.Connection#TRANSACTION_SERIALIZABLE}</li>
+     *                  </ul>
+     * @param runnable  Transaction procedure.
+     */
+    public static void runTransaction(int isolation, Runnable runnable) {
         TransactionManager.start();
-        TransactionManager.setTransactionIsolation(TransactionManager.DEFAULT_ISOLATION_LEVEL);
+        TransactionManager.setTransactionIsolation(isolation);
 
         try {
             runnable.run();
@@ -86,47 +109,6 @@ public class DAO {
         }
     }
 
-    /**
-     * Runs a transaction.
-     *
-     * @param runnable Transaction procedure.
-     *
-     * @return Whether successfully committed.
-     */
-    public static boolean runTransaction(Runnable runnable) throws TransactionException {
-        return runTransaction(runnable, TransactionManager.DEFAULT_ISOLATION_LEVEL);
-    }
-
-    /**
-     * Runs a transaction with specified isolation level.
-     *
-     * @param runnable  Transaction procedure.
-     * @param isolation One of the following values, default is TRANSACTION_READ_COMMITTED：
-     *                  <ul>
-     *                  <li>{@link java.sql.Connection#TRANSACTION_NONE}</li>
-     *                  <li>{@link java.sql.Connection#TRANSACTION_READ_COMMITTED}</li>
-     *                  <li>{@link java.sql.Connection#TRANSACTION_READ_UNCOMMITTED}</li>
-     *                  <li>{@link java.sql.Connection#TRANSACTION_REPEATABLE_READ}</li>
-     *                  <li>{@link java.sql.Connection#TRANSACTION_SERIALIZABLE}</li>
-     *                  </ul>
-     *
-     * @return Whether successfully committed.
-     */
-    public static boolean runTransaction(Runnable runnable, int isolation) {
-        TransactionManager.start();
-        TransactionManager.setTransactionIsolation(isolation);
-
-        try {
-            runnable.run();
-            TransactionManager.commit();
-            return true;
-        } catch (RuntimeException e) {
-            LOG.error("", e);
-            TransactionManager.rollback();
-            return false;
-        }
-    }
-
     /////////////////// QUERY //////////////////////
 
     /**
@@ -136,7 +118,7 @@ public class DAO {
      *
      * @return 修复后的 sql 语句
      */
-    protected static String fixSql(String sql) {
+    private static String fixSql(String sql) {
         return StringUtils.removeEnd(sql.trim(), ";");
     }
 
@@ -159,7 +141,7 @@ public class DAO {
      * @return 包含 Map 对象的 List
      */
     public static List<Map<String, Object>> toMapList(List<Row> rowList) {
-        return new ArrayList<Map<String, Object>>(rowList);
+        return new ArrayList<>(rowList);
     }
 
     void setExecutorFactory(ExecutorFactory executorFactory) {

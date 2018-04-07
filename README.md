@@ -11,6 +11,11 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ##更新
 
+#### 2018-04-07
+
+* 版本号升级到 3.0.0-DEV 开发版
+* 添加 Spring Boot Auto Configuration，使用 spring.datasource 配置来自动创建 DAO 对象 
+
 #### 2017-12-22:
 
 * 修复了 insert 对象的时候无法正确映射父类成员的问题。
