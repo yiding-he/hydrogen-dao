@@ -252,7 +252,7 @@ public class CommandBuilderHelper {
             }
 
             // 判断属性是否被标记了 @Sequence
-            if (isAnnotatedWithSequencce(field)) {
+            if (isAnnotatedWithSequence(field)) {
                 info.setAutoIncrement(true);
 
                 String sequenceName = field.getAnnotation(Sequence.class).sequenceName();
@@ -320,7 +320,7 @@ public class CommandBuilderHelper {
         return field;
     }
 
-    private static boolean isAnnotatedWithSequencce(Field field) {
+    private static boolean isAnnotatedWithSequence(Field field) {
         return field.isAnnotationPresent(Sequence.class);
     }
 
