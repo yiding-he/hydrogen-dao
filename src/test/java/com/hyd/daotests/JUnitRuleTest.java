@@ -1,6 +1,6 @@
 package com.hyd.daotests;
 
-import com.hyd.dao.unittest.HydrogenDAORule;
+import com.hyd.dao.junit.HydrogenDAORule;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

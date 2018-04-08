@@ -1,4 +1,4 @@
-package com.hyd.dao.unittest;
+package com.hyd.dao.junit;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.Page;

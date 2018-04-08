@@ -9,12 +9,12 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
 
-##更新
+## 更新
 
 #### 2018-04-07
 
-* 版本号升级到 3.0.0-DEV 开发版
-* 添加 Spring Boot Auto Configuration，使用 spring.datasource 配置来自动创建 DAO 对象 
+* 版本号升级到 3.0.0 开发版
+* 添加 Spring Boot Auto Configuration，使用 spring.datasource 配置来自动创建 DAO 对象
 
 #### 2017-12-22:
 
@@ -38,29 +38,29 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 * Java 最低要求升级到 1.7
 * 版本号升级到 2.5.0-SNAPSHOT
 
-####2016-10-19:
+#### 2016-10-19:
 
 * 添加对 H2 数据库的支持
 
-####2015-12-27:
+#### 2015-12-27:
 
 * 修复 Page 类计算总页数不正确的 BUG
 
-####2015-05-28:
+#### 2015-05-28:
 
 * 修复了一个对 SQL.Generatable 对象调用多次 toCommand() 方法返回的内容不一致的 BUG
 
-####2015-03-22:
+#### 2015-03-22:
 
 * 将数据库差异集中到 CommandBuilderHelper 的子类中去，去掉 DefaultExecutor 的子类。
 * 添加对 HSQLDB 分页查询的支持
 
-####2015-03-20: 
+#### 2015-03-20: 
 
 * 以自适应的方式支持 logback/log4j/log4j2 三种日志输出框架。使用 hydrogen-dao 的项目可以自行选择。
 * 版本升级到 2.3.0-SNAPSHOT。
 
-##使用例子
+## 使用例子
 
 ### 查询记录
 
@@ -105,10 +105,15 @@ dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
 ~~~Java
 final DAO dao = getDAO();
 
-DAO.runTransactionWithException(new Runnable() {  // 所有事务都以 Runnable 的方式执行，简单明了
+DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简单明了
     public void run() {
         dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
         throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
     }
 });
 ~~~
+
+## 文档
+
+具体的文档都在源代码 docs 目录下。
+
