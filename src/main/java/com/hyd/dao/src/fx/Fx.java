@@ -3,14 +3,13 @@ package com.hyd.dao.src.fx;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -95,11 +94,40 @@ public class Fx {
         });
     }
 
+    public static <T> void setListViewSelectionChanged(ListView<T> listView, Consumer<T> onSelected) {
+        if (onSelected != null) {
+            listView.getSelectionModel().selectedItemProperty()
+                    .addListener((ob, oldValue, newValue) -> onSelected.accept(newValue));
+        }
+    }
+
     public static <T> Form<T> form(int labelWidth, List<FormField<T>> fields) {
         return new Form<>(labelWidth, fields);
     }
 
     public static <T> TextFormField<T> textField(String text, Function<T, StringProperty> extractor) {
         return new TextFormField<>(text, extractor);
+    }
+
+    public static ButtonType alert(AlertType alertType, String title, String message, ButtonType... buttons) {
+        Alert alert = new Alert(alertType, message, buttons);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        return alert.showAndWait().orElse(ButtonType.CANCEL);
+    }
+
+    public static boolean confirm(String message) {
+        return alert(AlertType.CONFIRMATION, "Confirm", message,
+                ButtonType.YES, ButtonType.NO) == ButtonType.YES;
+    }
+
+    public static void error(Throwable throwable) {
+        alert(AlertType.ERROR, "Error", throwable.toString(), ButtonType.OK);
+    }
+
+    public static MenuItem menuItem(String text, Runnable onAction) {
+        MenuItem menuItem = new MenuItem(text);
+        menuItem.setOnAction(event -> onAction.run());
+        return menuItem;
     }
 }

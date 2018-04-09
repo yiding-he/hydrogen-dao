@@ -19,6 +19,13 @@ public class Profile {
 
     private StringProperty password = new SimpleStringProperty();
 
+    public Profile() {
+    }
+
+    public Profile(String name) {
+        this.setName(name);
+    }
+
     public String getName() {
         return name.get();
     }
