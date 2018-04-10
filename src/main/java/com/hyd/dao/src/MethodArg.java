@@ -8,4 +8,7 @@ package com.hyd.dao.src;
  */
 public class MethodArg {
 
+    public String type;
+
+    public String name;
 }

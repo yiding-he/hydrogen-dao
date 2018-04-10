@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author yidin
  */
-public class ClassDef {
+public class ClassDef implements Code {
 
     public String className;
 
@@ -18,22 +18,27 @@ public class ClassDef {
     public List<MethodDef> methods = new ArrayList<>();
 
     @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-
-        s.append("public class ").append(className).append(" {\n");
+    public CodeBlock toCodeBlock() {
+        CodeBlock codeBlock = new CodeBlock();
+        codeBlock.addLine("public", "class", className, "{");
+        codeBlock.addLine();
 
         for (FieldDef field : fields) {
-            s.append(field.toString());
+            codeBlock.addCode(field, true);
+            codeBlock.addLine();
         }
 
         for (MethodDef method : methods) {
-            s.append(method.toString());
+            codeBlock.addCode(method, true);
         }
 
-        s.append("}");
+        codeBlock.addLine("}");
+        return codeBlock;
+    }
 
-        return s.toString();
+    @Override
+    public String toString() {
+        return toCodeBlock().toCode();
     }
 
     private boolean containsField(FieldDef fieldDef) {

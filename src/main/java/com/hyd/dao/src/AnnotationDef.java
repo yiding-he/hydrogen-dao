@@ -6,7 +6,7 @@ package com.hyd.dao.src;
  *
  * @author yidin
  */
-public class AnnotationDef {
+public class AnnotationDef implements Code {
 
     public String name;
 
@@ -18,8 +18,8 @@ public class AnnotationDef {
     }
 
     @Override
-    public String toString() {
-        CodeBlock codeBlock = new CodeBlock(0);
-        codeBlock.addLine("@");
+    public CodeBlock toCodeBlock() {
+        return new CodeBlock("@" + name);
     }
 }
+

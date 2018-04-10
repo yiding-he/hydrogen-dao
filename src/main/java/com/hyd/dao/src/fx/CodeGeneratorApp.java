@@ -77,8 +77,13 @@ public class CodeGeneratorApp extends Application {
 
         primaryStage.setTitle(APP_NAME);
         primaryStage.setScene(scene);
-        primaryStage.setOnShown(event -> loadProfiles());
+        primaryStage.setOnShown(event -> onStageShown());
         primaryStage.show();
+    }
+
+    private void onStageShown() {
+        primaryStage.setMaximized(true);
+        loadProfiles();
     }
 
     private void initControls() {
@@ -93,7 +98,7 @@ public class CodeGeneratorApp extends Application {
 
         if (tableName != null) {
             Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
-            repoClassDef = currentProfile.repoClass(tableName);
+            repoClassDef = currentProfile.repoClass(tableName + "Repository");
             modelClassDef = currentProfile.modelClass(tableName);
         }
 

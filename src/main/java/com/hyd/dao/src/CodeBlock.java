@@ -1,6 +1,8 @@
 package com.hyd.dao.src;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,21 +18,39 @@ public class CodeBlock {
 
     private List<String> lines = new ArrayList<>();
 
-    public CodeBlock(int indent) {
+    public CodeBlock(String... lines) {
+        this.lines.addAll(Arrays.asList(lines));
+        this.lines.removeAll(Collections.singleton(null));
+    }
+
+    public void setIndent(int indent) {
         this.indent = indent;
     }
 
-    public void addLine(String line) {
-        this.lines.add(line);
+    public void addLine(String... tokens) {
+        if (tokens.length > 0) {
+            this.lines.add(String.join(" ", tokens));
+        } else {
+            this.lines.add("");
+        }
     }
 
-    public void addCodeBlock(CodeBlock codeBlock, int indent) {
-        this.lines.addAll(codeBlock.toLines());
+    public void addCode(Code code, boolean indent) {
+        if (code != null) {
+            addCodeBlock(code.toCodeBlock(), indent);
+        }
     }
-    
+
+    public void addCodeBlock(CodeBlock codeBlock, boolean indent) {
+        if (codeBlock != null) {
+            codeBlock.indent = indent ? 1 : 0;
+            this.lines.addAll(codeBlock.toLines());
+        }
+    }
+
     public List<String> toLines() {
         return lines.stream()
-                .map(l -> String.format("%" + indent + "s", " ") + l)
+                .map(l -> (indent > 0 ? "    " : "") + l)
                 .collect(Collectors.toList());
     }
 

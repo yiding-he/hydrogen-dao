@@ -6,7 +6,7 @@ package com.hyd.dao.src;
  *
  * @author yidin
  */
-public class FieldDef {
+public class FieldDef implements Code {
 
     public AccessType access;
 
@@ -19,20 +19,14 @@ public class FieldDef {
     public String value;
 
     @Override
-    public String toString() {
-        CodeBlock codeBlock = new CodeBlock(0);
-        
-        String s = "\n";
-        if (annotation != null) {
-            s += annotation.toString();
-        }
-        if (access != null) {
-            s += access.name().toLowerCase() + " ";
-        }
-        s += type + " " + name;
-        if (value != null) {
-            s += " = " + value;
-        }
-        return s + ";\n\n";
+    public CodeBlock toCodeBlock() {
+        CodeBlock codeBlock = new CodeBlock();
+        codeBlock.addCode(this.annotation, false);
+        codeBlock.addLine(
+                (access == null ? "" : (access.name().toLowerCase() + " ")) +
+                        type + " " + name +
+                        (value == null ? "" : (" = " + value)) + ";"
+        );
+        return codeBlock;
     }
 }
