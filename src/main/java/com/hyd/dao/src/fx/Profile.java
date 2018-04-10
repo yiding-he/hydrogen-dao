@@ -1,7 +1,15 @@
 package com.hyd.dao.src.fx;
 
+import com.hyd.dao.src.AccessType;
+import com.hyd.dao.src.AnnotationDef;
+import com.hyd.dao.src.ClassDef;
+import com.hyd.dao.src.FieldDef;
+import com.hyd.dao.util.Str;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * (description)
@@ -23,11 +31,23 @@ public class Profile {
 
     private StringProperty database = new SimpleStringProperty();
 
+    private Map<String, ClassDef> repoClassMap = new HashMap<>();
+
+    private Map<String, ClassDef> modelClassMap = new HashMap<>();
+
     public Profile() {
     }
 
     public Profile(String name) {
         this.setName(name);
+    }
+
+    public Map<String, ClassDef> getRepoClassMap() {
+        return repoClassMap;
+    }
+
+    public void setRepoClassMap(Map<String, ClassDef> repoClassMap) {
+        this.repoClassMap = repoClassMap;
     }
 
     public String getDriver() {
@@ -100,5 +120,37 @@ public class Profile {
 
     public void setPassword(String password) {
         this.password.set(password);
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    public ClassDef repoClass(String tableName) {
+        if (this.repoClassMap.containsKey(tableName)) {
+            return this.repoClassMap.get(tableName);
+        } else {
+            ClassDef classDef = new ClassDef();
+            classDef.className = Str.underscore2Class(tableName);
+
+            FieldDef daoField = new FieldDef();
+            daoField.access = AccessType.Private;
+            daoField.name = "dao";
+            daoField.type = "DAO";
+            daoField.annotation = new AnnotationDef("Autowired");
+            classDef.addFieldIfNotExists(daoField);
+
+            this.repoClassMap.put(tableName, classDef);
+            return classDef;
+        }
+    }
+
+    public ClassDef modelClass(String tableName) {
+        if (this.modelClassMap.containsKey(tableName)) {
+            return this.modelClassMap.get(tableName);
+        } else {
+            ClassDef classDef = new ClassDef();
+            classDef.className = Str.underscore2Class(tableName);
+            this.modelClassMap.put(tableName, classDef);
+            return classDef;
+        }
     }
 }

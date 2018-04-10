@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 处理字符串的类
@@ -50,12 +52,17 @@ public class Str extends StringUtils {
             return columnName.toUpperCase();
         }
 
-        String[] strs = columnName.toLowerCase().split("_");
-        String name = strs[0];
-        for (int i = 1; i < strs.length; i++) {
-            name += capitalize(strs[i]);
-        }
-        return name;
+        return underscore2Property(columnName);
+    }
+
+    public static String underscore2Property(String underscore) {
+        return Stream.of(underscore.split("_"))
+                .map(StringUtils::capitalize)
+                .collect(Collectors.joining());
+    }
+
+    public static String underscore2Class(String underscore) {
+        return StringUtils.capitalize(underscore2Property(underscore));
     }
 
     /**

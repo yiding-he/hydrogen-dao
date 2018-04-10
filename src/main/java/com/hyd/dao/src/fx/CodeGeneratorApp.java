@@ -3,6 +3,8 @@ package com.hyd.dao.src.fx;
 import com.alibaba.fastjson.JSON;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
+import com.hyd.dao.src.ClassDef;
+import com.hyd.dao.src.MethodDef;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -10,7 +12,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
@@ -25,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.hyd.dao.src.fx.Fx.*;
-import static com.hyd.dao.src.fx.Fx.Expand.FirstExpand;
-import static com.hyd.dao.src.fx.Fx.Expand.LastExpand;
+import static com.hyd.dao.src.fx.Fx.Expand.*;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
@@ -62,6 +62,12 @@ public class CodeGeneratorApp extends Application {
 
     private ConnectionManager connectionManager;
 
+    private TextArea repoCodeTextArea;
+
+    private TextArea modelCodeTextArea;
+
+    private TableView<MethodDef> methodTableView;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -78,6 +84,42 @@ public class CodeGeneratorApp extends Application {
     private void initControls() {
         setListViewContent(profileList, Profile::getName);
         setListViewSelectionChanged(profileList, this::onSelectedProfileChanged);
+        setListViewSelectionChanged(tableNamesList, this::onSelectedTableChanged);
+    }
+
+    private void onSelectedTableChanged(String tableName) {
+        ClassDef repoClassDef = null;
+        ClassDef modelClassDef = null;
+
+        if (tableName != null) {
+            Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
+            repoClassDef = currentProfile.repoClass(tableName);
+            modelClassDef = currentProfile.modelClass(tableName);
+        }
+
+        loadToModelCode(modelClassDef);
+        loadToRepoTable(repoClassDef);
+        loadToRepoCode(repoClassDef);
+    }
+
+    private void loadToModelCode(ClassDef classDef) {
+        if (classDef == null) {
+            modelCodeTextArea.setText(null);
+        } else {
+            modelCodeTextArea.setText(classDef.toString());
+        }
+    }
+
+    private void loadToRepoTable(ClassDef classDef) {
+
+    }
+
+    private void loadToRepoCode(ClassDef classDef) {
+        if (classDef == null) {
+            repoCodeTextArea.setText(null);
+        } else {
+            repoCodeTextArea.setText(classDef.toString());
+        }
     }
 
     private void onSelectedProfileChanged(Profile profile) {
@@ -168,13 +210,56 @@ public class CodeGeneratorApp extends Application {
                                 titledPane(-1, "Tables",
                                         vbox(LastExpand, 0, 0, tableNamesList))
                         ),
-                        vbox(LastExpand, 0, PADDING,
-                                titledPane(200, "Repository Class Options", new VBox()),
-                                titledPane(-1, "Code",
-                                        vbox(LastExpand, 0, 0, new TextArea()))
-                        )
+                        vbox(LastExpand, 0, 0, tabPane(
+                                tab("Model Class", vbox(LastExpand, 0, PADDING,
+                                        titledPane(-1, "Code",
+                                                vbox(FirstExpand, 0, 0, modelCodeArea()))
+                                )),
+                                tab("Repository Class", vbox(LastExpand, 0, PADDING,
+                                        pane(0, PADDING),
+                                        methodTable(),
+                                                  hbox(NoExpand, 0, PADDING,
+                                                button("Add...", this::addMethod),
+                                                button("Delete", this::deleteMethod)
+                                        ),
+                                        titledPane(-1, "Code",
+                                                vbox(FirstExpand, 0, 0, repoCodeArea()))
+                                ))
+                        ))
                 )
         );
+    }
+
+    private TextArea modelCodeArea() {
+        modelCodeTextArea = new TextArea();
+        modelCodeTextArea.setStyle("-fx-font-family: Consolas, monospace");
+        modelCodeTextArea.setEditable(false);
+        return modelCodeTextArea;
+    }
+
+    private TableView<MethodDef> methodTable() {
+        methodTableView = new TableView<>();
+        methodTableView.setPrefHeight(250);
+        methodTableView.getColumns().add(new TableColumn<>("Name"));
+        methodTableView.getColumns().add(new TableColumn<>("Action"));
+        methodTableView.getColumns().add(new TableColumn<>("Return"));
+        methodTableView.getColumns().add(new TableColumn<>("Arguments"));
+        return methodTableView;
+    }
+
+    private TextArea repoCodeArea() {
+        repoCodeTextArea = new TextArea();
+        repoCodeTextArea.setStyle("-fx-font-family: Consolas, monospace");
+        repoCodeTextArea.setEditable(false);
+        return repoCodeTextArea;
+    }
+
+    private void deleteMethod() {
+
+    }
+
+    private void addMethod() {
+
     }
 
     private void exit() {

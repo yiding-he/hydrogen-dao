@@ -26,6 +26,17 @@ public class Fx {
         FirstExpand, LastExpand, NoExpand
     }
 
+    public static Pane pane(int width, int height) {
+        Pane pane = new Pane();
+        if (width > 0) {
+            pane.setPrefWidth(width);
+        }
+        if (height > 0) {
+            pane.setPrefHeight(height);
+        }
+        return pane;
+    }
+
     public static TitledPane titledPane(int prefHeight, String title, Node content) {
         TitledPane titledPane = new TitledPane(title, content);
         titledPane.setCollapsible(false);
@@ -34,6 +45,16 @@ public class Fx {
             titledPane.setPrefHeight(prefHeight);
         }
         return titledPane;
+    }
+
+    public static TabPane tabPane(Tab... tabs) {
+        return new TabPane(tabs);
+    }
+
+    public static Tab tab(String text, Node content) {
+        Tab tab = new Tab(text, content);
+        tab.setClosable(false);
+        return tab;
     }
 
     public static Button button(String text, Runnable action) {
