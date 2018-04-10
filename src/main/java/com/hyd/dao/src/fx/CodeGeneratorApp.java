@@ -1,6 +1,7 @@
 package com.hyd.dao.src.fx;
 
 import com.alibaba.fastjson.JSON;
+import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -12,12 +13,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,6 +59,8 @@ public class CodeGeneratorApp extends Application {
     private TextFormField<Profile> txtProfileName;
 
     private Stage primaryStage;
+
+    private ConnectionManager connectionManager;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -122,6 +127,7 @@ public class CodeGeneratorApp extends Application {
 
         profileForm = Fx.form(75, Arrays.asList(
                 txtProfileName,
+                textField("Driver:", Profile::driverProperty),
                 textField("URL:", Profile::urlProperty),
                 textField("Username:", Profile::usernameProperty),
                 textField("Password:", Profile::passwordProperty)
@@ -139,8 +145,8 @@ public class CodeGeneratorApp extends Application {
 
         return vbox(LastExpand, 0, 0,
                 new MenuBar(new Menu("_File", null,
-                        menuItem("_Open...", this::openFile),
-                        menuItem("_Save", this::saveFile),
+                        menuItem("_Open...", "Shortcut+O", this::openFile),
+                        menuItem("_Save", "Shortcut+S", this::saveFile),
                         new SeparatorMenuItem(),
                         menuItem("E_xit", this::exit)
                 )),
@@ -191,7 +197,49 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void connectProfile() {
+        Profile selectedItem = profileList.getSelectionModel().getSelectedItem();
 
+        if (StringUtils.isAnyBlank(selectedItem.getDriver(), selectedItem.getUrl())) {
+            error("Profile is incomplete.");
+            return;
+        }
+
+        if (!initConnectionManager(selectedItem)) {
+            return;
+        }
+
+        loadTables();
+    }
+
+    private boolean initConnectionManager(Profile selectedItem) {
+        if (connectionManager != null) {
+            connectionManager.close();
+            connectionManager = null;
+        }
+
+        try {
+            Class.forName(selectedItem.getDriver());
+            connectionManager = new ConnectionManager(() ->
+                    DriverManager.getConnection(
+                            selectedItem.getUrl(),
+                            selectedItem.getUsername(),
+                            selectedItem.getPassword()
+                    )
+            );
+        } catch (ClassNotFoundException e) {
+            LOG.error("", e);
+            error(e);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void loadTables() {
+        this.connectionManager.withConnection(connection -> {
+            List<String> tableNames = CommandBuilderHelper.getHelper(connection).getTableNames();
+            tableNamesList.getItems().setAll(tableNames);
+        });
     }
 
     private void deleteProfile() {

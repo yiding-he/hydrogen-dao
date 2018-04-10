@@ -9,6 +9,7 @@ import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.Locker;
+import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
 
 import java.lang.reflect.Field;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 用于构造 SQL 命令的帮助类，隐藏不同数据库之间的区别
@@ -70,6 +73,18 @@ public class CommandBuilderHelper {
         cache.clear();
     }
 
+    public List<String> getTableNames() throws SQLException {
+        try {
+            ResultSet tables = this.connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
+            HashMap[] maps = ResultSetUtil.readResultSet(tables);
+            return Stream.of(maps).map(m -> (String)m.get("table_name")).collect(Collectors.toList());
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DAOException(e);
+        }
+    }
+
     /**
      * 获得指定库表的字段信息
      *
@@ -77,10 +92,8 @@ public class CommandBuilderHelper {
      * @param tableName 表名
      *
      * @return 表的字段信息
-     *
-     * @throws SQLException 如果获取信息失败
      */
-    public ColumnInfo[] getColumnInfos(String schema, String tableName) throws SQLException {
+    public ColumnInfo[] getColumnInfos(String schema, String tableName) {
         String fullTableName = schema + "." + tableName;
 
         if (cache.get(fullTableName) != null) {

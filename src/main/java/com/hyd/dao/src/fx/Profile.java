@@ -15,15 +15,43 @@ public class Profile {
 
     private StringProperty url = new SimpleStringProperty();
 
+    private StringProperty driver = new SimpleStringProperty();
+
     private StringProperty username = new SimpleStringProperty();
 
     private StringProperty password = new SimpleStringProperty();
+
+    private StringProperty database = new SimpleStringProperty();
 
     public Profile() {
     }
 
     public Profile(String name) {
         this.setName(name);
+    }
+
+    public String getDriver() {
+        return driver.get();
+    }
+
+    public StringProperty driverProperty() {
+        return driver;
+    }
+
+    public void setDriver(String driver) {
+        this.driver.set(driver);
+    }
+
+    public String getDatabase() {
+        return database.get();
+    }
+
+    public StringProperty databaseProperty() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database.set(database);
     }
 
     public String getName() {

@@ -5,9 +5,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -125,8 +125,19 @@ public class Fx {
         alert(AlertType.ERROR, "Error", throwable.toString(), ButtonType.OK);
     }
 
+    public static void error(String message) {
+        alert(AlertType.ERROR, "Error", message, ButtonType.OK);
+    }
+
     public static MenuItem menuItem(String text, Runnable onAction) {
         MenuItem menuItem = new MenuItem(text);
+        menuItem.setOnAction(event -> onAction.run());
+        return menuItem;
+    }
+
+    public static MenuItem menuItem(String text, String shortcut, Runnable onAction) {
+        MenuItem menuItem = new MenuItem(text);
+        menuItem.setAccelerator(KeyCombination.valueOf(shortcut));
         menuItem.setOnAction(event -> onAction.run());
         return menuItem;
     }
