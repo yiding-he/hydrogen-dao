@@ -5,6 +5,7 @@ import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.ClassDef;
 import com.hyd.dao.src.MethodDef;
+import com.hyd.dao.src.SelectedColumn;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -66,7 +67,9 @@ public class CodeGeneratorApp extends Application {
 
     private TextArea modelCodeTextArea;
 
-    private TableView<MethodDef> methodTableView;
+    private TableView<MethodDef> repoMethodTableView;
+
+    private TableView<SelectedColumn> modelFieldTableView;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -217,17 +220,23 @@ public class CodeGeneratorApp extends Application {
                         ),
                         vbox(LastExpand, 0, 0, tabPane(
                                 tab("Model Class", vbox(LastExpand, 0, PADDING,
-                                        titledPane(-1, "Code",
+                                        pane(0, PADDING),
+                                        modelFieldTable(),
+                                        hbox(NoExpand, 0, PADDING,
+                                                button("Select All", null),
+                                                button("Select None", null)
+                                        ),
+                                        titledPane(-1, "Code Preview",
                                                 vbox(FirstExpand, 0, 0, modelCodeArea()))
                                 )),
                                 tab("Repository Class", vbox(LastExpand, 0, PADDING,
                                         pane(0, PADDING),
                                         methodTable(),
-                                                  hbox(NoExpand, 0, PADDING,
+                                        hbox(NoExpand, 0, PADDING,
                                                 button("Add...", this::addMethod),
                                                 button("Delete", this::deleteMethod)
                                         ),
-                                        titledPane(-1, "Code",
+                                        titledPane(-1, "Code Preview",
                                                 vbox(FirstExpand, 0, 0, repoCodeArea()))
                                 ))
                         ))
@@ -242,14 +251,22 @@ public class CodeGeneratorApp extends Application {
         return modelCodeTextArea;
     }
 
+    private TableView<SelectedColumn> modelFieldTable() {
+        modelFieldTableView = new TableView<>();
+        modelFieldTableView.setPrefHeight(150);
+        modelFieldTableView.getColumns().add(new TableColumn<>("Column Name"));
+        modelFieldTableView.getColumns().add(new TableColumn<>("Field Name"));
+        return modelFieldTableView;
+    }
+
     private TableView<MethodDef> methodTable() {
-        methodTableView = new TableView<>();
-        methodTableView.setPrefHeight(250);
-        methodTableView.getColumns().add(new TableColumn<>("Name"));
-        methodTableView.getColumns().add(new TableColumn<>("Action"));
-        methodTableView.getColumns().add(new TableColumn<>("Return"));
-        methodTableView.getColumns().add(new TableColumn<>("Arguments"));
-        return methodTableView;
+        repoMethodTableView = new TableView<>();
+        repoMethodTableView.setPrefHeight(150);
+        repoMethodTableView.getColumns().add(new TableColumn<>("Name"));
+        repoMethodTableView.getColumns().add(new TableColumn<>("Action"));
+        repoMethodTableView.getColumns().add(new TableColumn<>("Return"));
+        repoMethodTableView.getColumns().add(new TableColumn<>("Arguments"));
+        return repoMethodTableView;
     }
 
     private TextArea repoCodeArea() {

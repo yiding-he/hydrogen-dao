@@ -60,7 +60,9 @@ public class Fx {
     public static Button button(String text, Runnable action) {
         Button button = new Button(text);
         button.setMinWidth(Region.USE_COMPUTED_SIZE);
-        button.setOnAction(event -> action.run());
+        if (action != null) {
+            button.setOnAction(event -> action.run());
+        }
         return button;
     }
 
