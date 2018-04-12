@@ -1,5 +1,6 @@
 package com.hyd.dao.src.fx;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -155,6 +156,11 @@ public class Fx {
 
     public static <T> TextFormField<T> textField(String text, Function<T, StringProperty> extractor) {
         return new TextFormField<>(text, extractor);
+    }
+
+    public static <T, C> ComboFormField<T, C> comboField(
+            String text, Function<T, ObjectProperty<C>> extractor, C[] values) {
+        return new ComboFormField<>(text, extractor, values);
     }
 
     public static ButtonType alert(AlertType alertType, String title, String message, ButtonType... buttons) {

@@ -1,8 +1,12 @@
 package com.hyd.dao.src.fx;
 
 import com.hyd.dao.src.MethodDef;
+import com.hyd.dao.src.RepoMethodInfo;
+import com.hyd.dao.src.RepoMethodType;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
+
+import java.util.Arrays;
 
 /**
  * (description)
@@ -18,7 +22,9 @@ public class AddMethodDialog extends Dialog<MethodDef> {
     }
 
     private static Parent root() {
-        return null;
+        return Fx.form(100, Arrays.asList(
+                Fx.comboField("Method Type", RepoMethodInfo::typeProperty, RepoMethodType.values())
+        ));
     }
 
     @Override
