@@ -88,6 +88,17 @@ public class CommandBuilderHelper {
     /**
      * 获得指定库表的字段信息
      *
+     * @param tableName 表名
+     *
+     * @return 表的字段信息
+     */
+    public ColumnInfo[] getColumnInfos(String tableName) {
+        return getColumnInfos(getSchema("%"), tableName);
+    }
+
+    /**
+     * 获得指定库表的字段信息
+     *
      * @param schema    登录数据库的用户名
      * @param tableName 表名
      *

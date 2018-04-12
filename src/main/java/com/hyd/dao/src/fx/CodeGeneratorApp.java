@@ -6,12 +6,16 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.ClassDef;
 import com.hyd.dao.src.MethodDef;
 import com.hyd.dao.src.SelectedColumn;
+import com.hyd.dao.src.classdef.ClassDefBuilder;
+import com.hyd.dao.src.classdef.HydrogenModelClassBuilder;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -102,12 +106,26 @@ public class CodeGeneratorApp extends Application {
         if (tableName != null) {
             Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
             repoClassDef = currentProfile.repoClass(tableName + "Repository");
-            modelClassDef = currentProfile.modelClass(tableName);
+            modelClassDef = buildModelClassDef(tableName, currentProfile);
         }
 
         loadToModelCode(modelClassDef);
         loadToRepoTable(repoClassDef);
         loadToRepoCode(repoClassDef);
+    }
+
+    private ClassDef buildModelClassDef(String tableName, Profile currentProfile) {
+        ClassDef modelClass = currentProfile.getModelClass(tableName);
+
+        if (modelClass != null) {
+            return modelClass;
+        } else {
+            ClassDefBuilder classDefBuilder = new HydrogenModelClassBuilder(connectionManager);
+            modelClass = classDefBuilder.build(tableName);
+            currentProfile.setModelClass(tableName, modelClass);
+        }
+
+        return modelClass;
     }
 
     private void loadToModelCode(ClassDef classDef) {
@@ -219,17 +237,12 @@ public class CodeGeneratorApp extends Application {
                                         vbox(LastExpand, 0, 0, tableNamesList))
                         ),
                         vbox(LastExpand, 0, 0, tabPane(
-                                tab("Model Class", vbox(LastExpand, 0, PADDING,
+                                tab("Model Class", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
-                                        modelFieldTable(),
-                                        hbox(NoExpand, 0, PADDING,
-                                                button("Select All", null),
-                                                button("Select None", null)
-                                        ),
-                                        titledPane(-1, "Code Preview",
-                                                vbox(FirstExpand, 0, 0, modelCodeArea()))
+                                        titledPane(-1, "Code Preview", vbox(FirstExpand, 0, 0, modelCodeArea())),
+                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyModelCode))
                                 )),
-                                tab("Repository Class", vbox(LastExpand, 0, PADDING,
+                                tab("Repository Class", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
                                         methodTable(),
                                         hbox(NoExpand, 0, PADDING,
@@ -237,11 +250,18 @@ public class CodeGeneratorApp extends Application {
                                                 button("Delete", this::deleteMethod)
                                         ),
                                         titledPane(-1, "Code Preview",
-                                                vbox(FirstExpand, 0, 0, repoCodeArea()))
+                                                vbox(FirstExpand, 0, 0, repoCodeArea())),
+                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyModelCode))
                                 ))
                         ))
                 )
         );
+    }
+
+    private void copyModelCode() {
+        ClipboardContent clipboardContent = new ClipboardContent();
+        clipboardContent.putString(modelCodeTextArea.getText());
+        Clipboard.getSystemClipboard().setContent(clipboardContent);
     }
 
     private TextArea modelCodeArea() {

@@ -23,7 +23,24 @@ public class Fx {
     public static final int PADDING = 7;
 
     public enum Expand {
-        FirstExpand, LastExpand, NoExpand
+        FirstExpand, LastExpand, NoExpand, NthExpand;
+
+        private int n;
+
+        public Expand set(int n) {
+            if (this != NthExpand) {
+                throw new IllegalArgumentException("Only NthExpand can use this method.");
+            }
+            this.n = n;
+            return this;
+        }
+
+        public int getN() {
+            if (this != NthExpand) {
+                throw new IllegalArgumentException("Only NthExpand can use this method.");
+            }
+            return n;
+        }
     }
 
     public static Pane pane(int width, int height) {
@@ -75,6 +92,10 @@ public class Fx {
                 HBox.setHgrow(children[children.length - 1], Priority.ALWAYS);
             } else if (expand == Expand.FirstExpand) {
                 HBox.setHgrow(children[0], Priority.ALWAYS);
+            } else if (expand == Expand.NthExpand) {
+                int n = expand.getN();
+                int index = n < 0 ? (children.length + n) : n;
+                HBox.setHgrow(children[index], Priority.ALWAYS);
             } else {
                 for (Node child : children) {
                     if (child.getClass() == Pane.class) {
@@ -97,6 +118,10 @@ public class Fx {
                 VBox.setVgrow(children[children.length - 1], Priority.ALWAYS);
             } else if (expand == Expand.FirstExpand) {
                 VBox.setVgrow(children[0], Priority.ALWAYS);
+            } else if (expand == Expand.NthExpand) {
+                int n = expand.getN();
+                int index = n < 0 ? (children.length + n) : n;
+                VBox.setVgrow(children[index], Priority.ALWAYS);
             }
         }
 

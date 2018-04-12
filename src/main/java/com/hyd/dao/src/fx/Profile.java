@@ -124,6 +124,22 @@ public class Profile {
 
     //////////////////////////////////////////////////////////////
 
+    public ClassDef gerRepoClass(String tableName) {
+        return this.repoClassMap.get(tableName);
+    }
+
+    public ClassDef getModelClass(String tableName) {
+        return this.modelClassMap.get(tableName);
+    }
+
+    public void setRepoClass(String tableName, ClassDef classDef) {
+        this.repoClassMap.put(tableName, classDef);
+    }
+
+    public void setModelClass(String tableName, ClassDef classDef) {
+        this.modelClassMap.put(tableName, classDef);
+    }
+
     public ClassDef repoClass(String tableName) {
         if (this.repoClassMap.containsKey(tableName)) {
             return this.repoClassMap.get(tableName);

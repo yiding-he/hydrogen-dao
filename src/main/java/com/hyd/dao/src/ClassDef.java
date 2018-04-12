@@ -30,6 +30,7 @@ public class ClassDef implements Code {
 
         for (MethodDef method : methods) {
             codeBlock.addCode(method, true);
+            codeBlock.addLine();
         }
 
         codeBlock.addLine("}");
@@ -51,5 +52,9 @@ public class ClassDef implements Code {
         }
 
         this.fields.add(fieldDef);
+    }
+
+    public void addMethod(MethodDef methodDef) {
+        this.methods.add(methodDef);
     }
 }
