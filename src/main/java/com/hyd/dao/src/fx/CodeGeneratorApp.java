@@ -301,7 +301,7 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void addMethod() {
-
+        MethodDef methodDef = new AddMethodDialog(primaryStage).show();
     }
 
     private void exit() {
