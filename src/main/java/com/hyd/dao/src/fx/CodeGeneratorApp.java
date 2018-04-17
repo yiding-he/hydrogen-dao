@@ -1,6 +1,8 @@
 package com.hyd.dao.src.fx;
 
 import com.alibaba.fastjson.JSON;
+import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.ClassDef;
@@ -75,6 +77,14 @@ public class CodeGeneratorApp extends Application {
 
     private TableView<SelectedColumn> modelFieldTableView;
 
+    ///////////////////////////////////////////////
+
+    private String currentTableName;
+
+    private ColumnInfo[] currentTableColumns;
+
+    private DatabaseType databaseType;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -100,6 +110,19 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void onSelectedTableChanged(String tableName) {
+        this.currentTableName = tableName;
+
+        connectionManager.withConnection(connection -> {
+            if (tableName != null) {
+                CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
+                this.currentTableColumns = helper.getColumnInfos(tableName);
+            }
+        });
+
+        updateCode(tableName);
+    }
+
+    private void updateCode(String tableName) {
         ClassDef repoClassDef = null;
         ClassDef modelClassDef = null;
 
@@ -120,7 +143,8 @@ public class CodeGeneratorApp extends Application {
         if (modelClass != null) {
             return modelClass;
         } else {
-            ClassDefBuilder classDefBuilder = new HydrogenModelClassBuilder(connectionManager);
+            ClassDefBuilder classDefBuilder = new HydrogenModelClassBuilder(
+                    tableName, currentTableColumns, databaseType);
             modelClass = classDefBuilder.build(tableName);
             currentProfile.setModelClass(tableName, modelClass);
         }
@@ -246,7 +270,18 @@ public class CodeGeneratorApp extends Application {
                                         pane(0, PADDING),
                                         methodTable(),
                                         hbox(NoExpand, 0, PADDING,
-                                                button("Add...", this::addMethod),
+                                                menuButton("Add...",
+                                                        menuItem("Query One", this::addQueryOneMethod),
+                                                        menuItem("Query List", this::addQueryMethod),
+                                                        menuItem("Query Count", this::addQueryMethod),
+                                                        menuItem("Query Page", this::addQueryMethod),
+                                                        new SeparatorMenuItem(),
+                                                        menuItem("Insert One", this::addQueryMethod),
+                                                        menuItem("Insert List", this::addQueryMethod),
+                                                        new SeparatorMenuItem(),
+                                                        menuItem("Update", this::addQueryMethod),
+                                                        menuItem("Delete", this::addQueryMethod)
+                                                ),
                                                 button("Delete", this::deleteMethod)
                                         ),
                                         titledPane(-1, "Code Preview",
@@ -300,8 +335,17 @@ public class CodeGeneratorApp extends Application {
 
     }
 
-    private void addMethod() {
-        MethodDef methodDef = new AddMethodDialog(primaryStage).show();
+    private void addQueryMethod() {
+    }
+
+    private void addQueryOneMethod() {
+        String currentTableName = tableNamesList.getSelectionModel().getSelectedItem();
+        if (currentTableName == null) {
+            return;
+        }
+
+
+        MethodDef methodDef = new AddQueryOneMethodDialog(primaryStage, currentTableColumns).show();
     }
 
     private void exit() {
@@ -353,6 +397,10 @@ public class CodeGeneratorApp extends Application {
                             selectedItem.getPassword()
                     )
             );
+
+            connectionManager.withConnection(
+                    connection -> databaseType = DatabaseType.of(connection));
+
         } catch (ClassNotFoundException e) {
             LOG.error("", e);
             error(e);

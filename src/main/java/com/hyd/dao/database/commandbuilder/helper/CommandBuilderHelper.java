@@ -5,7 +5,7 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.DataConversionException;
 import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.connection.ConnectionUtil;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.Locker;
@@ -53,16 +53,18 @@ public class CommandBuilderHelper {
      * @throws SQLException 如果获取数据库连接信息失败
      */
     public static CommandBuilderHelper getHelper(Connection conn) throws SQLException {
-        if (ConnectionUtil.isOracle(conn)) {
-            return new OracleCommandBuilderHelper(conn);
-        } else if (ConnectionUtil.isMySql(conn)) {
-            return new MySqlCommandBuilderHelper(conn);
-        } else if (ConnectionUtil.isHsqlDB(conn)) {
-            return new HSQLDBCommandBuildHelper(conn);
-        } else if (ConnectionUtil.isSqlServer(conn)) {
-            return new SQLServerCommandBuilderHelper(conn);
-        } else {
-            return new CommandBuilderHelper(conn);
+        DatabaseType databaseType = DatabaseType.of(conn);
+        switch (databaseType) {
+            case Oracle:
+                return new OracleCommandBuilderHelper(conn);
+            case HSQLDB:
+                return new HSQLDBCommandBuildHelper(conn);
+            case MySQL:
+                return new MySqlCommandBuilderHelper(conn);
+            case SQLServer:
+                return new SQLServerCommandBuilderHelper(conn);
+            default:
+                return new CommandBuilderHelper(conn);
         }
     }
 
@@ -77,7 +79,7 @@ public class CommandBuilderHelper {
         try {
             ResultSet tables = this.connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
             HashMap[] maps = ResultSetUtil.readResultSet(tables);
-            return Stream.of(maps).map(m -> (String)m.get("table_name")).collect(Collectors.toList());
+            return Stream.of(maps).map(m -> (String) m.get("table_name")).collect(Collectors.toList());
         } catch (SQLException e) {
             throw e;
         } catch (Exception e) {

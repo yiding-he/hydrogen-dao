@@ -1,7 +1,8 @@
 package com.hyd.dao.src.classdef;
 
+import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.src.ClassDef;
-import com.hyd.dao.src.fx.ConnectionManager;
 
 import java.sql.Types;
 
@@ -13,10 +14,20 @@ import java.sql.Types;
  */
 public abstract class ClassDefBuilder {
 
-    protected ConnectionManager connectionManager;
+    protected String tableName;
 
-    public ClassDefBuilder(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
+    protected ColumnInfo[] columnInfos;
+
+    protected DatabaseType databaseType;
+
+    public ClassDefBuilder(
+            String tableName,
+            ColumnInfo[] columnInfos,
+            DatabaseType databaseType) {
+
+        this.tableName = tableName;
+        this.columnInfos = columnInfos;
+        this.databaseType = databaseType;
     }
 
     public abstract ClassDef build(String tableName);
@@ -28,22 +39,22 @@ public abstract class ClassDefBuilder {
             case Types.LONGVARCHAR:
                 return "String";
             case Types.BIT:
-                return "boolean";
+                return "Boolean";
             case Types.NUMERIC:
                 return "java.math.BigDecimal";
             case Types.TINYINT:
-                return "byte";
+                return "Byte";
             case Types.SMALLINT:
-                return "short";
+                return "Short";
             case Types.INTEGER:
-                return "int";
+                return "Integer";
             case Types.BIGINT:
-                return "long";
+                return "Long";
             case Types.REAL:
             case Types.FLOAT:
-                return "float";
+                return "Float";
             case Types.DOUBLE:
-                return "double";
+                return "Double";
             case Types.VARBINARY:
             case Types.BINARY:
                 return "byte[]";
@@ -54,7 +65,31 @@ public abstract class ClassDefBuilder {
             case Types.TIMESTAMP:
                 return "java.sql.Timestamp";
             default:
+                return getJavaTypeByDatabase(dataType);
+        }
+    }
+
+    private String getJavaTypeByDatabase(int dataType) {
+        switch (databaseType) {
+            case MySQL:
+                return getMySQLJavaType(dataType);
+            case Oracle:
+                return getOracleJavaType(dataType);
+            default:
                 return "String";
         }
+    }
+
+    private String getMySQLJavaType(int dataType) {
+        switch (dataType) {
+            case 3:
+                return "Double";
+            default:
+                return "String";
+        }
+    }
+
+    private String getOracleJavaType(int dataType) {
+        return "String";
     }
 }

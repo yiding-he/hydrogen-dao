@@ -1,4 +1,6 @@
-package com.hyd.dao.database.commandbuilder;
+package com.hyd.dao;
+
+import com.hyd.dao.database.commandbuilder.Command;
 
 import java.lang.reflect.Array;
 import java.util.*;

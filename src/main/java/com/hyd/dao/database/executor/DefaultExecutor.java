@@ -4,13 +4,13 @@ import com.hyd.dao.BatchCommand;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
 import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
@@ -19,11 +19,9 @@ import com.hyd.dao.sp.StorageProsedureHelper;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
-import oracle.jdbc.OracleTypes;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +34,7 @@ import java.util.function.Consumer;
  *
  * @author <a href="mailto:yiding.he@gmail.com">Yiding He</a>
  */
+@SuppressWarnings("MagicConstant")
 public class DefaultExecutor extends Executor {
 
     private static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
@@ -48,7 +47,7 @@ public class DefaultExecutor extends Executor {
 
     private ResultSet rs;
 
-    public DefaultExecutor(String dsName, Connection connection) {
+    public DefaultExecutor(String dsName, Connection connection) throws SQLException {
         super(dsName, connection);
     }
 
@@ -99,7 +98,7 @@ public class DefaultExecutor extends Executor {
      *
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
-    protected String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
+    private String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
         return CommandBuilderHelper.getHelper(connection).getRangedSql(sql, startPos, endPos);
     }
 
@@ -127,7 +126,7 @@ public class DefaultExecutor extends Executor {
         }
     }
 
-    protected String getCountSql(String sql) throws SQLException {
+    private String getCountSql(String sql) throws SQLException {
         return CommandBuilderHelper.getHelper(connection).getCountSql(sql);
     }
 
@@ -406,7 +405,7 @@ public class DefaultExecutor extends Executor {
             }
             cs.executeQuery();
             return readResult(spParams, cs);
-        } catch (IOException | SQLException e) {
+        } catch (SQLException e) {
             throw new DAOException("Procedure failed: " + e.getMessage(), e, name, Arrays.asList(params));
         }
     }
@@ -415,10 +414,6 @@ public class DefaultExecutor extends Executor {
     public List callFunction(String name, Object[] params) {
 
         try {
-            if (!ConnectionUtil.isOracle(connection)) {
-                throw new DAOException("Target database is not oracle.");
-            }
-
             LOG.debug(findCaller() + "(function)" + name + Arrays.asList(params));
             SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, connection);
             int resultType = spParams[0].getSqlType();
@@ -461,11 +456,8 @@ public class DefaultExecutor extends Executor {
      * @param cs     执行过的 CallableStatement
      *
      * @return 调用结果（数字值将被统一转为 BigDecimal）
-     *
-     * @throws SQLException        如果读取结果失败
-     * @throws java.io.IOException 如果读取 LOB 对象失败
      */
-    private List readResult(SpParam[] params, CallableStatement cs) throws SQLException, IOException {
+    private List readResult(SpParam[] params, CallableStatement cs) {
         List<Object> result = new ArrayList<>();
         try {
             for (int i = 0; i < params.length; i++) {
@@ -474,7 +466,7 @@ public class DefaultExecutor extends Executor {
                     Object value = cs.getObject(i + 1);
 
                     // 对 Oracle 的 CURSOR 类型进行特殊处理
-                    if (ConnectionUtil.isOracle(connection) && param.getSqlType() == OracleTypes.CURSOR) {
+                    if (databaseType == DatabaseType.Oracle && param.getSqlType() == -10) {
                         ResultSet rs1 = (ResultSet) value;
                         result.add(ResultSetUtil.readResultSet(rs1, null, -1, -1));
 
@@ -496,21 +488,21 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果创建失败
      */
-    protected Statement createNormalStatement() throws SQLException {
+    private Statement createNormalStatement() throws SQLException {
         return connection.createStatement(getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
-    protected PreparedStatement createPreparedStatement(String sql) throws SQLException {
+    private PreparedStatement createPreparedStatement(String sql) throws SQLException {
         return connection.prepareStatement(sql, getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
-    protected int getResultSetType() throws SQLException {
+    private int getResultSetType() {
 
         // Oracle 可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
         // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
         // 但是 SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
 
-        if (ConnectionUtil.isSqlServer(connection)) {
+        if (databaseType == DatabaseType.SQLServer) {
             return ResultSet.TYPE_SCROLL_SENSITIVE;
         } else {
             return ResultSet.TYPE_FORWARD_ONLY;
@@ -528,15 +520,17 @@ public class DefaultExecutor extends Executor {
     }
 
     private String findCaller() {
+
         StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
-        boolean daostarted = false;
+        boolean daoStarted = false;
+
         for (StackTraceElement traceElement : traceElements) {
             String className = traceElement.getClassName();
             int lineNumber = traceElement.getLineNumber();
 
-            if (!daostarted) {
+            if (!daoStarted) {
                 if (className.startsWith("com.hyd.dao.")) {
-                    daostarted = true;
+                    daoStarted = true;
                 }
             } else {
                 if (!className.startsWith("com.hyd.dao.")) {
@@ -552,7 +546,7 @@ public class DefaultExecutor extends Executor {
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 
-        List<List<Object>> params = command.getParams() == null ? new ArrayList<List<Object>>() : command.getParams();
+        List<List<Object>> params = command.getParams() == null ? new ArrayList<>() : command.getParams();
 
         if (BATCH_LOG.isEnabled(Logger.Level.Debug)) {
             BATCH_LOG.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");

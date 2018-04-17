@@ -4,8 +4,8 @@ import com.hyd.dao.BatchCommand;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.connection.ConnectionUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
@@ -122,10 +122,13 @@ public class InsertCommandBuilder {
      *
      * @throws java.sql.SQLException 如果获取数据库类型失败
      */
-    private static Command buildCommand(String tableName, ColumnInfo[] infos, Object object, Connection conn)
-            throws SQLException {
+    private static Command buildCommand(
+            String tableName, ColumnInfo[] infos, Object object, Connection conn
+    ) throws SQLException {
+
+        DatabaseType databaseType = DatabaseType.of(conn);
         List params = CommandBuilderHelper.generateParams(infos, object);
-        List<Object> finalParams = new ArrayList<Object>();
+        List<Object> finalParams = new ArrayList<>();
 
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
 
@@ -150,11 +153,11 @@ public class InsertCommandBuilder {
 
             // 如果属性值是一个 sequence 占位符，那么生成相应的 SQL，而 value 就不必作为参数了。
             if (infos[i].isAutoIncrement()) {
-                if (ConnectionUtil.isSequenceSupported(conn) && infos[i].getSequenceName() == null) {
+                if (databaseType.isSequenceSupported() && infos[i].getSequenceName() == null) {
                     throw new DAOException("没有指定全局序列");
                 }
 
-                if (infos[i].getSequenceName() != null && ConnectionUtil.isSequenceSupported(conn)) {
+                if (infos[i].getSequenceName() != null && databaseType.isSequenceSupported()) {
                     questionMarks += infos[i].getSequenceName() + ".nextval,";
                 }
 

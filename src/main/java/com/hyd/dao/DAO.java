@@ -4,7 +4,6 @@ import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
-import com.hyd.dao.database.commandbuilder.MappedCommand;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;

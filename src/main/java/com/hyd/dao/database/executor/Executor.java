@@ -3,6 +3,7 @@ package com.hyd.dao.database.executor;
 import com.hyd.dao.BatchCommand;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.snapshot.ExecutorInfo;
@@ -28,15 +29,18 @@ public abstract class Executor {
 
     protected ExecutorInfo info;        // 当前状态
 
+    protected DatabaseType databaseType;
+
     /**
      * 构造函数
      *
      * @param dsName     数据源名称
      * @param connection 数据库连接
      */
-    public Executor(String dsName, Connection connection) {
+    public Executor(String dsName, Connection connection) throws SQLException {
         this.info = new ExecutorInfo(dsName);
         this.connection = connection;
+        this.databaseType = DatabaseType.of(connection);
     }
 
     /**

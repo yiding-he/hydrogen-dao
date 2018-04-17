@@ -23,7 +23,7 @@ dao.execute(command);
 
 ### 3. 执行 `MappedCommand` 对象
 
-`com.hyd.dao.database.commandbuilder.MappedCommand` 对象支持为参数起名。目前只有 `MappedCommand` 支持这种方式，其他方式执行查询或变更，都是用 "?" 作为参数占位符。
+`com.hyd.dao.MappedCommand` 对象支持为参数起名。目前只有 `MappedCommand` 支持这种方式，其他方式执行查询或变更，都是用 "?" 作为参数占位符。
 
 ~~~java
 MappedCommand cmd = new MappedCommand("insert into USER(username) values (#username#)");

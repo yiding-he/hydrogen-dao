@@ -22,6 +22,7 @@ public class ComboFormField<T, C> extends FormField<T> {
 
         this.comboBox = new ComboBox<>();
         this.comboBox.getItems().addAll(values);
+        this.comboBox.getSelectionModel().select(0);
         this.extractor = extractor;
 
         this.getChildren().add(comboBox);

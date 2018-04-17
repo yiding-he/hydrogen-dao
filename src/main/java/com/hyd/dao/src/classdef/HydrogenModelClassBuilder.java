@@ -1,11 +1,10 @@
 package com.hyd.dao.src.classdef;
 
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.src.AccessType;
 import com.hyd.dao.src.ClassDef;
 import com.hyd.dao.src.FieldDef;
-import com.hyd.dao.src.fx.ConnectionManager;
 import com.hyd.dao.util.Str;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,37 +16,30 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class HydrogenModelClassBuilder extends ClassDefBuilder {
 
-    public HydrogenModelClassBuilder(ConnectionManager connectionManager) {
-        super(connectionManager);
+    public HydrogenModelClassBuilder(
+            String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
+
+        super(tableName, columnInfos, databaseType);
     }
 
     @Override
     public ClassDef build(String tableName) {
-        ClassDef[] result = new ClassDef[1];
 
-        connectionManager.withConnection(connection -> {
+        ClassDef classDef = new ClassDef();
+        classDef.className = Str.underscore2Class(tableName);
 
-            ClassDef classDef = new ClassDef();
-            classDef.className = Str.underscore2Class(tableName);
+        for (ColumnInfo columnInfo : columnInfos) {
+            FieldDef field = new FieldDef();
+            field.name = StringUtils.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
+            field.type = getJavaType(columnInfo.getDataType());
+            field.access = AccessType.Private;
 
-            CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
-            ColumnInfo[] columnInfos = helper.getColumnInfos(tableName);
+            classDef.addFieldIfNotExists(field);
+            classDef.addMethod(field.toGetterMethod());
+            classDef.addMethod(field.toSetterMethod());
+        }
 
-            for (ColumnInfo columnInfo : columnInfos) {
-                FieldDef field = new FieldDef();
-                field.name = StringUtils.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
-                field.type = getJavaType(columnInfo.getDataType());
-                field.access = AccessType.Private;
-
-                classDef.addFieldIfNotExists(field);
-                classDef.addMethod(field.toGetterMethod());
-                classDef.addMethod(field.toSetterMethod());
-            }
-
-            result[0] = classDef;
-        });
-
-        return result[0];
+        return classDef;
     }
 
 }

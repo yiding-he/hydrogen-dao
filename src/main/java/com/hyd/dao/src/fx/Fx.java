@@ -24,7 +24,7 @@ public class Fx {
     public static final int PADDING = 7;
 
     public enum Expand {
-        FirstExpand, LastExpand, NoExpand, NthExpand;
+        FirstExpand, LastExpand, NoExpand, NthExpand, AllExpand;
 
         private int n;
 
@@ -97,6 +97,10 @@ public class Fx {
                 int n = expand.getN();
                 int index = n < 0 ? (children.length + n) : n;
                 HBox.setHgrow(children[index], Priority.ALWAYS);
+            } else if (expand == Expand.AllExpand) {
+                for (Node child : children) {
+                    HBox.setHgrow(child, Priority.ALWAYS);
+                }
             } else {
                 for (Node child : children) {
                     if (child.getClass() == Pane.class) {
@@ -194,5 +198,9 @@ public class Fx {
         menuItem.setAccelerator(KeyCombination.valueOf(shortcut));
         menuItem.setOnAction(event -> onAction.run());
         return menuItem;
+    }
+
+    public static MenuButton menuButton(String text, MenuItem... items) {
+        return new MenuButton(text, null, items);
     }
 }
