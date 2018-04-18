@@ -319,7 +319,7 @@ public class CodeGeneratorApp extends Application {
                                         ),
                                         titledPane(-1, "Code Preview",
                                                 vbox(FirstExpand, 0, 0, repoCodeArea())),
-                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyModelCode))
+                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyRepoCode))
                                 ))
                         ))
                 )
@@ -329,6 +329,12 @@ public class CodeGeneratorApp extends Application {
     private void copyModelCode() {
         ClipboardContent clipboardContent = new ClipboardContent();
         clipboardContent.putString(modelCodeTextArea.getText());
+        Clipboard.getSystemClipboard().setContent(clipboardContent);
+    }
+
+    private void copyRepoCode() {
+        ClipboardContent clipboardContent = new ClipboardContent();
+        clipboardContent.putString(repoCodeTextArea.getText());
         Clipboard.getSystemClipboard().setContent(clipboardContent);
     }
 

@@ -84,7 +84,7 @@ public class QueryOneMethodBuilder {
             codeBlock.addLine(where);
         }
 
-        codeBlock.addLine("));");
+        codeBlock.addLine(");");
         return codeBlock;
     }
 

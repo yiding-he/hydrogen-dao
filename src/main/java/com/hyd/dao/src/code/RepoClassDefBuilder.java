@@ -26,6 +26,9 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         classDef.annotation = new AnnotationDef("Repository");
         classDef.className = className;
         classDef.imports = new ImportDef(
+                "org.springframework.beans.factory.annotation.Autowired",
+                "org.springframework.stereotype.Repository",
+                "com.hyd.dao.DAO",
                 "com.hyd.dao.SQL",
                 "com.hyd.dao.Page",
                 "java.math.BigDecimal",
