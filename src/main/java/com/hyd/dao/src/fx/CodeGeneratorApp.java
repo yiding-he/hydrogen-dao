@@ -5,14 +5,16 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.src.ClassDef;
-import com.hyd.dao.src.MethodDef;
+import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.SelectedColumn;
-import com.hyd.dao.src.classdef.ClassDefBuilder;
-import com.hyd.dao.src.classdef.HydrogenModelClassBuilder;
+import com.hyd.dao.src.code.ClassDef;
+import com.hyd.dao.src.code.ClassDefBuilder;
+import com.hyd.dao.src.code.HydrogenModelClassBuilder;
+import com.hyd.dao.src.code.MethodDef;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -73,7 +75,7 @@ public class CodeGeneratorApp extends Application {
 
     private TextArea modelCodeTextArea;
 
-    private TableView<MethodDef> repoMethodTableView;
+    private TableView<RepoMethodDef> repoMethodTableView;
 
     private TableView<SelectedColumn> modelFieldTableView;
 
@@ -314,14 +316,24 @@ public class CodeGeneratorApp extends Application {
         return modelFieldTableView;
     }
 
-    private TableView<MethodDef> methodTable() {
+    private TableView<RepoMethodDef> methodTable() {
         repoMethodTableView = new TableView<>();
         repoMethodTableView.setPrefHeight(150);
-        repoMethodTableView.getColumns().add(new TableColumn<>("Name"));
-        repoMethodTableView.getColumns().add(new TableColumn<>("Action"));
-        repoMethodTableView.getColumns().add(new TableColumn<>("Return"));
-        repoMethodTableView.getColumns().add(new TableColumn<>("Arguments"));
+        repoMethodTableView.getColumns().add(column("Name", method -> method.name));
+        repoMethodTableView.getColumns().add(column("Return", method -> method.returnType));
+        repoMethodTableView.getColumns().add(column("Arguments", MethodDef::args2String));
+        repoMethodTableView.getItems().addListener((ListChangeListener<? super RepoMethodDef>) c -> updateRepoCode());
         return repoMethodTableView;
+    }
+
+    private void updateRepoCode() {
+        Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
+        ClassDef repoClass = currentProfile.repoClassByTableName(currentTableName);
+
+        repoClass.methods.clear();
+        repoClass.methods.addAll(repoMethodTableView.getItems());
+
+        loadToRepoCode(repoClass);
     }
 
     private TextArea repoCodeArea() {
@@ -344,8 +356,12 @@ public class CodeGeneratorApp extends Application {
             return;
         }
 
+        RepoMethodDef methodDef = new AddQueryOneMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
-        MethodDef methodDef = new AddQueryOneMethodDialog(primaryStage, currentTableColumns).show();
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
     }
 
     private void exit() {

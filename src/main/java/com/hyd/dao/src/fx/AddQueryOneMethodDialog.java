@@ -1,20 +1,28 @@
 package com.hyd.dao.src.fx;
 
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.src.MethodDef;
-import com.hyd.dao.src.RepoMethodInfo;
-import com.hyd.dao.src.RepoMethodType;
-import com.hyd.dao.src.fx.Fx.Expand;
+import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.src.RepoMethodDef;
+import com.hyd.dao.src.RepoMethodReturnType;
+import com.hyd.dao.src.code.AccessType;
+import com.hyd.dao.src.code.MethodArg;
+import com.hyd.dao.src.fx.Fx.*;
+import com.hyd.dao.util.Str;
+import com.hyd.dao.util.TypeUtil;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
-import static com.hyd.dao.src.fx.Fx.PADDING;
-import static com.hyd.dao.src.fx.Fx.hbox;
-import static com.hyd.dao.src.fx.Fx.vbox;
+import static com.hyd.dao.src.fx.Fx.*;
 
 /**
  * (description)
@@ -22,47 +30,123 @@ import static com.hyd.dao.src.fx.Fx.vbox;
  *
  * @author yidin
  */
-public class AddQueryOneMethodDialog extends Dialog<MethodDef> {
+public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
-    private static ListView<ColumnInfo> columnInfoListView;
+    private ListView<ParamInfo> parametersList;
 
     private ColumnInfo[] columns;
 
-    public AddQueryOneMethodDialog(Stage owner, ColumnInfo[] columns) {
-        super(owner, root());
+    private ParamInfo currentParamInfo;
+
+    private Form<ParamInfo> methodInfoForm;
+
+    private DatabaseType databaseType;
+
+    private TextField txtMethodName;
+
+    private String tableName;
+
+    public AddQueryOneMethodDialog(Stage owner, DatabaseType databaseType, String tableName, ColumnInfo[] columns) {
+        super(owner);
+        this.databaseType = databaseType;
         this.columns = columns;
-        setTitle("Add Query One Method");
+        this.tableName = tableName;
+        setTitle("Query One for Table '" + tableName + "'");
 
         initControls();
     }
 
     private void initControls() {
-        Fx.setListViewContent(columnInfoListView, ColumnInfo::getColumnName);
-        columnInfoListView.getItems().addAll(columns);
+        parametersList = new ListView<>();
+        Fx.setListViewContent(parametersList, ParamInfo::toString);
     }
 
-    private static Parent root() {
-        columnInfoListView = new ListView<>();
+    @Override
+    protected Parent getBodyRoot() {
 
-        return hbox(Expand.AllExpand, PADDING, PADDING,
-                vbox(Expand.LastExpand, 0, PADDING,
-                        new Label("Query Fields"),
-                        columnInfoListView
+        methodInfoForm = Fx.form(100, Arrays.asList(
+                comboField("Column:", info -> info.columnInfo, ColumnInfo::getColumnName, columns),
+                comboField("Comparator:", info -> info.comparator, Comparator::getSymbol, Comparator.values())
+        ));
+
+        txtMethodName = new TextField();
+
+        return vbox(Expand.LastExpand, 0, PADDING,
+                hbox(Expand.LastExpand, Pos.BASELINE_LEFT, PADDING, PADDING,
+                        new Label("Method Name:"),
+                        txtMethodName
                 ),
-                vbox(Expand.LastExpand, 0, PADDING,
-                        new Label("Condition Fields"),
-                        new ListView<String>()
+                hbox(Expand.AllExpand, PADDING, PADDING,
+                        vbox(Expand.LastExpand, 0, PADDING,
+                                new Label("Parameters:"),
+                                parametersList
+                        ),
+                        vbox(Expand.FirstExpand, 0, PADDING,
+                                titledPane(80, "Add Parameter", methodInfoForm),
+                                button("Add/Update", this::addOrUpdateParamInfo)
+                        )
                 )
         );
     }
 
+    private void addOrUpdateParamInfo() {
+        ObservableList<ParamInfo> items = parametersList.getItems();
+        if (!items.contains(currentParamInfo)) {
+            items.add(currentParamInfo);
+            currentParamInfo = new ParamInfo();
+            methodInfoForm.load(currentParamInfo);
+        }
+    }
+
     @Override
     protected void onOK() {
+        RepoMethodDef repoMethodDef = new RepoMethodDef();
+        repoMethodDef.access = AccessType.Public;
+        repoMethodDef.name = txtMethodName.getText();
+        repoMethodDef.returnType = RepoMethodReturnType.Single;
+        repoMethodDef.type = Str.underscore2Class(tableName);
 
+        parametersList.getItems().forEach(paramInfo -> repoMethodDef.args.add(parseParamInfo(paramInfo)));
+
+        if (Str.isEmptyString(repoMethodDef.name)) {
+            repoMethodDef.name = "queryBy" + repoMethodDef.args.stream()
+                    .map(arg -> Str.capitalize(arg.name))
+                    .collect(Collectors.joining("And"));
+        }
+
+        setResult(repoMethodDef);
+    }
+
+    private MethodArg parseParamInfo(ParamInfo paramInfo) {
+        ColumnInfo columnInfo = paramInfo.columnInfo.get();
+        return new MethodArg(
+                TypeUtil.getJavaType(databaseType, columnInfo.getDataType()),
+                Str.underscore2Property(columnInfo.getColumnName())
+        );
     }
 
     @Override
     protected void onCancel() {
+        setResult(null);
+    }
 
+    @Override
+    protected void onShown() {
+        currentParamInfo = new ParamInfo();
+        methodInfoForm.load(currentParamInfo);
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    private static class ParamInfo {
+
+        public ObjectProperty<ColumnInfo> columnInfo = new SimpleObjectProperty<>();
+
+        public ObjectProperty<Comparator> comparator = new SimpleObjectProperty<>();
+
+        @Override
+        public String toString() {
+            return columnInfo.get().getColumnName() + " " + comparator.get().getSymbol() + " ?";
+        }
     }
 }

@@ -1,9 +1,9 @@
 package com.hyd.dao.src.fx;
 
-import com.hyd.dao.src.AccessType;
-import com.hyd.dao.src.AnnotationDef;
-import com.hyd.dao.src.ClassDef;
-import com.hyd.dao.src.FieldDef;
+import com.hyd.dao.src.code.AccessType;
+import com.hyd.dao.src.code.AnnotationDef;
+import com.hyd.dao.src.code.ClassDef;
+import com.hyd.dao.src.code.FieldDef;
 import com.hyd.dao.util.Str;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -124,10 +124,6 @@ public class Profile {
 
     //////////////////////////////////////////////////////////////
 
-    public ClassDef gerRepoClass(String tableName) {
-        return this.repoClassMap.get(tableName);
-    }
-
     public ClassDef getModelClass(String tableName) {
         return this.modelClassMap.get(tableName);
     }
@@ -140,12 +136,17 @@ public class Profile {
         this.modelClassMap.put(tableName, classDef);
     }
 
-    public ClassDef repoClass(String tableName) {
-        if (this.repoClassMap.containsKey(tableName)) {
-            return this.repoClassMap.get(tableName);
+    public ClassDef repoClassByTableName(String tableName) {
+        String className = Str.underscore2Class(tableName);
+        return repoClass(className);
+    }
+
+    public ClassDef repoClass(String className) {
+        if (this.repoClassMap.containsKey(className)) {
+            return this.repoClassMap.get(className);
         } else {
             ClassDef classDef = new ClassDef();
-            classDef.className = Str.underscore2Class(tableName);
+            classDef.className = className;
 
             FieldDef daoField = new FieldDef();
             daoField.access = AccessType.Private;
@@ -154,7 +155,7 @@ public class Profile {
             daoField.annotation = new AnnotationDef("Autowired");
             classDef.addFieldIfNotExists(daoField);
 
-            this.repoClassMap.put(tableName, classDef);
+            this.repoClassMap.put(className, classDef);
             return classDef;
         }
     }

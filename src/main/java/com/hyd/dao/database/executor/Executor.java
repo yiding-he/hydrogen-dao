@@ -68,7 +68,7 @@ public abstract class Executor {
      *
      * @return 受影响的行数
      */
-    public abstract int execute(String sql, List params);
+    public abstract int execute(String sql, List<Object> params);
 
     /**
      * 执行批量 SQL 语句
@@ -90,7 +90,7 @@ public abstract class Executor {
      *
      * @return 查询的当前页
      */
-    public abstract <T> Page<T> queryPage(Class<T> clazz, String sql, List params, int pageSize, int pageIndex);
+    public abstract <T> Page<T> queryPage(Class<T> clazz, String sql, List<Object> params, int pageSize, int pageIndex);
 
     /**
      * @param clazz         包装类
@@ -101,7 +101,7 @@ public abstract class Executor {
      *
      * @return 查询结果。如果 startPosition < 0 或 endPosition < 0 则表示返回所有的查询结果
      */
-    public abstract List query(Class clazz, String sql, List params, int startPosition, int endPosition);
+    public abstract List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition);
 
     /**
      * 根据主键和表名查询指定的记录
@@ -165,7 +165,7 @@ public abstract class Executor {
      *
      * @return 用于获得查询结果的迭代器
      */
-    public abstract RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor);
+    public abstract RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor);
 
     public void setInfo(ExecutorInfo info) {
         this.info = info;

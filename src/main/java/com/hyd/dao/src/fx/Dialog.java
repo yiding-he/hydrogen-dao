@@ -9,6 +9,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.util.function.Supplier;
+
 import static com.hyd.dao.src.fx.Fx.*;
 
 /**
@@ -21,7 +23,7 @@ public abstract class Dialog<T> {
 
     private Stage owner;
 
-    private Parent root;
+    private Supplier<Parent> rootSupplier;
 
     private T result;
 
@@ -29,18 +31,21 @@ public abstract class Dialog<T> {
 
     private String title;
 
-    public Dialog(Stage owner, Parent root) {
+    public Dialog(Stage owner) {
         this.owner = owner;
-        this.root = vbox(Expand.FirstExpand, PADDING, PADDING,
-                root,
-                new Separator(),
-                hbox(Expand.FirstExpand, PADDING, PADDING,
-                        new Pane(),
-                        okButton(),
-                        cancelButton()
-                )
-        );
+        this.rootSupplier = () ->
+                vbox(Expand.FirstExpand, PADDING, PADDING,
+                        getBodyRoot(),
+                        new Separator(),
+                        hbox(Expand.FirstExpand, PADDING, PADDING,
+                                new Pane(),
+                                okButton(),
+                                cancelButton()
+                        )
+                );
     }
+
+    protected abstract Parent getBodyRoot();
 
     protected void setTitle(String title) {
         this.title = title;
@@ -80,12 +85,17 @@ public abstract class Dialog<T> {
 
     protected abstract void onCancel();
 
+    protected void onShown() {
+
+    }
+
     public T show() {
         this.stage = new Stage();
         this.stage.initOwner(this.owner);
         this.stage.initModality(Modality.WINDOW_MODAL);
-        this.stage.setScene(new Scene(this.root));
+        this.stage.setScene(new Scene(this.rootSupplier.get()));
         this.stage.setTitle(this.title);
+        this.stage.setOnShown(event -> this.onShown());
         this.stage.showAndWait();
         return result;
     }

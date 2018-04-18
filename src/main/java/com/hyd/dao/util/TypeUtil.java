@@ -1,5 +1,6 @@
 package com.hyd.dao.util;
 
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
 
@@ -12,22 +13,6 @@ import java.util.Date;
  * 处理数据库中的值类型的类
  */
 public class TypeUtil {
-
-    /**
-     * 判断当前进程中是否加载了指定的类
-     *
-     * @param className 类名
-     *
-     * @return 如果加载了则返回 true
-     */
-    public static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
 
     /**
      * 根据字段数据类型将数据库中的值转化为 Java 类型，用于对简单查询结果的转换
@@ -61,7 +46,7 @@ public class TypeUtil {
         return value;
     }
 
-    public static boolean isNumericType(int columnType) {
+    private static boolean isNumericType(int columnType) {
         return columnType == Types.NUMERIC || columnType == Types.INTEGER
                 || columnType == Types.BIGINT || columnType == Types.REAL
                 || columnType == Types.DECIMAL || columnType == Types.FLOAT
@@ -94,19 +79,82 @@ public class TypeUtil {
     /**
      * 对用户提供的执行参数进行一些修复
      *
-     * @param obj 参数值
+     * @param obj  参数值
+     * @param type 字段数据类型
      *
      * @return 修复后的参数
      */
-    public static Object cconvertParamValue(Object obj) {
+    public static Object convertParamValue(Object obj, Integer type) {
         if (obj == null) {
             return "";
         } else if (obj.getClass().equals(Date.class)) {
-            // 将 Date 转化为 TimeStamp，以避免时间丢失
-            return new Timestamp(((Date) obj).getTime());
+            return new Timestamp(((Date) obj).getTime());     // 将 Date 转化为 TimeStamp，以避免时间丢失
+        } else if (type == Types.BIT) {
+            return (obj instanceof Boolean) ? obj : Boolean.valueOf(String.valueOf(obj));
         } else {
             return obj;
         }
-
     }
+
+    public static String getJavaType(DatabaseType databaseType, int dataType) {
+        switch (dataType) {
+            case Types.VARCHAR:
+            case Types.CHAR:
+            case Types.LONGVARCHAR:
+                return "String";
+            case Types.BIT:
+                return "Boolean";
+            case Types.NUMERIC:
+                return "java.math.BigDecimal";
+            case Types.TINYINT:
+                return "Byte";
+            case Types.SMALLINT:
+                return "Short";
+            case Types.INTEGER:
+                return "Integer";
+            case Types.BIGINT:
+                return "Long";
+            case Types.REAL:
+            case Types.FLOAT:
+                return "Float";
+            case Types.DOUBLE:
+                return "Double";
+            case Types.VARBINARY:
+            case Types.BINARY:
+                return "byte[]";
+            case Types.DATE:
+                return "java.sql.Date";
+            case Types.TIME:
+                return "java.sql.Time";
+            case Types.TIMESTAMP:
+                return "java.sql.Timestamp";
+            default:
+                return getJavaTypeByDatabase(databaseType, dataType);
+        }
+    }
+
+    public static String getJavaTypeByDatabase(DatabaseType databaseType, int dataType) {
+        switch (databaseType) {
+            case MySQL:
+                return getMySQLJavaType(dataType);
+            case Oracle:
+                return getOracleJavaType(dataType);
+            default:
+                return "String";
+        }
+    }
+
+    public static String getMySQLJavaType(int dataType) {
+        switch (dataType) {
+            case 3:
+                return "Double";
+            default:
+                return "String";
+        }
+    }
+
+    public static String getOracleJavaType(int dataType) {
+        return "String";
+    }
+
 }
