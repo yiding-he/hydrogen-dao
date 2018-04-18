@@ -3,14 +3,9 @@ package com.hyd.dao.src.fx;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.src.RepoMethodDef;
-import com.hyd.dao.src.RepoMethodReturnType;
-import com.hyd.dao.src.code.AccessType;
-import com.hyd.dao.src.code.MethodArg;
+import com.hyd.dao.src.code.ParamInfo;
+import com.hyd.dao.src.code.method.QueryOneMethodBuilder;
 import com.hyd.dao.src.fx.Fx.*;
-import com.hyd.dao.util.Str;
-import com.hyd.dao.util.TypeUtil;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -20,8 +15,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static com.hyd.dao.src.fx.Fx.*;
 
@@ -104,29 +99,13 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
     @Override
     protected void onOK() {
-        RepoMethodDef repoMethodDef = new RepoMethodDef();
-        repoMethodDef.access = AccessType.Public;
-        repoMethodDef.name = txtMethodName.getText();
-        repoMethodDef.returnType = RepoMethodReturnType.Single;
-        repoMethodDef.type = Str.underscore2Class(tableName);
 
-        parametersList.getItems().forEach(paramInfo -> repoMethodDef.args.add(parseParamInfo(paramInfo)));
-
-        if (Str.isEmptyString(repoMethodDef.name)) {
-            repoMethodDef.name = "queryBy" + repoMethodDef.args.stream()
-                    .map(arg -> Str.capitalize(arg.name))
-                    .collect(Collectors.joining("And"));
-        }
-
-        setResult(repoMethodDef);
-    }
-
-    private MethodArg parseParamInfo(ParamInfo paramInfo) {
-        ColumnInfo columnInfo = paramInfo.columnInfo.get();
-        return new MethodArg(
-                TypeUtil.getJavaType(databaseType, columnInfo.getDataType()),
-                Str.underscore2Property(columnInfo.getColumnName())
+        QueryOneMethodBuilder methodBuilder = new QueryOneMethodBuilder(
+                databaseType, tableName,
+                txtMethodName.getText(), new ArrayList<>(parametersList.getItems())
         );
+
+        setResult(methodBuilder.build());
     }
 
     @Override
@@ -142,15 +121,4 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
     //////////////////////////////////////////////////////////////
 
-    private static class ParamInfo {
-
-        public ObjectProperty<ColumnInfo> columnInfo = new SimpleObjectProperty<>();
-
-        public ObjectProperty<Comparator> comparator = new SimpleObjectProperty<>();
-
-        @Override
-        public String toString() {
-            return columnInfo.get().getColumnName() + " " + comparator.get().getSymbol() + " ?";
-        }
-    }
 }

@@ -105,7 +105,7 @@ public class TypeUtil {
             case Types.BIT:
                 return "Boolean";
             case Types.NUMERIC:
-                return "java.math.BigDecimal";
+                return "BigDecimal";
             case Types.TINYINT:
                 return "Byte";
             case Types.SMALLINT:
@@ -123,11 +123,9 @@ public class TypeUtil {
             case Types.BINARY:
                 return "byte[]";
             case Types.DATE:
-                return "java.sql.Date";
             case Types.TIME:
-                return "java.sql.Time";
             case Types.TIMESTAMP:
-                return "java.sql.Timestamp";
+                return "Date";
             default:
                 return getJavaTypeByDatabase(databaseType, dataType);
         }

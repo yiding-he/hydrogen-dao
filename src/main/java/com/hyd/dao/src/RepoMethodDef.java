@@ -10,5 +10,7 @@ import com.hyd.dao.src.code.MethodDef;
  */
 public class RepoMethodDef extends MethodDef {
 
+    public boolean pageQuery;
+
     public RepoMethodReturnType returnType;
 }

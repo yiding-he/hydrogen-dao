@@ -25,7 +25,12 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         ClassDef classDef = new ClassDef();
         classDef.annotation = new AnnotationDef("Repository");
         classDef.className = className;
-        classDef.imports = new ImportDef("com.hyd.dao.SQL");
+        classDef.imports = new ImportDef(
+                "com.hyd.dao.SQL",
+                "com.hyd.dao.Page",
+                "java.math.BigDecimal",
+                "java.util.Date",
+                "java.util.List");
 
         FieldDef daoField = new FieldDef();
         daoField.access = AccessType.Private;
