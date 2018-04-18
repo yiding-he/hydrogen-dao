@@ -17,6 +17,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
@@ -71,7 +72,7 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
         txtMethodName = new TextField();
 
-        return vbox(Expand.LastExpand, 0, PADDING,
+        VBox root = vbox(Expand.LastExpand, 0, PADDING,
                 hbox(Expand.LastExpand, Pos.BASELINE_LEFT, PADDING, PADDING,
                         new Label("Method Name:"),
                         txtMethodName
@@ -87,6 +88,9 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
                         )
                 )
         );
+
+        root.setPrefHeight(300);
+        return root;
     }
 
     private void addOrUpdateParamInfo() {

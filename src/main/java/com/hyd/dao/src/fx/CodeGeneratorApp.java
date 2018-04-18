@@ -7,14 +7,12 @@ import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.SelectedColumn;
-import com.hyd.dao.src.code.ClassDef;
-import com.hyd.dao.src.code.ClassDefBuilder;
-import com.hyd.dao.src.code.HydrogenModelClassBuilder;
-import com.hyd.dao.src.code.MethodDef;
+import com.hyd.dao.src.code.*;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -81,6 +79,8 @@ public class CodeGeneratorApp extends Application {
 
     ///////////////////////////////////////////////
 
+    private Profile currentProfile;
+
     private String currentTableName;
 
     private ColumnInfo[] currentTableColumns;
@@ -121,7 +121,20 @@ public class CodeGeneratorApp extends Application {
             }
         });
 
+        updateMethodTable(tableName);
         updateCode(tableName);
+    }
+
+    private void updateMethodTable(String tableName) {
+        ObservableList<RepoMethodDef> repoMethodDefs = repoMethodTableView.getItems();
+        repoMethodDefs.clear();
+
+        if (tableName != null) {
+            List<MethodDef> methods = buildRepoClassDef(currentTableName, currentProfile).methods;
+            for (MethodDef method : methods) {
+                repoMethodDefs.add((RepoMethodDef) method);
+            }
+        }
     }
 
     private void updateCode(String tableName) {
@@ -130,7 +143,7 @@ public class CodeGeneratorApp extends Application {
 
         if (tableName != null) {
             Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
-            repoClassDef = currentProfile.repoClass(tableName + "Repository");
+            repoClassDef = buildRepoClassDef(tableName, currentProfile);
             modelClassDef = buildModelClassDef(tableName, currentProfile);
         }
 
@@ -139,14 +152,31 @@ public class CodeGeneratorApp extends Application {
         loadToRepoCode(repoClassDef);
     }
 
+    private ClassDef buildRepoClassDef(String tableName, Profile currentProfile) {
+        ClassDef repoClass = currentProfile.getRepoClass(tableName);
+
+        if (repoClass != null) {
+            return repoClass;
+        } else {
+            RepoClassDefBuilder classDefBuilder =
+                    new RepoClassDefBuilder(tableName, currentTableColumns, databaseType);
+
+            repoClass = classDefBuilder.build(tableName);
+            currentProfile.setRepoClass(tableName, repoClass);
+        }
+
+        return repoClass;
+    }
+
     private ClassDef buildModelClassDef(String tableName, Profile currentProfile) {
         ClassDef modelClass = currentProfile.getModelClass(tableName);
 
         if (modelClass != null) {
             return modelClass;
         } else {
-            ClassDefBuilder classDefBuilder = new HydrogenModelClassBuilder(
-                    tableName, currentTableColumns, databaseType);
+            ClassDefBuilder classDefBuilder =
+                    new ModelClassBuilder(tableName, currentTableColumns, databaseType);
+
             modelClass = classDefBuilder.build(tableName);
             currentProfile.setModelClass(tableName, modelClass);
         }
@@ -179,6 +209,7 @@ public class CodeGeneratorApp extends Application {
             profileForm.load(null);
         } else {
             profileForm.load(profile);
+            currentProfile = profile;
         }
     }
 
@@ -327,8 +358,7 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void updateRepoCode() {
-        Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
-        ClassDef repoClass = currentProfile.repoClassByTableName(currentTableName);
+        ClassDef repoClass = buildRepoClassDef(currentTableName, currentProfile);
 
         repoClass.methods.clear();
         repoClass.methods.addAll(repoMethodTableView.getItems());
@@ -344,14 +374,16 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void deleteMethod() {
-
+        RepoMethodDef selectedItem = repoMethodTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            repoMethodTableView.getItems().remove(selectedItem);
+        }
     }
 
     private void addQueryMethod() {
     }
 
     private void addQueryOneMethod() {
-        String currentTableName = tableNamesList.getSelectionModel().getSelectedItem();
         if (currentTableName == null) {
             return;
         }
@@ -384,14 +416,12 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void connectProfile() {
-        Profile selectedItem = profileList.getSelectionModel().getSelectedItem();
-
-        if (StringUtils.isAnyBlank(selectedItem.getDriver(), selectedItem.getUrl())) {
+        if (StringUtils.isAnyBlank(currentProfile.getDriver(), currentProfile.getUrl())) {
             error("Profile is incomplete.");
             return;
         }
 
-        if (!initConnectionManager(selectedItem)) {
+        if (!initConnectionManager(currentProfile)) {
             return;
         }
 
@@ -434,13 +464,12 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void deleteProfile() {
-        Profile selectedItem = profileList.getSelectionModel().getSelectedItem();
-        if (selectedItem == null) {
+        if (currentProfile == null) {
             return;
         }
 
         if (confirm("Are you sure to delete this profile?")) {
-            profileList.getItems().remove(selectedItem);
+            profileList.getItems().remove(currentProfile);
         }
     }
 

@@ -35,6 +35,12 @@ public class CodeBlock {
         }
     }
 
+    public void addLines(List<String> lines) {
+        for (String line : lines) {
+            addLine(line);
+        }
+    }
+
     public void addCode(Code code, boolean indent) {
         if (code != null) {
             addCodeBlock(code.toCodeBlock(), indent);

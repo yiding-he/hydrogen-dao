@@ -1,10 +1,6 @@
 package com.hyd.dao.src.fx;
 
-import com.hyd.dao.src.code.AccessType;
-import com.hyd.dao.src.code.AnnotationDef;
 import com.hyd.dao.src.code.ClassDef;
-import com.hyd.dao.src.code.FieldDef;
-import com.hyd.dao.util.Str;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -128,46 +124,15 @@ public class Profile {
         return this.modelClassMap.get(tableName);
     }
 
+    public ClassDef getRepoClass(String tableName) {
+        return this.repoClassMap.get(tableName);
+    }
+
     public void setRepoClass(String tableName, ClassDef classDef) {
         this.repoClassMap.put(tableName, classDef);
     }
 
     public void setModelClass(String tableName, ClassDef classDef) {
         this.modelClassMap.put(tableName, classDef);
-    }
-
-    public ClassDef repoClassByTableName(String tableName) {
-        String className = Str.underscore2Class(tableName);
-        return repoClass(className);
-    }
-
-    public ClassDef repoClass(String className) {
-        if (this.repoClassMap.containsKey(className)) {
-            return this.repoClassMap.get(className);
-        } else {
-            ClassDef classDef = new ClassDef();
-            classDef.className = className;
-
-            FieldDef daoField = new FieldDef();
-            daoField.access = AccessType.Private;
-            daoField.name = "dao";
-            daoField.type = "DAO";
-            daoField.annotation = new AnnotationDef("Autowired");
-            classDef.addFieldIfNotExists(daoField);
-
-            this.repoClassMap.put(className, classDef);
-            return classDef;
-        }
-    }
-
-    public ClassDef modelClass(String tableName) {
-        if (this.modelClassMap.containsKey(tableName)) {
-            return this.modelClassMap.get(tableName);
-        } else {
-            ClassDef classDef = new ClassDef();
-            classDef.className = Str.underscore2Class(tableName);
-            this.modelClassMap.put(tableName, classDef);
-            return classDef;
-        }
     }
 }

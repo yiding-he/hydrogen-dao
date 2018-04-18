@@ -11,9 +11,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author yidin
  */
-public class HydrogenModelClassBuilder extends ClassDefBuilder {
+public class ModelClassBuilder extends ClassDefBuilder {
 
-    public HydrogenModelClassBuilder(
+    public ModelClassBuilder(
             String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
 
         super(tableName, columnInfos, databaseType);
