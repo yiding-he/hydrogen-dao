@@ -2,6 +2,8 @@ package com.hyd.dao.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 处理字符串的类
@@ -48,12 +50,13 @@ public class Str {
             return columnName.toUpperCase();
         }
 
-        String[] strs = columnName.toLowerCase().split("_");
-        String name = strs[0];
-        for (int i = 1; i < strs.length; i++) {
-            name += capitalize(strs[i]);
-        }
-        return name;
+        return underscore2Property(columnName);
+    }
+
+    public static String underscore2Property(String underscore) {
+        return uncapitalize(Stream.of(underscore.split("_"))
+                .map(Str::capitalize)
+                .collect(Collectors.joining()));
     }
 
     private static String capitalize(String str) {
@@ -63,6 +66,16 @@ public class Str {
 
         char[] chars = str.toCharArray();
         chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
+    }
+
+    public static String uncapitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
 
@@ -158,5 +171,15 @@ public class Str {
             idx += sub.length();
         }
         return count;
+    }
+
+    public static boolean isAnyEmpty(String... strs) {
+        for (String str : strs) {
+            if (isEmptyString(str)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
