@@ -6,6 +6,8 @@ import com.hyd.dao.models.Blog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class BlogRepository {
 
@@ -21,6 +23,14 @@ public class BlogRepository {
                 SQL.Select("*")
                         .From("blog")
                         .Where("id = ?", Id)
+        );
+    }
+
+
+    public List<Blog> queryAll() {
+        return dao.query(Blog.class,
+                SQL.Select("*")
+                        .From("blog")
         );
     }
 

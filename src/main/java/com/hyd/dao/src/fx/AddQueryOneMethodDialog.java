@@ -28,7 +28,7 @@ import static com.hyd.dao.src.fx.Fx.*;
  */
 public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
-    private ListView<ParamInfo> parametersList;
+    ListView<ParamInfo> parametersList;
 
     private ColumnInfo[] columns;
 
@@ -36,11 +36,11 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
     private Form<ParamInfo> methodInfoForm;
 
-    private DatabaseType databaseType;
+    DatabaseType databaseType;
 
-    private TextField txtMethodName;
+    TextField txtMethodName;
 
-    private String tableName;
+    String tableName;
 
     public AddQueryOneMethodDialog(Stage owner, DatabaseType databaseType, String tableName, ColumnInfo[] columns) {
         super(owner);

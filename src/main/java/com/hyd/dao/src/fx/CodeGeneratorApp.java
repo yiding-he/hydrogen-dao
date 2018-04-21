@@ -308,7 +308,7 @@ public class CodeGeneratorApp extends Application {
                                         hbox(NoExpand, 0, PADDING,
                                                 menuButton("Add...",
                                                         menuItem("Query One", this::addQueryOneMethod),
-                                                        menuItem("Query List", this::addQueryMethod),
+                                                        menuItem("Query List", this::addQueryListMethod),
                                                         menuItem("Query Count", this::addQueryMethod),
                                                         menuItem("Query Page", this::addQueryMethod),
                                                         new SeparatorMenuItem(),
@@ -398,6 +398,19 @@ public class CodeGeneratorApp extends Application {
         }
 
         RepoMethodDef methodDef = new AddQueryOneMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addQueryListMethod() {
+        if (currentTableName == null) {
+            return;
+        }
+
+        RepoMethodDef methodDef = new AddQueryListMethodDialog(
                 primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
         if (methodDef != null) {

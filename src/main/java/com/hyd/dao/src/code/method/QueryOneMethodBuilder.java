@@ -22,7 +22,7 @@ public class QueryOneMethodBuilder {
 
     private DatabaseType databaseType;
 
-    private String tableName;
+    String tableName;
 
     private String methodName;
 
@@ -38,19 +38,35 @@ public class QueryOneMethodBuilder {
         this.paramInfoList = paramInfoList;
     }
 
+    String getMethodType() {
+        return Str.underscore2Class(tableName);
+    }
+
+    String getNonArgMethodName() {
+        return "queryOne";
+    }
+
+    RepoMethodReturnType getRepoReturnType() {
+        return RepoMethodReturnType.Single;
+    }
+
+    String getDaoQueryMethod() {
+        return "queryFirst";
+    }
+
     public RepoMethodDef build() {
 
         RepoMethodDef repoMethodDef = new RepoMethodDef();
         repoMethodDef.access = AccessType.Public;
         repoMethodDef.name = methodName;
-        repoMethodDef.returnType = RepoMethodReturnType.Single;
-        repoMethodDef.type = Str.underscore2Class(tableName);
+        repoMethodDef.returnType = getRepoReturnType();
+        repoMethodDef.type = getMethodType();
 
         paramInfoList.forEach(paramInfo -> repoMethodDef.args.add(parseParamInfo(paramInfo)));
 
         if (Str.isEmptyString(repoMethodDef.name)) {
             if (paramInfoList.isEmpty()) {
-                repoMethodDef.name = "queryAll";
+                repoMethodDef.name = getNonArgMethodName();
             } else {
                 repoMethodDef.name = "queryBy" + paramInfoList.stream()
                         .map(info -> Str.underscore2Class(info.columnInfo.get().getColumnName()))
@@ -68,7 +84,7 @@ public class QueryOneMethodBuilder {
 
         String className = Str.underscore2Class(tableName);
         CodeBlock codeBlock = new CodeBlock();
-        codeBlock.addLine("return", "dao.queryFirst(" + className + ".class, ");
+        codeBlock.addLine("return", "dao." + getDaoQueryMethod() + "(" + className + ".class, ");
         codeBlock.addLine("    SQL.Select(\"*\")");
         codeBlock.addLine("    .From(\"" + tableName + "\")");
 
