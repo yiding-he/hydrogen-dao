@@ -85,11 +85,11 @@ public class Str {
      * @return 如果 str 为 null、为空或仅包含空白字符，则返回 true。
      */
     public static boolean isEmptyString(String str) {
-        return str == null || str.matches("\\s*");
+        return str == null || str.trim().length() == 0;
     }
 
     public static boolean isEmpty(Object obj) {
-        return obj == null || isEmpty(obj.toString());
+        return obj == null || isEmptyString(obj.toString());
     }
 
     /**
