@@ -1,16 +1,13 @@
 package com.hyd.dao.src.code.method;
 
-import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.RepoMethodReturnType;
 import com.hyd.dao.src.code.AccessType;
 import com.hyd.dao.src.code.CodeBlock;
-import com.hyd.dao.src.code.MethodArg;
 import com.hyd.dao.src.code.ParamInfo;
 import com.hyd.dao.src.fx.Comparator;
 import com.hyd.dao.util.Str;
-import com.hyd.dao.util.TypeUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,24 +15,13 @@ import java.util.stream.Collectors;
 /**
  * @author yiding.he
  */
-public class QueryOneMethodBuilder {
-
-    private DatabaseType databaseType;
-
-    String tableName;
-
-    private String methodName;
-
-    private List<ParamInfo> paramInfoList;
+public class QueryOneMethodBuilder extends RepoMethodBuilder {
 
     public QueryOneMethodBuilder(
             DatabaseType databaseType,
             String tableName, String methodName, List<ParamInfo> paramInfoList) {
+        super(tableName, databaseType, paramInfoList, methodName);
 
-        this.databaseType = databaseType;
-        this.tableName = tableName;
-        this.methodName = methodName;
-        this.paramInfoList = paramInfoList;
     }
 
     String getMethodType() {
@@ -62,7 +48,7 @@ public class QueryOneMethodBuilder {
         repoMethodDef.returnType = getRepoReturnType();
         repoMethodDef.type = getMethodType();
 
-        paramInfoList.forEach(paramInfo -> repoMethodDef.args.add(parseParamInfo(paramInfo)));
+        paramInfoList.forEach(paramInfo -> repoMethodDef.args.add(paramInfo2Arg(paramInfo)));
 
         if (Str.isEmptyString(repoMethodDef.name)) {
             if (paramInfoList.isEmpty()) {
@@ -104,11 +90,4 @@ public class QueryOneMethodBuilder {
         return codeBlock;
     }
 
-    private MethodArg parseParamInfo(ParamInfo paramInfo) {
-        ColumnInfo columnInfo = paramInfo.columnInfo.get();
-        return new MethodArg(
-                TypeUtil.getJavaType(databaseType, columnInfo.getDataType()),
-                paramInfo.getSuggestParamName()
-        );
-    }
 }

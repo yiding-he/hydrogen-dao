@@ -1,14 +1,16 @@
 package com.hyd.dao.models;
 
+import java.util.Date;
+
 public class Blog {
 
     private Integer id;
 
     private String title;
 
-    private String lastUpdate;
-
     private String content;
+
+    private Date lastUpdate;
 
     public Integer getId() {
         return this.id;
@@ -26,14 +28,6 @@ public class Blog {
         this.title = title;
     }
 
-    public String getLastUpdate() {
-        return this.lastUpdate;
-    }
-
-    public void setLastUpdate(String lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
     public String getContent() {
         return this.content;
     }
@@ -42,4 +36,21 @@ public class Blog {
         this.content = content;
     }
 
+    public Date getLastUpdate() {
+        return this.lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public String toString() {
+        return "Blog{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                '}';
+    }
 }
