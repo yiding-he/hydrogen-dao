@@ -54,23 +54,32 @@ public class Str {
     }
 
     public static String underscore2Property(String underscore) {
-        return Str.uncapitalize(
-                Stream.of(underscore.split("_"))
-                        .map(StringUtils::capitalize)
-                        .collect(Collectors.joining()));
+        return Stream.of(underscore.split("_"))
+                .map(Str::capitalize)
+                .collect(Collectors.joining());
     }
 
     public static String underscore2Class(String underscore) {
-        return StringUtils.capitalize(underscore2Property(underscore));
+        return capitalize(underscore2Property(underscore));
     }
 
-    private static String capitalize(String str) {
+    public static String capitalize(String str) {
         if (str == null || str.length() == 0) {
             return str;
         }
 
         char[] chars = str.toCharArray();
         chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
+    }
+
+    public static String uncapitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
 
@@ -166,5 +175,15 @@ public class Str {
             idx += sub.length();
         }
         return count;
+    }
+
+    public static boolean isAnyEmpty(String... strs) {
+        for (String str : strs) {
+            if (isEmptyString(str)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
