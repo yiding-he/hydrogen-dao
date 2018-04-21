@@ -54,9 +54,10 @@ public class Str {
     }
 
     public static String underscore2Property(String underscore) {
-        return Stream.of(underscore.split("_"))
-                .map(StringUtils::capitalize)
-                .collect(Collectors.joining());
+        return Str.uncapitalize(
+                Stream.of(underscore.split("_"))
+                        .map(StringUtils::capitalize)
+                        .collect(Collectors.joining()));
     }
 
     public static String underscore2Class(String underscore) {

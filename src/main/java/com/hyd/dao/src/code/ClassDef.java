@@ -1,4 +1,4 @@
-package com.hyd.dao.src;
+package com.hyd.dao.src.code;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,10 @@ import java.util.List;
  */
 public class ClassDef implements Code {
 
+    public ImportDef imports;
+
+    public AnnotationDef annotation;
+
     public String className;
 
     public List<FieldDef> fields = new ArrayList<>();
@@ -20,6 +24,16 @@ public class ClassDef implements Code {
     @Override
     public CodeBlock toCodeBlock() {
         CodeBlock codeBlock = new CodeBlock();
+
+        if (imports != null) {
+            codeBlock.addCode(imports, false);
+            codeBlock.addLine();
+        }
+
+        if (annotation != null) {
+            codeBlock.addCode(annotation, false);
+        }
+
         codeBlock.addLine("public", "class", className, "{");
         codeBlock.addLine();
 

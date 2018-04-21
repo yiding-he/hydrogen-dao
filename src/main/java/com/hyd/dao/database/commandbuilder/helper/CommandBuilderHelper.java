@@ -156,7 +156,7 @@ public class CommandBuilderHelper {
             info.setDataType(Integer.parseInt(columns.getString(columnMeta.dataType)));
             info.setPrimary(primaryKey);
             info.setComment(columns.getString(columnMeta.remarks));
-            info.setSize(Integer.parseInt(columns.getString(columnMeta.columnSize)));
+            info.setSize(columns.getInt(columnMeta.columnSize));
             info.setNullable("1".equals(columns.getString(columnMeta.nullable)));
             infos.add(info);
         }

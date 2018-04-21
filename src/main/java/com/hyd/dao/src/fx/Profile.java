@@ -1,10 +1,6 @@
 package com.hyd.dao.src.fx;
 
-import com.hyd.dao.src.AccessType;
-import com.hyd.dao.src.AnnotationDef;
-import com.hyd.dao.src.ClassDef;
-import com.hyd.dao.src.FieldDef;
-import com.hyd.dao.util.Str;
+import com.hyd.dao.src.code.ClassDef;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -124,12 +120,12 @@ public class Profile {
 
     //////////////////////////////////////////////////////////////
 
-    public ClassDef gerRepoClass(String tableName) {
-        return this.repoClassMap.get(tableName);
-    }
-
     public ClassDef getModelClass(String tableName) {
         return this.modelClassMap.get(tableName);
+    }
+
+    public ClassDef getRepoClass(String tableName) {
+        return this.repoClassMap.get(tableName);
     }
 
     public void setRepoClass(String tableName, ClassDef classDef) {
@@ -138,35 +134,5 @@ public class Profile {
 
     public void setModelClass(String tableName, ClassDef classDef) {
         this.modelClassMap.put(tableName, classDef);
-    }
-
-    public ClassDef repoClass(String tableName) {
-        if (this.repoClassMap.containsKey(tableName)) {
-            return this.repoClassMap.get(tableName);
-        } else {
-            ClassDef classDef = new ClassDef();
-            classDef.className = Str.underscore2Class(tableName);
-
-            FieldDef daoField = new FieldDef();
-            daoField.access = AccessType.Private;
-            daoField.name = "dao";
-            daoField.type = "DAO";
-            daoField.annotation = new AnnotationDef("Autowired");
-            classDef.addFieldIfNotExists(daoField);
-
-            this.repoClassMap.put(tableName, classDef);
-            return classDef;
-        }
-    }
-
-    public ClassDef modelClass(String tableName) {
-        if (this.modelClassMap.containsKey(tableName)) {
-            return this.modelClassMap.get(tableName);
-        } else {
-            ClassDef classDef = new ClassDef();
-            classDef.className = Str.underscore2Class(tableName);
-            this.modelClassMap.put(tableName, classDef);
-            return classDef;
-        }
     }
 }

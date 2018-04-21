@@ -1,4 +1,4 @@
-package com.hyd.dao.src;
+package com.hyd.dao.src.code;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +32,12 @@ public class CodeBlock {
             this.lines.add(String.join(" ", tokens));
         } else {
             this.lines.add("");
+        }
+    }
+
+    public void addLines(List<String> lines) {
+        for (String line : lines) {
+            addLine(line);
         }
     }
 

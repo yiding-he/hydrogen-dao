@@ -17,6 +17,8 @@ public class ComboFormField<T, C> extends FormField<T> {
 
     private Function<T, ObjectProperty<C>> extractor;
 
+    private ObjectProperty<C> currentBind;
+
     public ComboFormField(String text, Function<T, ObjectProperty<C>> extractor, C[] values) {
         super(text);
 
@@ -29,8 +31,25 @@ public class ComboFormField<T, C> extends FormField<T> {
         this.expand(this.comboBox);
     }
 
+    public ComboBox<C> getComboBox() {
+        return comboBox;
+    }
+
     @Override
     public void readFrom(T t) {
 
+        if (currentBind != null) {
+            this.getComboBox().valueProperty().unbindBidirectional(currentBind);
+        }
+
+        if (t != null) {
+            ObjectProperty<C> property = extractor.apply(t);
+            if (property.get() == null) {
+                property.setValue(this.getComboBox().getSelectionModel().getSelectedItem());
+            }
+
+            this.getComboBox().valueProperty().bindBidirectional(property);
+            currentBind = property;
+        }
     }
 }

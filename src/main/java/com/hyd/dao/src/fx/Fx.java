@@ -1,8 +1,11 @@
 package com.hyd.dao.src.fx;
 
+import com.hyd.dao.log.Logger;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -20,6 +23,8 @@ import java.util.function.Function;
  * @author yidin
  */
 public class Fx {
+
+    private static final Logger LOG = Logger.getLogger(Fx.class);
 
     public static final int PADDING = 7;
 
@@ -85,8 +90,16 @@ public class Fx {
     }
 
     public static HBox hbox(Expand expand, int padding, int spacing, Node... children) {
+        return hbox(expand, null, padding, spacing, children);
+    }
+
+    public static HBox hbox(Expand expand, Pos alignment, int padding, int spacing, Node... children) {
         HBox hbox = new HBox(spacing, children);
         hbox.setPadding(new Insets(padding));
+
+        if (alignment != null) {
+            hbox.setAlignment(alignment);
+        }
 
         if (children.length > 0) {
             if (expand == Expand.LastExpand) {
@@ -133,8 +146,35 @@ public class Fx {
         return vbox;
     }
 
+    public static <S, T> TableColumn<S, T> column(String text, Function<S, T> parser) {
+        TableColumn<S, T> column = new TableColumn<>(text);
+        column.setCellValueFactory(features -> {
+            S value = features.getValue();
+            return new SimpleObjectProperty<>(parser.apply(value));
+        });
+        return column;
+    }
+
     public static <T> void setListViewContent(ListView<T> listView, Function<T, String> toString) {
-        listView.setCellFactory(lv -> new ListCell<T>() {
+        listView.setCellFactory(lv -> createCell(toString));
+    }
+
+    public static <T> void setListViewSelectionChanged(ListView<T> listView, Consumer<T> onSelected) {
+        if (onSelected != null) {
+            listView.getSelectionModel().selectedItemProperty()
+                    .addListener((ob, oldValue, newValue) -> onSelected.accept(newValue));
+        }
+    }
+
+    public static <T> void setComboBoxContent(ComboBox<T> comboBox, Function<T, String> toString) {
+        if (comboBox != null) {
+            comboBox.setButtonCell(createCell(toString));
+            comboBox.setCellFactory(combo -> createCell(toString));
+        }
+    }
+
+    private static <T> ListCell<T> createCell(Function<T, String> toString) {
+        return new ListCell<T>() {
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);
@@ -144,14 +184,7 @@ public class Fx {
                     setText(toString.apply(item));
                 }
             }
-        });
-    }
-
-    public static <T> void setListViewSelectionChanged(ListView<T> listView, Consumer<T> onSelected) {
-        if (onSelected != null) {
-            listView.getSelectionModel().selectedItemProperty()
-                    .addListener((ob, oldValue, newValue) -> onSelected.accept(newValue));
-        }
+        };
     }
 
     public static <T> Form<T> form(int labelWidth, List<FormField<T>> fields) {
@@ -167,6 +200,13 @@ public class Fx {
         return new ComboFormField<>(text, extractor, values);
     }
 
+    public static <T, C> ComboFormField<T, C> comboField(
+            String text, Function<T, ObjectProperty<C>> extractor, Function<C, String> toString, C[] values) {
+        ComboFormField<T, C> field = new ComboFormField<>(text, extractor, values);
+        setComboBoxContent(field.getComboBox(), toString);
+        return field;
+    }
+
     public static ButtonType alert(AlertType alertType, String title, String message, ButtonType... buttons) {
         Alert alert = new Alert(alertType, message, buttons);
         alert.setTitle(title);
@@ -180,6 +220,7 @@ public class Fx {
     }
 
     public static void error(Throwable throwable) {
+        LOG.error("", throwable);
         alert(AlertType.ERROR, "Error", throwable.toString(), ButtonType.OK);
     }
 

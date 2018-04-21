@@ -1,4 +1,4 @@
-package com.hyd.dao.src;
+package com.hyd.dao.src.code;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,5 +40,9 @@ public class MethodDef implements Code {
         return args.stream()
                 .map(arg -> arg.type + " " + arg.name)
                 .collect(Collectors.joining(", "));
+    }
+
+    public String args2String() {
+        return toArgs();
     }
 }

@@ -1,10 +1,7 @@
-package com.hyd.dao.src.classdef;
+package com.hyd.dao.src.code;
 
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.src.AccessType;
-import com.hyd.dao.src.ClassDef;
-import com.hyd.dao.src.FieldDef;
 import com.hyd.dao.util.Str;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,9 +11,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author yidin
  */
-public class HydrogenModelClassBuilder extends ClassDefBuilder {
+public class ModelClassBuilder extends ClassDefBuilder {
 
-    public HydrogenModelClassBuilder(
+    public ModelClassBuilder(
             String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
 
         super(tableName, columnInfos, databaseType);

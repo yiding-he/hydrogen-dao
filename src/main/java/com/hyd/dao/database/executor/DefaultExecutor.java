@@ -45,6 +45,8 @@ public class DefaultExecutor extends Executor {
 
     private static final int TIMEOUT = Integer.parseInt(Str.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
+    private static final int UNKNOWN_TYPE = Integer.MIN_VALUE;
+
     private Statement st;
 
     private ResultSet rs;
@@ -133,7 +135,7 @@ public class DefaultExecutor extends Executor {
     }
 
     @Override
-    public RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor) {
+    public RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor) {
         printCommand(sql, params);
         try {
             executeQuery(sql, params);
@@ -155,7 +157,7 @@ public class DefaultExecutor extends Executor {
      * @return 查询结果
      */
     @Override
-    public List query(Class clazz, String sql, List params, int startPosition, int endPosition) {
+    public List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition) {
 
         String rangedSql = null;
         try {
@@ -204,7 +206,7 @@ public class DefaultExecutor extends Executor {
     }
 
     // 执行语句并将结果赋值给 this.rs
-    private void executeQuery(String sql, List params) throws SQLException {
+    private void executeQuery(String sql, List<Object> params) throws SQLException {
 
         // PreparerdStatement 可以不用就不用，以免占用过多 Oracle 的指针。
         if (params == null || params.isEmpty()) {
@@ -240,7 +242,7 @@ public class DefaultExecutor extends Executor {
             PreparedStatement ps = createPreparedStatement(command.getCommand());
             st = ps;
 
-            for (List param : params) {
+            for (List<Object> param : params) {
                 insertBatchParams(command, param);
                 ps.addBatch();
             }
@@ -272,7 +274,7 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果填入参数失败
      */
-    private void insertBatchParams(BatchCommand command, List params) throws SQLException {
+    private void insertBatchParams(BatchCommand command, List<Object> params) throws SQLException {
         int length = Str.countMatches(command.getCommand(), "?");
 
         List<Integer> paramTypes = new ArrayList<>();
@@ -286,11 +288,11 @@ public class DefaultExecutor extends Executor {
     }
 
     @Override
-    public int execute(String sql, List params) {
+    public int execute(String sql, List<Object> params) {
         return execute(sql, params, null);
     }
 
-    public int execute(String sql, List params, List paramTypes) throws DAOException {
+    public int execute(String sql, List<Object> params, List<Integer> paramTypes) throws DAOException {
         printCommand(sql, params);
         try {
             // 执行语句
@@ -319,7 +321,7 @@ public class DefaultExecutor extends Executor {
     }
 
     // 为普通 SQL 语句填入参数值
-    private void insertParams(List params) throws SQLException {
+    private void insertParams(List<Object> params) throws SQLException {
         insertParams(params, null);
     }
 
@@ -331,16 +333,18 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果插入参数失败
      */
-    private void insertParams(List params, List paramTypes) throws SQLException {
+    private void insertParams(List<Object> params, List<Integer> paramTypes) throws SQLException {
         PreparedStatement ps = (PreparedStatement) st;
         for (int i = 0; i < params.size(); i++) {
+            int paramType = paramTypes != null && paramTypes.size() > i ? paramTypes.get(i) : UNKNOWN_TYPE;
             Object value = params.get(i);
+
             if (value != null) {
-                value = TypeUtil.cconvertParamValue(value);
+                value = TypeUtil.convertParamValue(value, paramType);
                 ps.setObject(i + 1, value);
             } else {
-                if (paramTypes != null && paramTypes.size() > i) {
-                    ps.setNull(i + 1, (Integer) paramTypes.get(i));
+                if (paramType != UNKNOWN_TYPE) {
+                    ps.setNull(i + 1, paramType);
                 } else {
                     ps.setObject(i + 1, null); // this will cause exception
                 }
