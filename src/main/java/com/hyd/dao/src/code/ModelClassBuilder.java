@@ -22,6 +22,7 @@ public class ModelClassBuilder extends ClassDefBuilder {
     public ClassDef build(String tableName) {
 
         ClassDef classDef = new ClassDef();
+        classDef.imports = new ImportDef("java.util.Date");
         classDef.className = Str.underscore2Class(tableName);
 
         for (ColumnInfo columnInfo : columnInfos) {

@@ -33,6 +33,7 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
                 "com.hyd.dao.Page",
                 "java.math.BigDecimal",
                 "java.util.Date",
+                "java.util.Map",
                 "java.util.List");
 
         FieldDef daoField = new FieldDef();

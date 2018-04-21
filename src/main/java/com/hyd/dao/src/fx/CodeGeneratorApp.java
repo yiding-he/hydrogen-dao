@@ -10,6 +10,7 @@ import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.SelectedColumn;
 import com.hyd.dao.src.code.*;
 import com.hyd.dao.src.code.method.InsertBeanMethodBuilder;
+import com.hyd.dao.src.code.method.InsertMapMethodBuilder;
 import com.hyd.dao.util.Str;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -314,7 +315,7 @@ public class CodeGeneratorApp extends Application {
                                                         menuItem("Query Page", this::addQueryMethod),
                                                         new SeparatorMenuItem(),
                                                         menuItem("Insert Bean", this::addInsertBeanMethod),
-                                                        menuItem("Insert Map", this::addQueryMethod),
+                                                        menuItem("Insert Map", this::addInsertMapMethod),
                                                         menuItem("Insert List", this::addQueryMethod),
                                                         new SeparatorMenuItem(),
                                                         menuItem("Update", this::addQueryMethod),
@@ -422,6 +423,15 @@ public class CodeGeneratorApp extends Application {
 
     private void addInsertBeanMethod() {
         RepoMethodDef methodDef = new InsertBeanMethodBuilder(
+                currentTableName, databaseType, null, null).build();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addInsertMapMethod() {
+        RepoMethodDef methodDef = new InsertMapMethodBuilder(
                 currentTableName, databaseType, null, null).build();
 
         if (methodDef != null) {
