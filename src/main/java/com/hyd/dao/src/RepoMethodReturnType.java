@@ -7,5 +7,19 @@ package com.hyd.dao.src;
  * @author yidin
  */
 public enum RepoMethodReturnType {
-    Single, Collection, Page
+
+    Single("单条记录"), Collection("多条记录"), Page("分页结果")
+
+    ///////////////////////////////////////////////
+    ;
+
+    private String name;
+
+    RepoMethodReturnType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

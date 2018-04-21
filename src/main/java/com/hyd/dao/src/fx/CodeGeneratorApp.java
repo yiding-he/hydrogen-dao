@@ -160,8 +160,8 @@ public class CodeGeneratorApp extends Application {
         if (repoClass != null) {
             return repoClass;
         } else {
-            RepoClassDefBuilder classDefBuilder =
-                    new RepoClassDefBuilder(tableName, currentTableColumns, databaseType);
+            RepoClassDefBuilder classDefBuilder = new RepoClassDefBuilder(
+                    tableName, currentTableColumns, databaseType, currentProfile.getModelPackage());
 
             repoClass = classDefBuilder.build(tableName);
             currentProfile.setRepoClass(tableName, repoClass);
@@ -352,7 +352,7 @@ public class CodeGeneratorApp extends Application {
         repoMethodTableView = new TableView<>();
         repoMethodTableView.setPrefHeight(150);
         repoMethodTableView.getColumns().add(column("方法名", method -> method.name));
-        repoMethodTableView.getColumns().add(column("返回类型", method -> method.returnType));
+        repoMethodTableView.getColumns().add(column("返回类型", method -> method.returnType.getName()));
         repoMethodTableView.getColumns().add(column("参数", MethodDef::args2String));
         repoMethodTableView.getItems().addListener((ListChangeListener<? super RepoMethodDef>) c -> updateRepoCode());
         return repoMethodTableView;

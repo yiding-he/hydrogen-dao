@@ -12,15 +12,20 @@ import com.hyd.dao.util.Str;
  */
 public class RepoClassDefBuilder extends ClassDefBuilder {
 
+    private String modelPackage;
+
     public RepoClassDefBuilder(
             String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType) {
+            DatabaseType databaseType, String modelPackage
+    ) {
         super(tableName, columnInfos, databaseType);
+        this.modelPackage = Str.removeEnd(modelPackage, ".");
     }
 
     @Override
     public ClassDef build(String tableName) {
-        String className = Str.underscore2Class(tableName) + "Repository";
+        String modelClassName = Str.underscore2Class(tableName);
+        String className = modelClassName + "Repository";
 
         ClassDef classDef = new ClassDef();
         classDef.annotation = new AnnotationDef("Repository");
@@ -35,6 +40,10 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
                 "java.util.Date",
                 "java.util.Map",
                 "java.util.List");
+
+        if (!Str.isEmptyString(modelPackage)) {
+            classDef.imports.addPackage(modelPackage + "." + modelClassName);
+        }
 
         FieldDef daoField = new FieldDef();
         daoField.access = AccessType.Private;
