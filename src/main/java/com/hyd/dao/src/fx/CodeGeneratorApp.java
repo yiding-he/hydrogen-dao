@@ -3,6 +3,7 @@ package com.hyd.dao.src.fx;
 import com.alibaba.fastjson.JSON;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.JDBCDriver;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
@@ -132,7 +133,9 @@ public class CodeGeneratorApp extends Application {
         if (tableName != null) {
             List<MethodDef> methods = buildRepoClassDef(currentTableName, currentProfile).methods;
             for (MethodDef method : methods) {
-                repoMethodDefs.add((RepoMethodDef) method);
+                if (method instanceof RepoMethodDef) {
+                    repoMethodDefs.add((RepoMethodDef) method);
+                }
             }
         }
     }
@@ -366,7 +369,7 @@ public class CodeGeneratorApp extends Application {
     private void updateRepoCode() {
         ClassDef repoClass = buildRepoClassDef(currentTableName, currentProfile);
 
-        repoClass.methods.clear();
+        repoClass.methods.removeIf(m -> m instanceof RepoMethodDef);
         repoClass.methods.addAll(repoMethodTableView.getItems());
 
         loadToRepoCode(repoClass);
@@ -422,7 +425,7 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void connectProfile() {
-        if (Str.isAnyEmpty(currentProfile.getDriver(), currentProfile.getUrl())) {
+        if (Str.isEmpty(currentProfile.getUrl())) {
             error("Profile is incomplete.");
             return;
         }
@@ -441,7 +444,11 @@ public class CodeGeneratorApp extends Application {
         }
 
         try {
-            Class.forName(selectedItem.getDriver());
+            JDBCDriver driver = JDBCDriver.getDriverByUrl(selectedItem.getUrl());
+            if (driver == null) {
+                return false;
+            }
+
             connectionManager = new ConnectionManager(() ->
                     DriverManager.getConnection(
                             selectedItem.getUrl(),
@@ -453,7 +460,7 @@ public class CodeGeneratorApp extends Application {
             connectionManager.withConnection(
                     connection -> databaseType = DatabaseType.of(connection));
 
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             LOG.error("", e);
             error(e);
             return false;

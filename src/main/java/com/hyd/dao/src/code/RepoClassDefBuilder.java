@@ -42,6 +42,8 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         daoField.annotation = new AnnotationDef("Autowired");
         classDef.addFieldIfNotExists(daoField);
 
+        classDef.addMethod(daoField.toSetterMethod());
+
         return classDef;
     }
 }

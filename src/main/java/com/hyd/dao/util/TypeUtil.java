@@ -7,12 +7,20 @@ import com.hyd.dao.database.type.ClobUtil;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * 处理数据库中的值类型的类
  */
 public class TypeUtil {
+
+    public static final String[] DATE_PATTERNS = {
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd",
+    };
 
     /**
      * 根据字段数据类型将数据库中的值转化为 Java 类型，用于对简单查询结果的转换
@@ -63,9 +71,13 @@ public class TypeUtil {
             return (Date) value;
         }
 
-        Class<?> type;
+        Class<?> type = value.getClass();
+
+        if (type == String.class) {
+            return toDateFromString(value.toString());
+        }
+
         try {
-            type = value.getClass();
             if (type.getDeclaredMethod("dateValue") != null) {
                 return (Date) type.getDeclaredMethod("dateValue").invoke(value);
             }
@@ -74,6 +86,18 @@ public class TypeUtil {
         }
 
         throw new IllegalStateException("Value of type " + type + " cannot be cast to Date");
+    }
+
+    private static Date toDateFromString(String s) {
+        for (String pattern : DATE_PATTERNS) {
+            try {
+                return new SimpleDateFormat(pattern).parse(s);
+            } catch (ParseException e) {
+                // ignore
+            }
+        }
+
+        throw new IllegalStateException("Unable to parse date string '" + s + "'");
     }
 
     /**

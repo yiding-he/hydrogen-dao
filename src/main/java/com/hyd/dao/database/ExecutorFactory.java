@@ -95,7 +95,6 @@ public class ExecutorFactory {
      */
     public Connection getConnection(boolean autoCommit) throws SQLException {
         Connection connection = this.dataSource.getConnection();
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         connection.setAutoCommit(autoCommit);
         return connection;
     }

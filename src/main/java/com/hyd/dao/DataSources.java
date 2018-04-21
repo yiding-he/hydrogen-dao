@@ -149,4 +149,8 @@ public class DataSources {
             return factory;
         });
     }
+
+    public boolean isEmpty() {
+        return this.dataSources.isEmpty();
+    }
 }
