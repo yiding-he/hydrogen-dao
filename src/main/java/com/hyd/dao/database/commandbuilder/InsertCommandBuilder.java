@@ -6,7 +6,6 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.util.Str;
 
 import java.sql.Connection;

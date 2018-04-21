@@ -3,7 +3,6 @@ package com.hyd.dao.src.code;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.util.Str;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * (description)
@@ -27,7 +26,7 @@ public class ModelClassBuilder extends ClassDefBuilder {
 
         for (ColumnInfo columnInfo : columnInfos) {
             FieldDef field = new FieldDef();
-            field.name = StringUtils.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
+            field.name = Str.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
             field.type = getJavaType(columnInfo.getDataType());
             field.access = AccessType.Private;
 

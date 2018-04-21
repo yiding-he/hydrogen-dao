@@ -1,6 +1,7 @@
 package com.hyd.dao.src.code;
 
-import org.apache.commons.lang3.StringUtils;
+
+import com.hyd.dao.util.Str;
 
 /**
  * (description)
@@ -34,7 +35,7 @@ public class FieldDef implements Code {
 
     public MethodDef toGetterMethod() {
         MethodDef method = new MethodDef();
-        method.name = (type.equalsIgnoreCase("boolean") ? "is" : "get") + StringUtils.capitalize(name);
+        method.name = (type.equalsIgnoreCase("boolean") ? "is" : "get") + Str.capitalize(name);
         method.access = AccessType.Public;
         method.type = type;
         method.body = new CodeBlock("return this." + name + ";");
@@ -43,7 +44,7 @@ public class FieldDef implements Code {
 
     public MethodDef toSetterMethod() {
         MethodDef method = new MethodDef();
-        method.name = "set" + StringUtils.capitalize(name);
+        method.name = "set" + Str.capitalize(name);
         method.access = AccessType.Public;
         method.args.add(new MethodArg(type, name));
         method.body = new CodeBlock("this." + name + " = " + name + ";");

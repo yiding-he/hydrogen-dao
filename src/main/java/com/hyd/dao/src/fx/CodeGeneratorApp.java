@@ -8,6 +8,7 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.SelectedColumn;
 import com.hyd.dao.src.code.*;
+import com.hyd.dao.util.Str;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -21,7 +22,6 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -422,7 +422,7 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void connectProfile() {
-        if (StringUtils.isAnyBlank(currentProfile.getDriver(), currentProfile.getUrl())) {
+        if (Str.isAnyEmpty(currentProfile.getDriver(), currentProfile.getUrl())) {
             error("Profile is incomplete.");
             return;
         }
