@@ -2,9 +2,9 @@ package com.hyd.dao;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.CaseInsensitiveHashMap;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -162,7 +162,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
             return null;
         } else if (value instanceof String) {
             try {
-                return DateUtils.parseDate((String) value, pattern);
+                return parseDate((String) value, pattern);
             } catch (ParseException e) {
                 throw new DAOException(e);
             }
@@ -172,11 +172,15 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
             return (Date) value;
         } else {
             try {
-                return DateUtils.parseDate(value.toString(), pattern);
+                return parseDate(value.toString(), pattern);
             } catch (ParseException e) {
                 throw new DAOException(e);
             }
         }
+    }
+
+    private Date parseDate(String dateStr, String pattern) throws ParseException {
+        return new SimpleDateFormat(pattern).parse(dateStr);
     }
 
     public String getString(String key) {

@@ -8,7 +8,7 @@ import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.hyd.dao.util.Str;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -118,7 +118,7 @@ public class DAO {
      * @return 修复后的 sql 语句
      */
     private static String fixSql(String sql) {
-        return StringUtils.removeEnd(sql.trim(), ";");
+        return Str.removeEnd(sql.trim(), ";");
     }
 
     /**

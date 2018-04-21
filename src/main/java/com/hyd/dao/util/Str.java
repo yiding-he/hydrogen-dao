@@ -1,7 +1,5 @@
 package com.hyd.dao.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -10,7 +8,7 @@ import java.util.stream.Stream;
 /**
  * 处理字符串的类
  */
-public class Str extends StringUtils {
+public class Str {
 
     /**
      * 查找指定字符串中包含匹配指定正则表达式的次数
@@ -65,6 +63,16 @@ public class Str extends StringUtils {
         return StringUtils.capitalize(underscore2Property(underscore));
     }
 
+    private static String capitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
+    }
+
     /**
      * 将属性名转换为字段名。属性名应符合 JavaBean 命名规范。
      *
@@ -84,11 +92,11 @@ public class Str extends StringUtils {
      * @return 如果 str 为 null、为空或仅包含空白字符，则返回 true。
      */
     public static boolean isEmptyString(String str) {
-        return str == null || str.matches("\\s*");
+        return str == null || str.trim().length() == 0;
     }
 
     public static boolean isEmpty(Object obj) {
-        return obj == null || isEmpty(obj.toString());
+        return obj == null || isEmptyString(obj.toString());
     }
 
     /**
@@ -128,5 +136,34 @@ public class Str extends StringUtils {
      */
     public static String valueOf(Object o) {
         return o == null ? "" : String.valueOf(o);
+    }
+
+    public static String removeEnd(String s, String end) {
+        if (s == null || end == null) {
+            return s;
+        }
+
+        if (s.length() < end.length()) {
+            return s;
+        }
+
+        return s.endsWith(end) ? s.substring(0, s.length() - end.length()) : s;
+    }
+
+    public static String defaultIfEmpty(String s, String defaultValue) {
+        return isEmptyString(s) ? defaultValue : s;
+    }
+
+    public static int countMatches(String str, String sub) {
+        if (isEmpty(str) || isEmpty(sub)) {
+            return 0;
+        }
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != -1) {
+            count++;
+            idx += sub.length();
+        }
+        return count;
     }
 }

@@ -2,7 +2,6 @@ package com.hyd.dao;
 
 
 import com.hyd.dao.database.commandbuilder.Command;
-import com.hyd.dao.util.Str;
 
 import java.util.*;
 
@@ -487,7 +486,7 @@ public class SQL {
         }
 
         public Select(String... columns) {
-            this.columns = Str.join(columns, ",");
+            this.columns = String.join(",", columns);
         }
 
         public Select From(String from) {  // NOSONAR
@@ -496,7 +495,7 @@ public class SQL {
         }
 
         public Select From(String... from) {  // NOSONAR
-            this.from = Str.join(from, ",");
+            this.from = String.join(",", from);
             return this;
         }
 

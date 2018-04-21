@@ -6,7 +6,8 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import org.apache.commons.lang3.StringUtils;
+import com.hyd.dao.database.connection.ConnectionUtil;
+import com.hyd.dao.util.Str;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -59,9 +60,9 @@ public class InsertCommandBuilder {
             values += "?,";
         }
 
-        statement = StringUtils.removeEnd(statement, ",")
+        statement = Str.removeEnd(statement, ",")
                 + ") values ("
-                + StringUtils.removeEnd(values, ",") + ")";
+                + Str.removeEnd(values, ",") + ")";
 
         // 生成命令
         BatchCommand bc = new BatchCommand(statement);
@@ -170,8 +171,8 @@ public class InsertCommandBuilder {
             questionMarks += "?" + ",";
         }
 
-        command = StringUtils.removeEnd(command, ",");
-        questionMarks = StringUtils.removeEnd(questionMarks, ",");
+        command = Str.removeEnd(command, ",");
+        questionMarks = Str.removeEnd(questionMarks, ",");
 
         command += ") values (" + questionMarks + ")";
 
