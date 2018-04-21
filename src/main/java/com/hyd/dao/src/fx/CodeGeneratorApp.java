@@ -7,7 +7,6 @@ import com.hyd.dao.database.JDBCDriver;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
-import com.hyd.dao.src.SelectedColumn;
 import com.hyd.dao.src.code.*;
 import com.hyd.dao.src.code.method.InsertBeanMethodBuilder;
 import com.hyd.dao.src.code.method.InsertMapMethodBuilder;
@@ -54,7 +53,7 @@ public class CodeGeneratorApp extends Application {
 
     public static final String DEFAULT_PROFILE_PATH = "./hydrogen-generator-profiles.json";
 
-    public static final String APP_NAME = "Code Generator";
+    public static final String APP_NAME = "代码生成工具";
 
     ///////////////////////////////////////////////
 
@@ -77,8 +76,6 @@ public class CodeGeneratorApp extends Application {
     private TextArea modelCodeTextArea;
 
     private TableView<RepoMethodDef> repoMethodTableView;
-
-    private TableView<SelectedColumn> modelFieldTableView;
 
     ///////////////////////////////////////////////
 
@@ -232,7 +229,7 @@ public class CodeGeneratorApp extends Application {
 
             this.primaryStage.setTitle(APP_NAME + " - " + profilePath);
         } catch (Exception e) {
-            LOG.error("Error reading profiles, please remove this file", e);
+            LOG.error("读取配置文件错误", e);
             error(e);
         }
     }
@@ -245,26 +242,26 @@ public class CodeGeneratorApp extends Application {
             Path profilePath = Paths.get(this.profilePath);
             Files.write(profilePath, content, TRUNCATE_EXISTING, CREATE);
         } catch (Exception e) {
-            LOG.error("Error writing profiles", e);
+            LOG.error("保存配置文件失败", e);
             error(e);
         }
     }
 
     private Parent root() {
 
-        txtProfileName = textField("Name:", Profile::nameProperty);
+        txtProfileName = textField("名称:", Profile::nameProperty);
         txtProfileName.setOnTextChanged(text -> profileList.refresh());
 
         profileForm = Fx.form(75, Arrays.asList(
                 txtProfileName,
-                textField("Driver:", Profile::driverProperty),
                 textField("URL:", Profile::urlProperty),
-                textField("Username:", Profile::usernameProperty),
-                textField("Password:", Profile::passwordProperty)
+                textField("用户名:", Profile::usernameProperty),
+                textField("密码:", Profile::passwordProperty),
+                textField("Model 包名:", Profile::modelPackageProperty)
         ));
 
-        Button deleteButton = button("Delete", this::deleteProfile);
-        Button connectButton = button("Connect", this::connectProfile);
+        Button deleteButton = button("删除", this::deleteProfile);
+        Button connectButton = button("连接", this::connectProfile);
 
         BooleanBinding selectedProfileIsNull =
                 Bindings.isNull(profileList.getSelectionModel().selectedItemProperty());
@@ -274,58 +271,58 @@ public class CodeGeneratorApp extends Application {
         connectButton.disableProperty().bind(selectedProfileIsNull);
 
         return vbox(LastExpand, 0, 0,
-                new MenuBar(new Menu("_File", null,
-                        menuItem("_Open...", "Shortcut+O", this::openFile),
-                        menuItem("_Save", "Shortcut+S", this::saveFile),
+                new MenuBar(new Menu("文件(_F)", null,
+                        menuItem("打开(_O)...", "Shortcut+O", this::openFile),
+                        menuItem("保存(_S)", "Shortcut+S", this::saveFile),
                         new SeparatorMenuItem(),
-                        menuItem("E_xit", this::exit)
+                        menuItem("退出(_X)", this::exit)
                 )),
                 hbox(LastExpand, PADDING, PADDING,
                         vbox(FirstExpand, 0, PADDING,
-                                titledPane(-1, "Profiles",
+                                titledPane(-1, "档案列表",
                                         vbox(FirstExpand, PADDING, PADDING,
                                                 profileList,
                                                 hbox(Expand.NoExpand, 0, PADDING,
-                                                        button("Create", this::createProfile),
+                                                        button("创建档案", this::createProfile),
                                                         deleteButton,
                                                         new Pane(),
                                                         connectButton
                                                 )
                                         )),
-                                titledPane(250, "Profile Options", profileForm)
+                                titledPane(250, "档案选项", profileForm)
                         ),
                         vbox(LastExpand, 0, 0,
-                                titledPane(-1, "Tables",
+                                titledPane(-1, "数据库表",
                                         vbox(LastExpand, 0, 0, tableNamesList))
                         ),
                         vbox(LastExpand, 0, 0, tabPane(
-                                tab("Model Class", vbox(NthExpand.set(-2), 0, PADDING,
+                                tab("Model 类", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
-                                        titledPane(-1, "Code Preview", vbox(FirstExpand, 0, 0, modelCodeArea())),
-                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyModelCode))
+                                        titledPane(-1, "代码预览", vbox(FirstExpand, 0, 0, modelCodeArea())),
+                                        hbox(NoExpand, 0, PADDING, button("复制代码", this::copyModelCode))
                                 )),
-                                tab("Repository Class", vbox(NthExpand.set(-2), 0, PADDING,
+                                tab("Repository 类", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
                                         methodTable(),
                                         hbox(NoExpand, 0, PADDING,
-                                                menuButton("Add...",
-                                                        menuItem("Query One", this::addQueryOneMethod),
-                                                        menuItem("Query List", this::addQueryListMethod),
-                                                        menuItem("Query Count", this::addQueryMethod),
-                                                        menuItem("Query Page", this::addQueryMethod),
+                                                menuButton("添加方法",
+                                                        menuItem("查询单条记录", this::addQueryOneMethod),
+                                                        menuItem("查询多条记录", this::addQueryListMethod),
+                                                        menuItem("查询计数", this::addQueryMethod),
+                                                        menuItem("分页查询", this::addQueryMethod),
                                                         new SeparatorMenuItem(),
-                                                        menuItem("Insert Bean", this::addInsertBeanMethod),
-                                                        menuItem("Insert Map", this::addInsertMapMethod),
-                                                        menuItem("Insert List", this::addQueryMethod),
+                                                        menuItem("插入实体对象", this::addInsertBeanMethod),
+                                                        menuItem("插入 Map 对象", this::addInsertMapMethod),
+                                                        menuItem("批量插入记录", this::addQueryMethod),
                                                         new SeparatorMenuItem(),
-                                                        menuItem("Update", this::addQueryMethod),
-                                                        menuItem("Delete", this::addQueryMethod)
+                                                        menuItem("更新记录", this::addQueryMethod),
+                                                        menuItem("删除记录", this::addQueryMethod)
                                                 ),
-                                                button("Delete", this::deleteMethod)
+                                                button("删除方法", this::deleteMethod)
                                         ),
-                                        titledPane(-1, "Code Preview",
+                                        titledPane(-1, "代码预览",
                                                 vbox(FirstExpand, 0, 0, repoCodeArea())),
-                                        hbox(NoExpand, 0, PADDING, button("Copy Code", this::copyRepoCode))
+                                        hbox(NoExpand, 0, PADDING, button("复制代码", this::copyRepoCode))
                                 ))
                         ))
                 )
@@ -351,20 +348,12 @@ public class CodeGeneratorApp extends Application {
         return modelCodeTextArea;
     }
 
-    private TableView<SelectedColumn> modelFieldTable() {
-        modelFieldTableView = new TableView<>();
-        modelFieldTableView.setPrefHeight(150);
-        modelFieldTableView.getColumns().add(new TableColumn<>("Column Name"));
-        modelFieldTableView.getColumns().add(new TableColumn<>("Field Name"));
-        return modelFieldTableView;
-    }
-
     private TableView<RepoMethodDef> methodTable() {
         repoMethodTableView = new TableView<>();
         repoMethodTableView.setPrefHeight(150);
-        repoMethodTableView.getColumns().add(column("Name", method -> method.name));
-        repoMethodTableView.getColumns().add(column("Return", method -> method.returnType));
-        repoMethodTableView.getColumns().add(column("Arguments", MethodDef::args2String));
+        repoMethodTableView.getColumns().add(column("方法名", method -> method.name));
+        repoMethodTableView.getColumns().add(column("返回类型", method -> method.returnType));
+        repoMethodTableView.getColumns().add(column("参数", MethodDef::args2String));
         repoMethodTableView.getItems().addListener((ListChangeListener<? super RepoMethodDef>) c -> updateRepoCode());
         return repoMethodTableView;
     }
@@ -460,7 +449,7 @@ public class CodeGeneratorApp extends Application {
 
     private void connectProfile() {
         if (Str.isEmpty(currentProfile.getUrl())) {
-            error("Profile is incomplete.");
+            error("档案配置不完整，请填写 URL");
             return;
         }
 
@@ -468,6 +457,8 @@ public class CodeGeneratorApp extends Application {
             return;
         }
 
+        currentProfile.clearModelClasses();
+        currentProfile.clearRepositoryClasses();
         loadTables();
     }
 
@@ -515,13 +506,13 @@ public class CodeGeneratorApp extends Application {
             return;
         }
 
-        if (confirm("Are you sure to delete this profile?")) {
+        if (confirm("确定要删除该档案吗？")) {
             profileList.getItems().remove(currentProfile);
         }
     }
 
     private void createProfile() {
-        Profile profile = new Profile("Unnamed");
+        Profile profile = new Profile("未命名");
         profileList.getItems().add(profile);
         profileList.getSelectionModel().select(profile);
     }

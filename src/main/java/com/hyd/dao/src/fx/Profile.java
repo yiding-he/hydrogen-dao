@@ -19,7 +19,7 @@ public class Profile {
 
     private StringProperty url = new SimpleStringProperty();
 
-    private StringProperty driver = new SimpleStringProperty();
+    private StringProperty modelPackage = new SimpleStringProperty();
 
     private StringProperty username = new SimpleStringProperty();
 
@@ -46,16 +46,16 @@ public class Profile {
         this.repoClassMap = repoClassMap;
     }
 
-    public String getDriver() {
-        return driver.get();
+    public String getModelPackage() {
+        return modelPackage.get();
     }
 
-    public StringProperty driverProperty() {
-        return driver;
+    public StringProperty modelPackageProperty() {
+        return modelPackage;
     }
 
-    public void setDriver(String driver) {
-        this.driver.set(driver);
+    public void setModelPackage(String modelPackage) {
+        this.modelPackage.set(modelPackage);
     }
 
     public String getDatabase() {
@@ -134,5 +134,13 @@ public class Profile {
 
     public void setModelClass(String tableName, ClassDef classDef) {
         this.modelClassMap.put(tableName, classDef);
+    }
+
+    public void clearModelClasses() {
+        this.modelClassMap.clear();
+    }
+
+    public void clearRepositoryClasses() {
+        this.repoClassMap.clear();
     }
 }

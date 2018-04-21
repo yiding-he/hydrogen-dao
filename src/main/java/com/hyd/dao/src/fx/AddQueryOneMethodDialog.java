@@ -42,12 +42,14 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
 
     String tableName;
 
-    public AddQueryOneMethodDialog(Stage owner, DatabaseType databaseType, String tableName, ColumnInfo[] columns) {
+    AddQueryOneMethodDialog(
+            Stage owner, DatabaseType databaseType, String tableName, ColumnInfo[] columns) {
+
         super(owner);
         this.databaseType = databaseType;
         this.columns = columns;
         this.tableName = tableName;
-        setTitle("Query One for Table '" + tableName + "'");
+        setTitle("表 '" + tableName + "' 的查询条件");
 
         initControls();
     }
@@ -61,31 +63,39 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
     protected Parent getBodyRoot() {
 
         methodInfoForm = Fx.form(100, Arrays.asList(
-                comboField("Column:", info -> info.columnInfo, ColumnInfo::getColumnName, columns),
-                comboField("Comparator:", info -> info.comparator, Comparator::getSymbol, Comparator.values())
+                comboField("字段:", info -> info.columnInfo, ColumnInfo::getColumnName, columns),
+                comboField("操作符:", info -> info.comparator, Comparator::getSymbol, Comparator.values())
         ));
 
         txtMethodName = new TextField();
 
         VBox root = vbox(Expand.LastExpand, 0, PADDING,
                 hbox(Expand.LastExpand, Pos.BASELINE_LEFT, PADDING, PADDING,
-                        new Label("Method Name:"),
+                        new Label("方法名称:"),
                         txtMethodName
                 ),
                 hbox(Expand.AllExpand, PADDING, PADDING,
                         vbox(Expand.LastExpand, 0, PADDING,
-                                new Label("Parameters:"),
-                                parametersList
+                                new Label("查询参数列表:"),
+                                parametersList,
+                                button("Delete", this::deleteParam)
                         ),
                         vbox(Expand.FirstExpand, 0, PADDING,
-                                titledPane(80, "Add Parameter", methodInfoForm),
-                                button("Add/Update", this::addOrUpdateParamInfo)
+                                titledPane(80, "添加参数", methodInfoForm),
+                                button("添加", this::addOrUpdateParamInfo)
                         )
                 )
         );
 
         root.setPrefHeight(300);
         return root;
+    }
+
+    private void deleteParam() {
+        ParamInfo selectedItem = parametersList.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            parametersList.getItems().remove(selectedItem);
+        }
     }
 
     private void addOrUpdateParamInfo() {
@@ -118,7 +128,4 @@ public class AddQueryOneMethodDialog extends Dialog<RepoMethodDef> {
         currentParamInfo = new ParamInfo();
         methodInfoForm.load(currentParamInfo);
     }
-
-    //////////////////////////////////////////////////////////////
-
 }

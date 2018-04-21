@@ -82,12 +82,24 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
 
             String where = "    " + (i == 0 ? ".Where" : ".And");
             where += "(\"" + columnName + " " + comparator.getSymbol() + " ?\", ";
-            where += paramInfo.getSuggestParamName() + ")";
+            where += getParamValue(paramInfo) + ")";
             codeBlock.addLine(where);
         }
 
         codeBlock.addLine(");");
         return codeBlock;
+    }
+
+    private String getParamValue(ParamInfo paramInfo) {
+
+        Comparator comparator = paramInfo.comparator.get();
+        String result = paramInfo.getSuggestParamName();
+
+        if (comparator == Comparator.Like) {
+            result = "\"%\" + " + result + " + \"%\"";
+        }
+
+        return result;
     }
 
 }

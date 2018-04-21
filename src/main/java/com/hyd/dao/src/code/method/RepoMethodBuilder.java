@@ -5,6 +5,7 @@ import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.code.MethodArg;
 import com.hyd.dao.src.code.ParamInfo;
+import com.hyd.dao.src.fx.Comparator;
 import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
 
@@ -46,11 +47,24 @@ public abstract class RepoMethodBuilder {
     public abstract RepoMethodDef build();
 
     MethodArg paramInfo2Arg(ParamInfo paramInfo) {
+
+        Comparator comparator = paramInfo.comparator.get();
         ColumnInfo columnInfo = paramInfo.columnInfo.get();
+
         return new MethodArg(
-                TypeUtil.getJavaType(databaseType, columnInfo.getDataType()),
+                getArgType(columnInfo, comparator),
                 paramInfo.getSuggestParamName()
         );
+    }
+
+    private String getArgType(ColumnInfo columnInfo, Comparator comparator) {
+
+        String javaType = TypeUtil.getJavaType(databaseType, columnInfo.getDataType());
+        if (comparator == Comparator.In) {
+            return "List<" + javaType + ">";
+        } else {
+            return javaType;
+        }
     }
 
     String beanClassName() {
