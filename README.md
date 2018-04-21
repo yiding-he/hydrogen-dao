@@ -11,6 +11,13 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ## 更新
 
+#### 2018-04-21
+
+* 删除对 Apache commons-lang3 的依赖关系
+* 修复 Spring Boot Auto Configuration 的问题
+* 自动配置时根据 JDBC URL 来猜测 Driver 类，无需手动指定
+* 自动配置当没有找到可用的连接池时，使用 com.hyd.dao.database.NonPooledDataSource
+
 #### 2018-04-07
 
 * 版本号升级到 3.0.0 开发版

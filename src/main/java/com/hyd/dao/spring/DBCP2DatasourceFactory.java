@@ -11,7 +11,16 @@ import javax.sql.DataSource;
  *
  * @author yidin
  */
-public class BasicDataSourceCreator {
+public class DBCP2DatasourceFactory {
+
+    static boolean isAvailable() {
+        try {
+            Class.forName("org.apache.commons.dbcp2.BasicDataSource");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
     static DataSource createDataSource(@Autowired DataSourceProperties dataSourceProperties) {
         BasicDataSource basicDataSource = new BasicDataSource();

@@ -1,6 +1,6 @@
 package com.hyd.dao.database.commandbuilder;
 
-import org.apache.commons.lang3.StringUtils;
+import com.hyd.dao.util.Str;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ public class FQN {
     private String name;
 
     public FQN(Connection conn, String fqn) throws SQLException {
-        if (StringUtils.isEmpty(fqn)) {
+        if (Str.isEmpty(fqn)) {
             throw new IllegalArgumentException("FQN parameter cannot be empty");
         }
 
@@ -32,7 +32,7 @@ public class FQN {
     }
 
     public String getSchema(String defaultValue) {
-        return StringUtils.defaultIfEmpty(schema, defaultValue);
+        return Str.defaultIfEmpty(schema, defaultValue);
     }
 
     public void setSchema(String schema) {
@@ -40,7 +40,7 @@ public class FQN {
     }
 
     public String getName(String defaultValue) {
-        return StringUtils.defaultIfEmpty(name, defaultValue);
+        return Str.defaultIfEmpty(name, defaultValue);
     }
 
     public void setName(String name) {

@@ -16,12 +16,11 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProsedureHelper;
+import com.hyd.dao.util.Arr;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
 import oracle.jdbc.OracleTypes;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.sql.*;
@@ -42,7 +41,7 @@ public class DefaultExecutor extends Executor {
 
     private static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
 
-    private static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
+    private static final int TIMEOUT = Integer.parseInt(Str.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
     private Statement st;
 
@@ -424,7 +423,7 @@ public class DefaultExecutor extends Executor {
             int resultType = spParams[0].getSqlType();
 
             // 去掉第一个
-            spParams = ArrayUtils.subarray(spParams, 1, spParams.length);
+            spParams = Arr.subarray(spParams, 1, spParams.length);
 
             CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, connection);
             if (TIMEOUT != -1) {

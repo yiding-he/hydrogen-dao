@@ -1,14 +1,12 @@
 package com.hyd.dao.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * 处理字符串的类
  */
-public class Str extends StringUtils {
+public class Str {
 
     /**
      * 查找指定字符串中包含匹配指定正则表达式的次数
@@ -56,6 +54,16 @@ public class Str extends StringUtils {
             name += capitalize(strs[i]);
         }
         return name;
+    }
+
+    private static String capitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
     }
 
     /**
@@ -121,5 +129,34 @@ public class Str extends StringUtils {
      */
     public static String valueOf(Object o) {
         return o == null ? "" : String.valueOf(o);
+    }
+
+    public static String removeEnd(String s, String end) {
+        if (s == null || end == null) {
+            return s;
+        }
+
+        if (s.length() < end.length()) {
+            return s;
+        }
+
+        return s.endsWith(end) ? s.substring(0, s.length() - end.length()) : s;
+    }
+
+    public static String defaultIfEmpty(String s, String defaultValue) {
+        return isEmptyString(s) ? defaultValue : s;
+    }
+
+    public static int countMatches(String str, String sub) {
+        if (isEmpty(str) || isEmpty(sub)) {
+            return 0;
+        }
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != -1) {
+            count++;
+            idx += sub.length();
+        }
+        return count;
     }
 }

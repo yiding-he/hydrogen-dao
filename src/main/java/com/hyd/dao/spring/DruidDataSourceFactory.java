@@ -11,9 +11,18 @@ import javax.sql.DataSource;
  *
  * @author yidin
  */
-public class DruidDataSourceCreator {
+public class DruidDataSourceFactory {
 
-    static DataSource createDataSource(@Autowired DataSourceProperties dataSourceProperties) {
+    static boolean isAvailable() {
+        try {
+            Class.forName("com.alibaba.druid.pool.DruidDataSource");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    static DataSource createDataSource(DataSourceProperties dataSourceProperties) {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriverClassName(dataSourceProperties.getDriverClassName());
         druidDataSource.setUrl(dataSourceProperties.getUrl());
