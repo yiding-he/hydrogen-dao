@@ -230,7 +230,11 @@ public class Fx {
 
     public static MenuItem menuItem(String text, Runnable onAction) {
         MenuItem menuItem = new MenuItem(text);
-        menuItem.setOnAction(event -> onAction.run());
+        if (onAction != null) {
+            menuItem.setOnAction(event -> onAction.run());
+        } else {
+            menuItem.setDisable(true);
+        }
         return menuItem;
     }
 

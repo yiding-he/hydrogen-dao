@@ -308,15 +308,15 @@ public class CodeGeneratorApp extends Application {
                                                 menuButton("添加方法",
                                                         menuItem("查询单条记录", this::addQueryOneMethod),
                                                         menuItem("查询多条记录", this::addQueryListMethod),
-                                                        menuItem("查询计数", this::addQueryMethod),
-                                                        menuItem("分页查询", this::addQueryMethod),
+                                                        menuItem("查询计数", null),
+                                                        menuItem("分页查询", this::addPageQueryMethod),
                                                         new SeparatorMenuItem(),
                                                         menuItem("插入实体对象", this::addInsertBeanMethod),
                                                         menuItem("插入 Map 对象", this::addInsertMapMethod),
-                                                        menuItem("批量插入记录", this::addQueryMethod),
+                                                        menuItem("批量插入记录", null),
                                                         new SeparatorMenuItem(),
-                                                        menuItem("更新记录", this::addQueryMethod),
-                                                        menuItem("删除记录", this::addQueryMethod)
+                                                        menuItem("更新记录", null),
+                                                        menuItem("删除记录", null)
                                                 ),
                                                 button("删除方法", this::deleteMethod)
                                         ),
@@ -327,6 +327,63 @@ public class CodeGeneratorApp extends Application {
                         ))
                 )
         );
+    }
+
+    private void addPageQueryMethod() {
+        if (currentTableName == null) {
+            return;
+        }
+
+        RepoMethodDef methodDef = new AddQueryPageMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addQueryOneMethod() {
+        if (currentTableName == null) {
+            return;
+        }
+
+        RepoMethodDef methodDef = new AddQueryOneMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addQueryListMethod() {
+        if (currentTableName == null) {
+            return;
+        }
+
+        RepoMethodDef methodDef = new AddQueryListMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addInsertBeanMethod() {
+        RepoMethodDef methodDef = new InsertBeanMethodBuilder(
+                currentTableName, databaseType, null, null).build();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
+    }
+
+    private void addInsertMapMethod() {
+        RepoMethodDef methodDef = new InsertMapMethodBuilder(
+                currentTableName, databaseType, null, null).build();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
     }
 
     private void copyModelCode() {
@@ -378,53 +435,6 @@ public class CodeGeneratorApp extends Application {
         RepoMethodDef selectedItem = repoMethodTableView.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             repoMethodTableView.getItems().remove(selectedItem);
-        }
-    }
-
-    private void addQueryMethod() {
-    }
-
-    private void addQueryOneMethod() {
-        if (currentTableName == null) {
-            return;
-        }
-
-        RepoMethodDef methodDef = new AddQueryOneMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
-
-        if (methodDef != null) {
-            repoMethodTableView.getItems().add(methodDef);
-        }
-    }
-
-    private void addQueryListMethod() {
-        if (currentTableName == null) {
-            return;
-        }
-
-        RepoMethodDef methodDef = new AddQueryListMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
-
-        if (methodDef != null) {
-            repoMethodTableView.getItems().add(methodDef);
-        }
-    }
-
-    private void addInsertBeanMethod() {
-        RepoMethodDef methodDef = new InsertBeanMethodBuilder(
-                currentTableName, databaseType, null, null).build();
-
-        if (methodDef != null) {
-            repoMethodTableView.getItems().add(methodDef);
-        }
-    }
-
-    private void addInsertMapMethod() {
-        RepoMethodDef methodDef = new InsertMapMethodBuilder(
-                currentTableName, databaseType, null, null).build();
-
-        if (methodDef != null) {
-            repoMethodTableView.getItems().add(methodDef);
         }
     }
 

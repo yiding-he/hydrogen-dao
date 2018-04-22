@@ -41,6 +41,11 @@ public class CodeBlock {
         }
     }
 
+    public void addLine(int position, String line, boolean indent) {
+        int index = position < 0 ? lines.size() + position : position;
+        lines.add(index, (indent ? "    " : "") + line);
+    }
+
     public void addCode(Code code, boolean indent) {
         if (code != null) {
             addCodeBlock(code.toCodeBlock(), indent);

@@ -5,10 +5,12 @@ import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.RepoMethodReturnType;
 import com.hyd.dao.src.code.AccessType;
 import com.hyd.dao.src.code.CodeBlock;
+import com.hyd.dao.src.code.MethodArg;
 import com.hyd.dao.src.code.ParamInfo;
 import com.hyd.dao.src.fx.Comparator;
 import com.hyd.dao.util.Str;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,14 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         return "queryFirst";
     }
 
+    List<MethodArg> getExtraArgs() {
+        return Collections.emptyList();
+    }
+
+    void afterBodyCreated(CodeBlock body) {
+
+    }
+
     public RepoMethodDef build() {
 
         RepoMethodDef repoMethodDef = new RepoMethodDef();
@@ -49,6 +59,8 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         repoMethodDef.type = getMethodType();
 
         paramInfoList.forEach(paramInfo -> repoMethodDef.args.add(paramInfo2Arg(paramInfo)));
+        repoMethodDef.args.addAll(getExtraArgs());
+
 
         if (Str.isEmptyString(repoMethodDef.name)) {
             if (paramInfoList.isEmpty()) {
@@ -62,6 +74,7 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         }
 
         repoMethodDef.body = buildBody();
+        afterBodyCreated(repoMethodDef.body);
 
         return repoMethodDef;
     }
