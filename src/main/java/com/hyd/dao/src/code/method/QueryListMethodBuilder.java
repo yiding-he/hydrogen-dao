@@ -22,7 +22,7 @@ public class QueryListMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    String getDaoQueryMethod() {
+    String getDaoMethod() {
         return "query";
     }
 

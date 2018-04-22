@@ -1,8 +1,8 @@
 package com.hyd.dao.src.code.method;
 
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.RepoMethodReturnType;
-import com.hyd.dao.src.code.CodeBlock;
 import com.hyd.dao.src.code.MethodArg;
 import com.hyd.dao.src.code.ParamInfo;
 import com.hyd.dao.util.Str;
@@ -27,7 +27,7 @@ public class QueryPageMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    String getDaoQueryMethod() {
+    String getDaoMethod() {
         return "queryPage";
     }
 
@@ -50,7 +50,7 @@ public class QueryPageMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    void afterBodyCreated(CodeBlock body) {
-        body.addLine(-1, ", pageSize, pageIndex", true);
+    void afterBodyCreated(RepoMethodDef methodDef) {
+        methodDef.body.addLine(-1, ", pageSize, pageIndex", true);
     }
 }

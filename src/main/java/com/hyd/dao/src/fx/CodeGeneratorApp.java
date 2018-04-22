@@ -316,7 +316,7 @@ public class CodeGeneratorApp extends Application {
                                                         menuItem("批量插入记录", null),
                                                         new SeparatorMenuItem(),
                                                         menuItem("更新记录", null),
-                                                        menuItem("删除记录", null)
+                                                        menuItem("删除记录", this::addDeleteMethod)
                                                 ),
                                                 button("删除方法", this::deleteMethod)
                                         ),
@@ -327,6 +327,19 @@ public class CodeGeneratorApp extends Application {
                         ))
                 )
         );
+    }
+
+    private void addDeleteMethod() {
+        if (currentTableName == null) {
+            return;
+        }
+
+        RepoMethodDef methodDef = new AddDeleteMethodDialog(
+                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+
+        if (methodDef != null) {
+            repoMethodTableView.getItems().add(methodDef);
+        }
     }
 
     private void addPageQueryMethod() {

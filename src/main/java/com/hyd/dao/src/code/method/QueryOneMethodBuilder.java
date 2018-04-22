@@ -38,7 +38,7 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         return RepoMethodReturnType.Single;
     }
 
-    String getDaoQueryMethod() {
+    String getDaoMethod() {
         return "queryFirst";
     }
 
@@ -46,8 +46,12 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         return Collections.emptyList();
     }
 
-    void afterBodyCreated(CodeBlock body) {
+    void afterBodyCreated(RepoMethodDef repoMethodDef) {
 
+    }
+
+    String getMethodNamePrefix() {
+        return "queryBy";
     }
 
     public RepoMethodDef build() {
@@ -66,7 +70,7 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
             if (paramInfoList.isEmpty()) {
                 repoMethodDef.name = getNonArgMethodName();
             } else {
-                repoMethodDef.name = "queryBy" + paramInfoList.stream()
+                repoMethodDef.name = getMethodNamePrefix() + paramInfoList.stream()
                         .map(info -> Str.underscore2Class(info.columnInfo.get().getColumnName()))
                         .distinct()
                         .collect(Collectors.joining("And"));
@@ -74,19 +78,26 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         }
 
         repoMethodDef.body = buildBody();
-        afterBodyCreated(repoMethodDef.body);
+        afterBodyCreated(repoMethodDef);
 
         return repoMethodDef;
     }
 
-    private CodeBlock buildBody() {
+    CodeBlock buildBody() {
 
         String className = Str.underscore2Class(tableName);
         CodeBlock codeBlock = new CodeBlock();
-        codeBlock.addLine("return", "dao." + getDaoQueryMethod() + "(" + className + ".class, ");
+        codeBlock.addLine("return", "dao." + getDaoMethod() + "(" + className + ".class, ");
         codeBlock.addLine("    SQL.Select(\"*\")");
         codeBlock.addLine("    .From(\"" + tableName + "\")");
 
+        addQueryParameters(codeBlock);
+
+        codeBlock.addLine(");");
+        return codeBlock;
+    }
+
+    void addQueryParameters(CodeBlock codeBlock) {
         for (int i = 0; i < paramInfoList.size(); i++) {
 
             ParamInfo paramInfo = paramInfoList.get(i);
@@ -98,9 +109,6 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
             where += getParamValue(paramInfo) + ")";
             codeBlock.addLine(where);
         }
-
-        codeBlock.addLine(");");
-        return codeBlock;
     }
 
     private String getParamValue(ParamInfo paramInfo) {
