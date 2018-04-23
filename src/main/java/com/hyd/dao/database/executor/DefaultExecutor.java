@@ -1,9 +1,6 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.BatchCommand;
-import com.hyd.dao.DAOException;
-import com.hyd.dao.Page;
-import com.hyd.dao.Row;
+import com.hyd.dao.*;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.commandbuilder.Command;
@@ -22,10 +19,7 @@ import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -261,6 +255,36 @@ public class DefaultExecutor extends Executor {
         } finally {
             closeButConnection();
         }
+    }
+
+    @Override
+    public int execute(IteratorBatchCommand command) {
+
+        int batchSize = command.getBatchSize();
+        int counter = 0;
+        if (batchSize < 1) {
+            throw new IllegalStateException("Batch command size must > 0");
+        }
+
+        Iterator<List<Object>> params = command.getParams();
+        List<List<Object>> buffer = new ArrayList<>(batchSize);
+
+        while (params.hasNext()) {
+            List<Object> next = params.next();
+
+            buffer.add(next);
+            if (buffer.size() >= batchSize) {
+                counter += execute(new BatchCommand(command.getCommand(), buffer));
+                buffer = new ArrayList<>(batchSize);
+            }
+        }
+
+        // flush final data
+        if (!buffer.isEmpty()) {
+            counter += execute(new BatchCommand(command.getCommand(), buffer));
+        }
+
+        return counter;
     }
 
     /**

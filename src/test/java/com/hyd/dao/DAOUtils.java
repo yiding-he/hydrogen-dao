@@ -45,4 +45,8 @@ public class DAOUtils {
             System.setProperty("jdbc.password", password);
         }
     }
+
+    public static void setupLocalMySQL() {
+        setupDataSource("jdbc:mysql://localhost/test", "root", "root123");
+    }
 }

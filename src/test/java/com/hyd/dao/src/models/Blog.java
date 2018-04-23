@@ -1,4 +1,4 @@
-package com.hyd.dao.models;
+package com.hyd.dao.src.models;
 
 import java.util.Date;
 

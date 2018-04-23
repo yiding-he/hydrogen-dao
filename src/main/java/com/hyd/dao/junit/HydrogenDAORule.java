@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  */
 public class HydrogenDAORule implements TestRule {
 
-    private static final String SCRIPT_FOLDER = "hydrogen-scripts";
+    private static final String SCRIPT_FOLDER = "junit-rule-scripts";
 
     private final Supplier<DAO> daoSupplier;
 

@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * @author yidin
  */
-public class JUnitRuleTest extends DAOBaseTest {
+public class JUnitRuleTestBase extends InMemoryTestBase {
 
     @Rule
     public HydrogenDAORule hydrogenDAORule = new HydrogenDAORule(() -> dao);

@@ -1,7 +1,7 @@
-package com.hyd.dao.repositories;
+package com.hyd.dao.src.repositories;
 
 import com.hyd.dao.DAOUtils;
-import com.hyd.dao.models.Blog;
+import com.hyd.dao.src.models.Blog;
 import org.junit.Test;
 
 import java.util.List;

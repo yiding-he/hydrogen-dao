@@ -1,6 +1,7 @@
 package com.hyd.dao.database.executor;
 
 import com.hyd.dao.BatchCommand;
+import com.hyd.dao.IteratorBatchCommand;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.database.DatabaseType;
@@ -78,6 +79,15 @@ public abstract class Executor {
      * @return 受影响的行数
      */
     public abstract int execute(BatchCommand command);
+
+    /**
+     * 流式执行批量 SQL 语句
+     *
+     * @param command 批量 SQL 语句
+     *
+     * @return 受影响的行数
+     */
+    public abstract int execute(IteratorBatchCommand command);
 
     /**
      * 查询分页

@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 /**
  * @author yidin
  */
-public abstract class DAOBaseTest {
+public abstract class InMemoryTestBase {
 
     private static DataSources dataSources = new DataSources();
 

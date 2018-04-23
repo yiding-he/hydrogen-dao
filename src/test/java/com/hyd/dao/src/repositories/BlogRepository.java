@@ -1,8 +1,8 @@
-package com.hyd.dao.repositories;
+package com.hyd.dao.src.repositories;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.SQL;
-import com.hyd.dao.models.Blog;
+import com.hyd.dao.src.models.Blog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

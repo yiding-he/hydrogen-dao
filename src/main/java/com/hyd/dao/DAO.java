@@ -631,6 +631,15 @@ public class DAO {
         }
     }
 
+    public int execute(IteratorBatchCommand command) throws DAOException {
+        Executor executor = getExecutor();
+        try {
+            return executor.execute(command);
+        } finally {
+            executor.finish();
+        }
+    }
+
     public int execute(SQL.Generatable generatable) {
 
         // 当 Generatable 发现无法生成可执行的 SQL 时，将返回 null
