@@ -27,7 +27,7 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         String className = modelClassName + "Repository";
 
         ClassDef classDef = new ClassDef();
-        classDef.annotation = new AnnotationDef("Repository");
+        classDef.addAnnotation(new AnnotationDef("Repository"));
         classDef.className = className;
         classDef.imports = new ImportDef(
                 "org.springframework.beans.factory.annotation.Autowired",
@@ -52,7 +52,7 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         daoField.access = AccessType.Private;
         daoField.name = "dao";
         daoField.type = "DAO";
-        daoField.annotation = new AnnotationDef("Autowired");
+        daoField.addAnnotation(new AnnotationDef("Autowired"));
         classDef.addFieldIfNotExists(daoField);
 
         classDef.addMethod(daoField.toSetterMethod());

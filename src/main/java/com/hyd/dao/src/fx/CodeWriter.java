@@ -16,13 +16,20 @@ import java.nio.file.Paths;
 public class CodeWriter {
 
     public static void writeClass(ClassDef classDef) throws IOException {
+        writeClass0(classDef, "./src/main/java");
+    }
 
+    public static void writeUnitTestClass(ClassDef unitClassDef) throws IOException {
+        writeClass0(unitClassDef, "./src/test/java");
+    }
+
+    private static void writeClass0(ClassDef classDef, String codeRoot) throws IOException {
         if (classDef == null || classDef.packageDef == null) {
             return;
         }
 
         String modelPackage = classDef.packageDef.packageName;
-        Path packageDir = Paths.get("./src/main/java").resolve(modelPackage.replace(".", "/"));
+        Path packageDir = Paths.get(codeRoot).resolve(modelPackage.replace(".", "/"));
 
         if (!Files.exists(packageDir)) {
             Files.createDirectories(packageDir);

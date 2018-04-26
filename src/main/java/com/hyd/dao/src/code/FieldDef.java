@@ -3,6 +3,9 @@ package com.hyd.dao.src.code;
 
 import com.hyd.dao.util.Str;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * (description)
  * created at 2018/4/10
@@ -13,7 +16,7 @@ public class FieldDef implements Code {
 
     public AccessType access;
 
-    public AnnotationDef annotation;
+    public List<AnnotationDef> annotations = new ArrayList<>();
 
     public String name;
 
@@ -24,7 +27,11 @@ public class FieldDef implements Code {
     @Override
     public CodeBlock toCodeBlock() {
         CodeBlock codeBlock = new CodeBlock();
-        codeBlock.addCode(this.annotation, false);
+
+        for (AnnotationDef annotation : annotations) {
+            codeBlock.addCode(annotation, false);
+        }
+
         codeBlock.addLine(
                 (access == null ? "" : (access.name().toLowerCase() + " ")) +
                         type + " " + name +
@@ -49,5 +56,9 @@ public class FieldDef implements Code {
         method.args.add(new MethodArg(type, name));
         method.body = new CodeBlock("this." + name + " = " + name + ";");
         return method;
+    }
+
+    public void addAnnotation(AnnotationDef annotationDef) {
+        this.annotations.add(annotationDef);
     }
 }

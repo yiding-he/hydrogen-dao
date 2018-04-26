@@ -16,6 +16,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -77,6 +78,8 @@ public class CodeGeneratorApp extends Application {
     private TextArea modelCodeTextArea;
 
     private TableView<RepoMethodDef> repoMethodTableView;
+
+    private CheckBox chkGenerateUnitTest;
 
     ///////////////////////////////////////////////
 
@@ -284,6 +287,8 @@ public class CodeGeneratorApp extends Application {
         deleteButton.disableProperty().bind(selectedProfileIsNull);
         connectButton.disableProperty().bind(selectedProfileIsNull);
 
+        chkGenerateUnitTest = new CheckBox("生成单元测试");
+
         return vbox(LastExpand, 0, 0,
                 new MenuBar(new Menu("文件(_F)", null,
                         menuItem("打开(_O)...", "Shortcut+O", this::openFile),
@@ -339,9 +344,10 @@ public class CodeGeneratorApp extends Application {
                                         ),
                                         titledPane(-1, "代码预览",
                                                 vbox(FirstExpand, 0, 0, repoCodeArea())),
-                                        hbox(NoExpand, 0, PADDING,
+                                        hbox(NoExpand, Pos.BASELINE_LEFT, 0, PADDING,
                                                 button("复制代码", this::copyRepoCode),
-                                                button("写入项目", this::writeRepoCode)
+                                                button("写入项目", this::writeRepoCode),
+                                                chkGenerateUnitTest
                                         )
                                 ))
                         ))
@@ -361,6 +367,8 @@ public class CodeGeneratorApp extends Application {
                 return;
             }
 
+            ////////////////////////////////////////////////////////////// Repository Class
+
             ClassDef classDef = buildRepoClassDef(currentTableName, currentProfile);
             if (classDef.packageDef == null) {
                 error("没有指定 Repository 包名");
@@ -368,10 +376,44 @@ public class CodeGeneratorApp extends Application {
             }
 
             CodeWriter.writeClass(classDef);
+
+            ////////////////////////////////////////////////////////////// Unit Test Class
+
+            if (!chkGenerateUnitTest.isSelected()) {
+                return;
+            }
+
+            ClassDef unitClassDef = buildRepoUnitTestClassDef(classDef);
+            CodeWriter.writeUnitTestClass(unitClassDef);
+
         } catch (IOException e) {
             LOG.error("写入文件失败", e);
             error(e);
         }
+    }
+
+    private ClassDef buildRepoUnitTestClassDef(ClassDef repoClassDef) {
+        ClassDef classDef = new ClassDef();
+        classDef.imports = new ImportDef(
+                "org.junit.runner.RunWith",
+                "org.springframework.test.context.junit4.SpringRunner",
+                "org.springframework.boot.test.context.SpringBootTest",
+                "org.springframework.beans.factory.annotation.Autowired",
+                "org.junit.Test"
+        );
+        classDef.packageDef = repoClassDef.packageDef;
+        classDef.className = repoClassDef.className + "Test";
+        classDef.addAnnotation(new AnnotationDef("RunWith").setProperty("SpringRunner.class"));
+        classDef.addAnnotation(new AnnotationDef("SpringBootTest"));
+
+        FieldDef repoField = new FieldDef();
+        repoField.addAnnotation(new AnnotationDef("Autowired"));
+        repoField.access = AccessType.Private;
+        repoField.type = repoClassDef.className;
+        repoField.name = Str.uncapitalize(repoClassDef.className);
+        classDef.addFieldIfNotExists(repoField);
+
+        return classDef;
     }
 
     private void writeModelCode() {

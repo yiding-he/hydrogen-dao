@@ -15,7 +15,7 @@ public class ClassDef implements Code {
 
     public ImportDef imports;
 
-    public AnnotationDef annotation;
+    public List<AnnotationDef> annotations = new ArrayList<>();
 
     public String className;
 
@@ -37,7 +37,7 @@ public class ClassDef implements Code {
             codeBlock.addLine();
         }
 
-        if (annotation != null) {
+        for (AnnotationDef annotation : annotations) {
             codeBlock.addCode(annotation, false);
         }
 
@@ -77,5 +77,9 @@ public class ClassDef implements Code {
 
     public void addMethod(MethodDef methodDef) {
         this.methods.add(methodDef);
+    }
+
+    public void addAnnotation(AnnotationDef annotationDef) {
+        this.annotations.add(annotationDef);
     }
 }
