@@ -12,6 +12,8 @@ import com.hyd.dao.util.TypeUtil;
  */
 public abstract class ClassDefBuilder {
 
+    protected String packageName;
+
     protected String tableName;
 
     protected ColumnInfo[] columnInfos;
@@ -19,10 +21,8 @@ public abstract class ClassDefBuilder {
     protected DatabaseType databaseType;
 
     public ClassDefBuilder(
-            String tableName,
-            ColumnInfo[] columnInfos,
-            DatabaseType databaseType) {
-
+            String packageName, String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
+        this.packageName = packageName;
         this.tableName = tableName;
         this.columnInfos = columnInfos;
         this.databaseType = databaseType;

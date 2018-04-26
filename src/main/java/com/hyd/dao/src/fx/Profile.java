@@ -21,6 +21,8 @@ public class Profile {
 
     private StringProperty modelPackage = new SimpleStringProperty();
 
+    private StringProperty repoPackage = new SimpleStringProperty();
+
     private StringProperty username = new SimpleStringProperty();
 
     private StringProperty password = new SimpleStringProperty();
@@ -36,6 +38,18 @@ public class Profile {
 
     public Profile(String name) {
         this.setName(name);
+    }
+
+    public String getRepoPackage() {
+        return repoPackage.get();
+    }
+
+    public StringProperty repoPackageProperty() {
+        return repoPackage;
+    }
+
+    public void setRepoPackage(String repoPackage) {
+        this.repoPackage.set(repoPackage);
     }
 
     public Map<String, ClassDef> getRepoClassMap() {

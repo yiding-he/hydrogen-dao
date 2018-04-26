@@ -26,6 +26,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -155,13 +156,20 @@ public class CodeGeneratorApp extends Application {
     }
 
     private ClassDef buildRepoClassDef(String tableName, Profile currentProfile) {
+        if (tableName == null || currentProfile == null) {
+            return null;
+        }
+
         ClassDef repoClass = currentProfile.getRepoClass(tableName);
+        String repoPackage = currentProfile.getRepoPackage();
+        String modelPackage = currentProfile.getModelPackage();
 
         if (repoClass != null) {
             return repoClass;
         } else {
             RepoClassDefBuilder classDefBuilder = new RepoClassDefBuilder(
-                    tableName, currentTableColumns, databaseType, currentProfile.getModelPackage());
+                    repoPackage, modelPackage,
+                    tableName, currentTableColumns, databaseType);
 
             repoClass = classDefBuilder.build(tableName);
             currentProfile.setRepoClass(tableName, repoClass);
@@ -171,13 +179,18 @@ public class CodeGeneratorApp extends Application {
     }
 
     private ClassDef buildModelClassDef(String tableName, Profile currentProfile) {
+        if (tableName == null || currentProfile == null) {
+            return null;
+        }
+
         ClassDef modelClass = currentProfile.getModelClass(tableName);
+        String modelPackage = currentProfile.getModelPackage();
 
         if (modelClass != null) {
             return modelClass;
         } else {
             ClassDefBuilder classDefBuilder =
-                    new ModelClassBuilder(tableName, currentTableColumns, databaseType);
+                    new ModelClassBuilder(modelPackage, tableName, currentTableColumns, databaseType);
 
             modelClass = classDefBuilder.build(tableName);
             currentProfile.setModelClass(tableName, modelClass);
@@ -257,7 +270,8 @@ public class CodeGeneratorApp extends Application {
                 textField("URL:", Profile::urlProperty),
                 textField("用户名:", Profile::usernameProperty),
                 textField("密码:", Profile::passwordProperty),
-                textField("Model 包名:", Profile::modelPackageProperty)
+                textField("Model 包名:", Profile::modelPackageProperty),
+                textField("Repository 包名:", Profile::repoPackageProperty)
         ));
 
         Button deleteButton = button("删除", this::deleteProfile);
@@ -299,7 +313,10 @@ public class CodeGeneratorApp extends Application {
                                 tab("Model 类", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
                                         titledPane(-1, "代码预览", vbox(FirstExpand, 0, 0, modelCodeArea())),
-                                        hbox(NoExpand, 0, PADDING, button("复制代码", this::copyModelCode))
+                                        hbox(NoExpand, 0, PADDING,
+                                                button("复制代码", this::copyModelCode),
+                                                button("写入项目", this::writeModelCode)
+                                        )
                                 )),
                                 tab("Repository 类", vbox(NthExpand.set(-2), 0, PADDING,
                                         pane(0, PADDING),
@@ -322,11 +339,64 @@ public class CodeGeneratorApp extends Application {
                                         ),
                                         titledPane(-1, "代码预览",
                                                 vbox(FirstExpand, 0, 0, repoCodeArea())),
-                                        hbox(NoExpand, 0, PADDING, button("复制代码", this::copyRepoCode))
+                                        hbox(NoExpand, 0, PADDING,
+                                                button("复制代码", this::copyRepoCode),
+                                                button("写入项目", this::writeRepoCode)
+                                        )
                                 ))
                         ))
                 )
         );
+    }
+
+    private void writeRepoCode() {
+        try {
+            if (currentTableName == null) {
+                error("没有选择表");
+                return;
+            }
+
+            if (currentProfile == null) {
+                error("没有连接数据库");
+                return;
+            }
+
+            ClassDef classDef = buildRepoClassDef(currentTableName, currentProfile);
+            if (classDef.packageDef == null) {
+                error("没有指定 Repository 包名");
+                return;
+            }
+
+            CodeWriter.writeClass(classDef);
+        } catch (IOException e) {
+            LOG.error("写入文件失败", e);
+            error(e);
+        }
+    }
+
+    private void writeModelCode() {
+        try {
+            if (currentTableName == null) {
+                error("没有选择表");
+                return;
+            }
+
+            if (currentProfile == null) {
+                error("没有连接数据库");
+                return;
+            }
+
+            ClassDef classDef = buildModelClassDef(currentTableName, currentProfile);
+            if (classDef.packageDef == null) {
+                error("没有指定 Model 包名");
+                return;
+            }
+
+            CodeWriter.writeClass(classDef);
+        } catch (IOException e) {
+            LOG.error("写入文件失败", e);
+            error(e);
+        }
     }
 
     private void addDeleteMethod() {

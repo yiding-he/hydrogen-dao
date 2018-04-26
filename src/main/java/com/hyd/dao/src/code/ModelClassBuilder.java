@@ -13,9 +13,8 @@ import com.hyd.dao.util.Str;
 public class ModelClassBuilder extends ClassDefBuilder {
 
     public ModelClassBuilder(
-            String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
-
-        super(tableName, columnInfos, databaseType);
+            String packageName, String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
+        super(packageName, tableName, columnInfos, databaseType);
     }
 
     @Override
@@ -24,6 +23,10 @@ public class ModelClassBuilder extends ClassDefBuilder {
         ClassDef classDef = new ClassDef();
         classDef.imports = new ImportDef("java.util.Date");
         classDef.className = Str.underscore2Class(tableName);
+
+        if (!Str.isEmptyString(packageName)) {
+            classDef.packageDef = new PackageDef(packageName);
+        }
 
         for (ColumnInfo columnInfo : columnInfos) {
             FieldDef field = new FieldDef();

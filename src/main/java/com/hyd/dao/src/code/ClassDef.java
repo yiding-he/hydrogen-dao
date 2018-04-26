@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class ClassDef implements Code {
 
+    public PackageDef packageDef;
+
     public ImportDef imports;
 
     public AnnotationDef annotation;
@@ -24,6 +26,11 @@ public class ClassDef implements Code {
     @Override
     public CodeBlock toCodeBlock() {
         CodeBlock codeBlock = new CodeBlock();
+
+        if (packageDef != null) {
+            codeBlock.addCode(packageDef, false);
+            codeBlock.addLine();
+        }
 
         if (imports != null) {
             codeBlock.addCode(imports, false);

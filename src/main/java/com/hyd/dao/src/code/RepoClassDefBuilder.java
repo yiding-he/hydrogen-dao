@@ -15,11 +15,10 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
     private String modelPackage;
 
     public RepoClassDefBuilder(
-            String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType, String modelPackage
-    ) {
-        super(tableName, columnInfos, databaseType);
-        this.modelPackage = Str.removeEnd(modelPackage, ".");
+            String packageName, String modelPackage, String tableName, ColumnInfo[] columnInfos,
+            DatabaseType databaseType) {
+        super(packageName, tableName, columnInfos, databaseType);
+        this.modelPackage = modelPackage;
     }
 
     @Override
@@ -40,6 +39,10 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
                 "java.util.Date",
                 "java.util.Map",
                 "java.util.List");
+
+        if (!Str.isEmptyString(packageName)) {
+            classDef.packageDef = new PackageDef(packageName);
+        }
 
         if (!Str.isEmptyString(modelPackage)) {
             classDef.imports.addPackage(modelPackage + "." + modelClassName);
