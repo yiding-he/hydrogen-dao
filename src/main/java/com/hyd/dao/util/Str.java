@@ -29,6 +29,19 @@ public class Str {
         return count;
     }
 
+    public static int countMatches(String str, String sub) {
+        if (isEmpty(str) || isEmpty(sub)) {
+            return 0;
+        }
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != -1) {
+            count++;
+            idx += sub.length();
+        }
+        return count;
+    }
+
     /**
      * 将字段名转换为属性名
      *
@@ -160,21 +173,17 @@ public class Str {
         return s.endsWith(end) ? s.substring(0, s.length() - end.length()) : s;
     }
 
-    public static String defaultIfEmpty(String s, String defaultValue) {
-        return isEmptyString(s) ? defaultValue : s;
+    public static String removeLastAndAfter(String s, String search) {
+        if (s == null || search == null) {
+            return s;
+        }
+
+        int index = s.lastIndexOf(search);
+        return index == -1 ? s : s.substring(0, index);
     }
 
-    public static int countMatches(String str, String sub) {
-        if (isEmpty(str) || isEmpty(sub)) {
-            return 0;
-        }
-        int count = 0;
-        int idx = 0;
-        while ((idx = str.indexOf(sub, idx)) != -1) {
-            count++;
-            idx += sub.length();
-        }
-        return count;
+    public static String defaultIfEmpty(String s, String defaultValue) {
+        return isEmptyString(s) ? defaultValue : s;
     }
 
     public static boolean isAnyEmpty(String... strs) {

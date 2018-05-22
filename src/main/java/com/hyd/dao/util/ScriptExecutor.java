@@ -94,9 +94,13 @@ public class ScriptExecutor {
             while (scanner.hasNextLine()) {
                 line = scanner.nextLine().trim();
 
+                // 整行为注释内容，略过
                 if (line.startsWith("//") || line.startsWith("--")) {
                     continue;
                 }
+
+                // 对于可能出现的行尾注释，如果 "--" 是出现在单引号内部，则不视为注释
+                line = fixInlineComments(line).trim();
 
                 statement.append(" ").append(line);
 
@@ -113,6 +117,22 @@ public class ScriptExecutor {
             executeStatement(dao, finalStatement);
             counter.incrementAndGet();
         }
+    }
+
+    private static String fixInlineComments(String line) {
+        int index = line.indexOf("--");
+        while (index != -1) {
+            if (isComment(line, index)) {
+                return line.substring(0, index);
+            }
+            index = line.indexOf("--", index + 2);
+        }
+        return line;
+    }
+
+    private static boolean isComment(String line, int index) {
+        int count = Str.countMatches(line.substring(0, index), "'");
+        return count % 2 == 0;
     }
 
     private static void executeStatement(DAO dao, String statement) {
