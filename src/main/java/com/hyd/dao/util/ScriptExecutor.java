@@ -51,7 +51,9 @@ public class ScriptExecutor {
 
     public static void execute(String path, DAO dao, Charset charset) {
 
+        LOG.info("Executing script '" + path + "'...");
         InputStream inputStream;
+
         if (path.startsWith(CLASSPATH)) {
             inputStream = ScriptExecutor.class
                     .getResourceAsStream(path.substring(CLASSPATH.length()));
@@ -72,10 +74,22 @@ public class ScriptExecutor {
             throw new DAOException("Invalid input stream");
         }
 
-        String line;
-        StringBuilder statement = new StringBuilder();
         AtomicInteger counter = new AtomicInteger();
 
+        try {
+            executeStatements(is, dao, charset, counter);
+            LOG.info(counter.get() + " statements executed successfully.");
+        } catch (RuntimeException e) {
+            LOG.error(counter.get() + " statements executed before exception.");
+            throw e;
+        }
+    }
+
+    private static void executeStatements(
+            InputStream is, DAO dao, Charset charset, AtomicInteger counter) {
+
+        String line;
+        StringBuilder statement = new StringBuilder();
         try (Scanner scanner = new Scanner(is, charset.name())) {
             while (scanner.hasNextLine()) {
                 line = scanner.nextLine().trim();
@@ -84,10 +98,11 @@ public class ScriptExecutor {
                     continue;
                 }
 
-                statement.append(line);
+                statement.append(" ").append(line);
 
                 if (line.endsWith(";")) {
-                    executeStatement(dao, statement.toString(), counter);
+                    executeStatement(dao, statement.toString());
+                    counter.incrementAndGet();
                     statement = new StringBuilder();
                 }
             }
@@ -95,12 +110,12 @@ public class ScriptExecutor {
 
         String finalStatement = statement.toString();
         if (finalStatement.trim().length() > 0) {
-            executeStatement(dao, finalStatement, counter);
+            executeStatement(dao, finalStatement);
+            counter.incrementAndGet();
         }
     }
 
-    private static void executeStatement(DAO dao, String statement, AtomicInteger counter) {
+    private static void executeStatement(DAO dao, String statement) {
         dao.execute(statement);
-        LOG.info(counter.incrementAndGet() + " statements executed.");
     }
 }
