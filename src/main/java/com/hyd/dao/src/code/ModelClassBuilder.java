@@ -31,7 +31,7 @@ public class ModelClassBuilder extends ClassDefBuilder {
         for (ColumnInfo columnInfo : columnInfos) {
             FieldDef field = new FieldDef();
             field.name = Str.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
-            field.type = getJavaType(columnInfo.getDataType());
+            field.type = getJavaType(columnInfo);
             field.access = AccessType.Private;
 
             classDef.addFieldIfNotExists(field);

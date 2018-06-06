@@ -59,7 +59,7 @@ public abstract class RepoMethodBuilder {
 
     private String getArgType(ColumnInfo columnInfo, Comparator comparator) {
 
-        String javaType = TypeUtil.getJavaType(databaseType, columnInfo.getDataType());
+        String javaType = TypeUtil.getJavaType(databaseType, columnInfo);
         if (comparator == Comparator.In) {
             return "List<" + javaType + ">";
         } else {

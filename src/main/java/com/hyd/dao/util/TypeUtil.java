@@ -1,5 +1,6 @@
 package com.hyd.dao.util;
 
+import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
@@ -120,7 +121,11 @@ public class TypeUtil {
         }
     }
 
-    public static String getJavaType(DatabaseType databaseType, int dataType) {
+    public static String getJavaType(DatabaseType databaseType, ColumnInfo columnInfo) {
+
+        int dataType = columnInfo.getDataType();
+        int size = columnInfo.getSize();
+
         switch (dataType) {
             case Types.VARCHAR:
             case Types.CHAR:
@@ -135,7 +140,7 @@ public class TypeUtil {
             case Types.SMALLINT:
                 return "Short";
             case Types.INTEGER:
-                return "Integer";
+                return size < 10 ? "Integer" : "Long";
             case Types.BIGINT:
                 return "Long";
             case Types.REAL:

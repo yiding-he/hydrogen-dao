@@ -30,7 +30,7 @@ public abstract class ClassDefBuilder {
 
     public abstract ClassDef build(String tableName);
 
-    protected String getJavaType(int type) {
-        return TypeUtil.getJavaType(databaseType, type);
+    protected String getJavaType(ColumnInfo columnInfo) {
+        return TypeUtil.getJavaType(databaseType, columnInfo);
     }
 }
