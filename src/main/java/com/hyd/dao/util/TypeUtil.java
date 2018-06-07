@@ -136,7 +136,7 @@ public class TypeUtil {
             case Types.NUMERIC:
                 return "BigDecimal";
             case Types.TINYINT:
-                return "Byte";
+                return "Integer";
             case Types.SMALLINT:
                 return "Short";
             case Types.INTEGER:
