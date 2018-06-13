@@ -2,6 +2,7 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.ResultSetUtil;
 
@@ -115,6 +116,23 @@ public class RowIterator implements Closeable {
             } catch (SQLException e) {
                 LOG.warn(e.getMessage(), e);
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> void iterate(Class<T> type, Consumer<T> consumer) {
+        try {
+            while (this.next()) {
+                try {
+                    Row row = this.getRow();
+                    T t = (T) TypeConverter.convertRow(type, row);
+                    consumer.accept(t);
+                } catch (Exception e) {
+                    throw new DAOException(e);
+                }
+            }
+        } finally {
+            close();
         }
     }
 }
