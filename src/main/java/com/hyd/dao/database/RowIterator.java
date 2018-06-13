@@ -135,4 +135,16 @@ public class RowIterator implements Closeable {
             close();
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public void iterate(Consumer<Row> consumer) {
+        try {
+            while (this.next()) {
+                Row row = this.getRow();
+                consumer.accept(row);
+            }
+        } finally {
+            close();
+        }
+    }
 }
