@@ -44,13 +44,19 @@ public class RowIterator implements Closeable {
 
     private Consumer<Row> rowPreProcessor;
 
+    private boolean closed;
+
     public RowIterator(ResultSet rs) {
-        this.rs = rs;
+        this(rs, null);
     }
 
     public RowIterator(ResultSet rs, Consumer<Row> rowPreProcessor) {
         this.rs = rs;
         this.rowPreProcessor = rowPreProcessor;
+
+        if (this.rs == null) {
+            closed = true;
+        }
     }
 
     public void setRowPreProcessor(Consumer<Row> rowPreProcessor) {
@@ -63,8 +69,21 @@ public class RowIterator implements Closeable {
      * @return 如果还有查询结果则返回 true，并移至下一行
      */
     public boolean next() {
+
+        if (closed) {
+            return false;
+        }
+
         try {
-            return rs.next();
+            if (rs.isClosed()) {
+                return false;
+            }
+
+            boolean next = rs.next();
+            if (!next) {
+                close();
+            }
+            return next;
         } catch (SQLException e) {
             throw new DAOException("failed to read next record", e);
         }
@@ -89,6 +108,11 @@ public class RowIterator implements Closeable {
 
     @Override
     public void close() {
+
+        if (closed) {
+            return;
+        }
+
         if (rs != null) {
             Statement st;
             Connection conn;
@@ -116,11 +140,18 @@ public class RowIterator implements Closeable {
             } catch (SQLException e) {
                 LOG.warn(e.getMessage(), e);
             }
+
+            closed = true;
         }
     }
 
     @SuppressWarnings("unchecked")
     public <T> void iterate(Class<T> type, Consumer<T> consumer) {
+
+        if (closed) {
+            return;
+        }
+
         try {
             while (this.next()) {
                 try {
