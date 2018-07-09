@@ -141,10 +141,10 @@ public class BeanUtil {
                     throw new DAOException("Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz);
                 }
             }
-        } else if (clazz == Boolean.TYPE) {
+        } else if (clazz == Boolean.TYPE || clazz == Boolean.class) {
             return Boolean.valueOf(String.valueOf(value));
 
-        } else if (clazz.isPrimitive() && clazz != Boolean.TYPE) { // 处理基本型别
+        } else if (clazz.isPrimitive()) { // 处理基本型别
 
             BigDecimal bdValue = new BigDecimal(String.valueOf(value));
 

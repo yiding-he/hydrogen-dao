@@ -1,7 +1,7 @@
 package com.hyd.dao.src.repositories;
 
-import com.hyd.dao.DAOUtils;
 import com.hyd.dao.src.models.Blog;
+import com.hyd.daotests.JUnitRuleTestBase;
 import org.junit.Test;
 
 import java.util.List;
@@ -9,15 +9,11 @@ import java.util.List;
 /**
  * @author yiding.he
  */
-public class BlogRepositoryTest {
-
-    static {
-        DAOUtils.setupDataSource("jdbc:h2:U:/demo/demo.db", null, null);
-    }
+public class BlogRepositoryTest extends JUnitRuleTestBase {
 
     private BlogRepository getRepository() {
         BlogRepository blogRepository = new BlogRepository();
-        blogRepository.setDao(DAOUtils.getDAO());
+        blogRepository.setDao(dao);
         return blogRepository;
     }
 
@@ -32,11 +28,13 @@ public class BlogRepositoryTest {
     @Test
     public void testInsertBlog() throws Exception {
         Blog blog = new Blog();
-        blog.setId(5);
+        blog.setId(999);
         blog.setTitle("ttttt");
         blog.setContent("dfqwliufqwiuefhqliuwefhuiqweyfiw");
+        blog.setHidden(true);
 
         getRepository().insert(blog);
+        System.out.println(getRepository().queryById(999));
     }
 
     @Test

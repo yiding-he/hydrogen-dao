@@ -12,6 +12,16 @@ public class Blog {
 
     private Date lastUpdate;
 
+    private Boolean hidden;
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
+    }
+
     public Integer getId() {
         return this.id;
     }
@@ -51,6 +61,7 @@ public class Blog {
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", lastUpdate=" + lastUpdate +
+                ", hidden=" + hidden +
                 '}';
     }
 }
