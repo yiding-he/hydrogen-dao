@@ -14,6 +14,18 @@ public class Blog {
 
     private Boolean hidden;
 
+    public Blog() {
+    }
+
+    public Blog(Integer id, String title, String content, Boolean hidden) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.hidden = hidden;
+
+        this.lastUpdate = new Date();
+    }
+
     public Boolean getHidden() {
         return hidden;
     }

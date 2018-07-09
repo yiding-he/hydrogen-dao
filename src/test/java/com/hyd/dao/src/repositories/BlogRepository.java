@@ -48,6 +48,10 @@ public class BlogRepository {
         dao.insert(blog, "BLOG");
     }
 
+    public void insert(List<Blog> blogList) {
+        dao.insert(blogList, "BLOG");
+    }
+
     public void insert(Map<String, Object> map) {
         dao.insert(map, "BLOG");
     }
