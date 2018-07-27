@@ -7,7 +7,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 * 根据参数值来动态组装 select/insert/update/delete 语句，免除大量的 if-else
 * 简化分页查询和批处理
 
-使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
+使用方法参考源码下的 `docs` 目录。
 
 ## 更新
 
