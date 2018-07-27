@@ -11,6 +11,12 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ## 更新
 
+#### 2018-07-09
+
+* 实现基于 JavaFX 的代码生成工具，在 Maven 目录结构下生成 Pojo、Repository 
+及对应的单元测试代码。[视频演示](https://www.bilibili.com/video/av22590671/)
+* 修复若干 BUG，详见日志
+
 #### 2018-04-21
 
 * 删除对 Apache commons-lang3 的依赖关系
