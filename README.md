@@ -1,4 +1,4 @@
-#hydrogen-dao
+# hydrogen-dao
 
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
@@ -7,13 +7,9 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 * 根据参数值来动态组装 select/insert/update/delete 语句，免除大量的 if-else
 * 简化分页查询和批处理
 
-使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
+使用方法参考源码下的 `docs` 目录。
 
 ## 更新
-
-#### 2018-04-22
-
-* 代码生成功能放入版本号 3.1.0
 
 #### 2018-04-21
 
@@ -117,10 +113,8 @@ dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
 final DAO dao = getDAO();
 
 DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简单明了
-    public void run() {
-        dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
-        throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
-    }
+    dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
+    throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
 });
 ~~~
 
