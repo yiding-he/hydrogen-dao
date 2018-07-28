@@ -1,6 +1,7 @@
 package com.hyd.dao.src.models;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Blog {
 
@@ -75,5 +76,22 @@ public class Blog {
                 ", lastUpdate=" + lastUpdate +
                 ", hidden=" + hidden +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Blog blog = (Blog) o;
+        return Objects.equals(id, blog.id) &&
+                Objects.equals(title, blog.title) &&
+                Objects.equals(content, blog.content) &&
+                Objects.equals(lastUpdate, blog.lastUpdate) &&
+                Objects.equals(hidden, blog.hidden);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, content, lastUpdate, hidden);
     }
 }
