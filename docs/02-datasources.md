@@ -6,33 +6,33 @@ hydrogen-dao 支持同时管理多个数据源，不论它们各自属于什么�
 
 `com.hyd.dao.DataSources` 是管理数据源的类，一个项目只需要创建一个 DataSources 对象即可。如果是在 Spring 项目中使用，一般应该将 DataSources 定义到配置文件。
 
-~~~java
+```java
 DataSources datasources = new DataSources();
-~~~
+```
 
 ### 创建数据源
 
 接下来，你可以用任何数据库连接池类库（DBCP，c3p0，等等）创建一个包装好的 `javax.sql.DataSource` 对象，然后将其配置到 DataSources 里。例如配置一个 DBCP 的数据源：
 
-~~~java
+```java
 DataSource ds = new org.apache.commons.dbcp.BasicDataSource();
 ...
 datasources.setDataSource("db1", ds);
-~~~
+```
 
 ### 获取 DAO 对象
 
 配置好数据源后，就可以调用 DataSources 的 getDAO() 方法来获得 DAO 对象了。
 
-~~~java
+```java
 DAO dao = datasources.getDAO("db1");  // 这个 DAO 对象的所有操作都是针对 db1 数据库
-~~~
+```
 
 ### 完整例子
 
 下面是一个完整的例子：
 
-~~~java
+```java
 
 // 1. 创建一个 DataSource 对象
 BasicDataSource dataSource = new BasicDataSource();
@@ -49,11 +49,11 @@ dataSources.setDataSource("demodb1", dataSource);
 // 3. 获取 DAO 对象。
 DAO dao = dataSources.getDAO("demodb1");
 
-~~~
+```
 
 如果你用的是 Spring，则配置起来是这个样子：
 
-~~~xml
+```xml
 <bean class="com.hyd.dao.DataSources" id="dataSources">
     <property name="dataSources">
         <map>
@@ -72,4 +72,4 @@ DAO dao = dataSources.getDAO("demodb1");
 <bean id="db1Dao" factory-bean="dataSources" factory-method="getDAO">
     <constructor-arg name="dsName" value="db1"/>
 </bean>
-~~~
+```

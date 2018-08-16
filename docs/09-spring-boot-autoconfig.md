@@ -1,3 +1,6 @@
+
+> 注：这种配置方式会在将来的版本中废除，改为适应多个数据源的配置方式。
+
 对于 Spring Boot 项目，hydrogen-dao 提供了开箱即用的 DAO 对象。方法如下：
 
 1. 在 pom.xml 中加入 spring-boot-autoconfigure 的依赖关系；
@@ -14,7 +17,7 @@ public class UserService {
     @Autowired
     private com.hyd.dao.DAO dao;
     
-    ...
+    // ...
 }
 ```
 

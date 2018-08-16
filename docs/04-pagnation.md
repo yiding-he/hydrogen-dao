@@ -2,7 +2,7 @@
 
 在执行 `queryPage()` 方法时，`DAO` 实际执行了两次查询，一次是查询总记录数，一次是查询指定范围的记录列表。
 
-~~~java
+```java
 // 分页查询
 String sql = "select * from users where name like ?";
 int pageSize = 10;  // 页大小
@@ -17,5 +17,5 @@ System.out.println("Total count: " + page.getTotal());
 for (User user: page) {
     System.out.println(user);
 }
-~~~
+```
 

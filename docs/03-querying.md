@@ -1,13 +1,13 @@
 使用 DAO 对象来进行查询的方式有以下几种。
 
 ### 简单的带参数查询
-~~~java
+```java
 // 简单查询
 List<Row> users = dao.query(
         "select * from users where id in(?,?,?)", 
         1, 2, 3
 );
-~~~
+```
 
 使用简单的带参数查询，只需要调用 query() 方法，在 SQL  中用问号"?"指定参数位置，并在后面写上对应数量的参数值即可。只要你写过 JDBC 调用 PreparedStatement 来执行查询，就会很熟悉这种方式。
 
@@ -28,25 +28,25 @@ class              | CLASS
 
 注意，当使用了像 `abstract`/`private`/`protected`/`static`/`void`/`interface`/`enum`/`class` 等 Java 关键字来做字段名时，因为这些名字不可能转为 Pojo 类的属性名，hydrogen-dao 将其转换为大写。如果你有一条查询语句返回了一个名为 `class` 的字段，而你想用 Pojo 来接收它，你可以在 Pojo 中定义一个名为 "`CLASS`" 的属性。
 
-~~~java
+```java
 // 查询结果包装成 Pojo
 List<User> users = dao.query(User.class, 
         "select * from users where id in(?,?,?)",
          1, 2, 3);
-~~~
+```
 
 ### 带参数名的查询
 
 有些童鞋不喜欢 "?" 作为占位符，希望每个参数都有名字。hydrogen-dao 提供一个叫 MappedCommand 的类，下面是一个例子：
 
-~~~java
+```java
 MappedCommand mappedCommand = new MappedCommand(
         "select * from USER where USERNAME=#username# and ROLE in (#role#)")
         .setParam("username", "admin")
         .setParam("role", new int[]{1, 2, 3, 4, 5, 6});
 
 List<User> users = dao.query(User.class, mappedCommand);
-~~~
+```
 
 ### 只取第一条查询结果
 

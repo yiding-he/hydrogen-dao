@@ -5,7 +5,7 @@ hydrogen-dao 没有发布到中心库，因此你需要下载源代码自己编�
 
 新建一个空的 Maven 项目，在 pom.xml 中添加下面的依赖关系：
 
-~~~xml
+```xml
 <!--演示用内存 SQL 数据库 HSqlDB-->
 <dependency>
     <groupId>org.hsqldb</groupId>
@@ -24,4 +24,4 @@ hydrogen-dao 没有发布到中心库，因此你需要下载源代码自己编�
     <artifactId>logback-classic</artifactId>
     <version>1.1.2</version>
 </dependency>
-~~~
+```

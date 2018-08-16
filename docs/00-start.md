@@ -24,8 +24,6 @@ hydrogen-dao 还提供更多非常方便的操作数据库方式，包括**直�
 1. Spring Boot 自动初始化
 1. 在 Junit 单元测试中自动进行数据库初始化
 
-![dao-demo1.gif](http://git.oschina.net/uploads/images/2015/0322/171100_27e64522_298739.gif)
-
 ### 数据库兼容性
 
 本人开发经历有限，现在能做到比较好的兼容性的数据库是 Oracle/MySQL/HSQLDB，其他数据库若有不兼容之处，还望不吝指出，我会尽快解决！
