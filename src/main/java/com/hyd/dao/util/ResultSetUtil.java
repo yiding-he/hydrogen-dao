@@ -56,7 +56,7 @@ public class ResultSetUtil {
         for (int i = 0; i < meta.getColumnCount(); i++) {
             String colName = meta.getColumnLabel(i + 1);
             int columnType = meta.getColumnType(i + 1);
-            Object o = TypeUtil.isDateType(columnType) ? rs.getTimestamp(i + 1) : rs.getObject(i + 1);
+            Object o = rs.getObject(i + 1);
             Object value = TypeUtil.convertDatabaseValue(columnType, o);
             row.put(colName.toLowerCase(), value);
         }
@@ -104,6 +104,9 @@ public class ResultSetUtil {
     // 将 ResultSet 扫描位置重置为第0位
     private static void resetRsPosition(ResultSet rs) throws SQLException {
         try {
+            if (rs.getType() == ResultSet.TYPE_FORWARD_ONLY) {
+                return;
+            }
             rs.beforeFirst();
         } catch (SQLFeatureNotSupportedException e) {
             // just ignore it

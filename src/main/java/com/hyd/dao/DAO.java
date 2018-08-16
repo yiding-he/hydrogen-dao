@@ -4,12 +4,11 @@ import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
-import com.hyd.dao.database.commandbuilder.MappedCommand;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.hyd.dao.util.Str;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -119,7 +118,7 @@ public class DAO {
      * @return 修复后的 sql 语句
      */
     private static String fixSql(String sql) {
-        return StringUtils.removeEnd(sql.trim(), ";");
+        return Str.removeEnd(sql.trim(), ";");
     }
 
     /**
@@ -624,6 +623,15 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(BatchCommand command) throws DAOException {
+        Executor executor = getExecutor();
+        try {
+            return executor.execute(command);
+        } finally {
+            executor.finish();
+        }
+    }
+
+    public int execute(IteratorBatchCommand command) throws DAOException {
         Executor executor = getExecutor();
         try {
             return executor.execute(command);

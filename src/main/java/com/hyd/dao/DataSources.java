@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 管理数据源配置
@@ -27,6 +28,22 @@ public class DataSources {
      * “数据源名称 -> ExecutorFactory对象” 映射关系
      */
     private Map<String, ExecutorFactory> executorFactories = new HashMap<String, ExecutorFactory>();
+
+    /**
+     * 删除指定的数据源
+     *
+     * @param dataSourceName 数据源名称
+     * @param finalization   删除后要对数据源做什么操作（例如关闭）
+     */
+    public void remove(String dataSourceName, Consumer<DataSource> finalization) {
+        DataSource dataSource = dataSources.get(dataSourceName);
+
+        if (dataSource != null) {
+            dataSources.remove(dataSourceName);
+            executorFactories.remove(dataSourceName);
+            finalization.accept(dataSource);
+        }
+    }
 
     public Map<String, DataSource> getDataSources() {
         return dataSources;
@@ -148,5 +165,9 @@ public class DataSources {
             executorFactories.put(dsName, factory);
             return factory;
         });
+    }
+
+    public boolean isEmpty() {
+        return this.dataSources.isEmpty();
     }
 }

@@ -1,4 +1,4 @@
-#hydrogen-dao
+# hydrogen-dao
 
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
@@ -7,9 +7,22 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 * 根据参数值来动态组装 select/insert/update/delete 语句，免除大量的 if-else
 * 简化分页查询和批处理
 
-使用方法参考 [WIKI](http://git.oschina.net/yidinghe/hydrogen-dao/wikis/home)
+使用方法参考源码下的 `docs` 目录。
 
 ## 更新
+
+#### 2018-07-09
+
+* 实现基于 JavaFX 的代码生成工具，在 Maven 目录结构下生成 Pojo、Repository 
+及对应的单元测试代码。[视频演示](https://www.bilibili.com/video/av22590671/)
+* 修复若干 BUG，详见日志
+
+#### 2018-04-21
+
+* 删除对 Apache commons-lang3 的依赖关系
+* 修复 Spring Boot Auto Configuration 的问题
+* 自动配置时根据 JDBC URL 来猜测 Driver 类，无需手动指定
+* 自动配置当没有找到可用的连接池时，使用 com.hyd.dao.database.NonPooledDataSource
 
 #### 2018-04-07
 
@@ -106,10 +119,8 @@ dao.query(SQL.Select("ID", "NAME", "DESCRIPTION")
 final DAO dao = getDAO();
 
 DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简单明了
-    public void run() {
-        dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
-        throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
-    }
+    dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
+    throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
 });
 ~~~
 

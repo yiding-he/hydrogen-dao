@@ -1,14 +1,14 @@
 package com.hyd.dao.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 处理字符串的类
  */
-public class Str extends StringUtils {
+public class Str {
 
     /**
      * 查找指定字符串中包含匹配指定正则表达式的次数
@@ -26,6 +26,19 @@ public class Str extends StringUtils {
         int count = 0;
         Matcher matcher = Pattern.compile(regex).matcher(str);
         while (matcher.find()) count++;
+        return count;
+    }
+
+    public static int countMatches(String str, String sub) {
+        if (isEmpty(str) || isEmpty(sub)) {
+            return 0;
+        }
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != -1) {
+            count++;
+            idx += sub.length();
+        }
         return count;
     }
 
@@ -50,12 +63,37 @@ public class Str extends StringUtils {
             return columnName.toUpperCase();
         }
 
-        String[] strs = columnName.toLowerCase().split("_");
-        String name = strs[0];
-        for (int i = 1; i < strs.length; i++) {
-            name += capitalize(strs[i]);
+        return underscore2Property(columnName);
+    }
+
+    public static String underscore2Property(String underscore) {
+        return uncapitalize(Stream.of(underscore.toLowerCase().split("_"))
+                .map(Str::capitalize)
+                .collect(Collectors.joining()));
+    }
+
+    public static String underscore2Class(String underscore) {
+        return capitalize(underscore2Property(underscore));
+    }
+
+    public static String capitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
         }
-        return name;
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
+    }
+
+    public static String uncapitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
+        return new String(chars);
     }
 
     /**
@@ -77,11 +115,11 @@ public class Str extends StringUtils {
      * @return 如果 str 为 null、为空或仅包含空白字符，则返回 true。
      */
     public static boolean isEmptyString(String str) {
-        return str == null || str.matches("\\s*");
+        return str == null || str.trim().length() == 0;
     }
 
     public static boolean isEmpty(Object obj) {
-        return obj == null || isEmpty(obj.toString());
+        return obj == null || isEmptyString(obj.toString());
     }
 
     /**
@@ -121,5 +159,40 @@ public class Str extends StringUtils {
      */
     public static String valueOf(Object o) {
         return o == null ? "" : String.valueOf(o);
+    }
+
+    public static String removeEnd(String s, String end) {
+        if (s == null || end == null) {
+            return s;
+        }
+
+        if (s.length() < end.length()) {
+            return s;
+        }
+
+        return s.endsWith(end) ? s.substring(0, s.length() - end.length()) : s;
+    }
+
+    public static String removeLastAndAfter(String s, String search) {
+        if (s == null || search == null) {
+            return s;
+        }
+
+        int index = s.lastIndexOf(search);
+        return index == -1 ? s : s.substring(0, index);
+    }
+
+    public static String defaultIfEmpty(String s, String defaultValue) {
+        return isEmptyString(s) ? defaultValue : s;
+    }
+
+    public static boolean isAnyEmpty(String... strs) {
+        for (String str : strs) {
+            if (isEmptyString(str)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

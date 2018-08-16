@@ -1,8 +1,10 @@
 package com.hyd.dao.database.executor;
 
 import com.hyd.dao.BatchCommand;
+import com.hyd.dao.IteratorBatchCommand;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.snapshot.ExecutorInfo;
@@ -28,15 +30,18 @@ public abstract class Executor {
 
     protected ExecutorInfo info;        // 当前状态
 
+    protected DatabaseType databaseType;
+
     /**
      * 构造函数
      *
      * @param dsName     数据源名称
      * @param connection 数据库连接
      */
-    public Executor(String dsName, Connection connection) {
+    public Executor(String dsName, Connection connection) throws SQLException {
         this.info = new ExecutorInfo(dsName);
         this.connection = connection;
+        this.databaseType = DatabaseType.of(connection);
     }
 
     /**
@@ -64,7 +69,7 @@ public abstract class Executor {
      *
      * @return 受影响的行数
      */
-    public abstract int execute(String sql, List params);
+    public abstract int execute(String sql, List<Object> params);
 
     /**
      * 执行批量 SQL 语句
@@ -74,6 +79,15 @@ public abstract class Executor {
      * @return 受影响的行数
      */
     public abstract int execute(BatchCommand command);
+
+    /**
+     * 流式执行批量 SQL 语句
+     *
+     * @param command 批量 SQL 语句
+     *
+     * @return 受影响的行数
+     */
+    public abstract int execute(IteratorBatchCommand command);
 
     /**
      * 查询分页
@@ -86,7 +100,7 @@ public abstract class Executor {
      *
      * @return 查询的当前页
      */
-    public abstract <T> Page<T> queryPage(Class<T> clazz, String sql, List params, int pageSize, int pageIndex);
+    public abstract <T> Page<T> queryPage(Class<T> clazz, String sql, List<Object> params, int pageSize, int pageIndex);
 
     /**
      * @param clazz         包装类
@@ -97,7 +111,7 @@ public abstract class Executor {
      *
      * @return 查询结果。如果 startPosition < 0 或 endPosition < 0 则表示返回所有的查询结果
      */
-    public abstract List query(Class clazz, String sql, List params, int startPosition, int endPosition);
+    public abstract List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition);
 
     /**
      * 根据主键和表名查询指定的记录
@@ -161,7 +175,7 @@ public abstract class Executor {
      *
      * @return 用于获得查询结果的迭代器
      */
-    public abstract RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor);
+    public abstract RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor);
 
     public void setInfo(ExecutorInfo info) {
         this.info = info;

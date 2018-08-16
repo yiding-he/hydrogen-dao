@@ -51,7 +51,9 @@ public class ScriptExecutor {
 
     public static void execute(String path, DAO dao, Charset charset) {
 
+        LOG.info("Executing script '" + path + "'...");
         InputStream inputStream;
+
         if (path.startsWith(CLASSPATH)) {
             inputStream = ScriptExecutor.class
                     .getResourceAsStream(path.substring(CLASSPATH.length()));
@@ -72,22 +74,39 @@ public class ScriptExecutor {
             throw new DAOException("Invalid input stream");
         }
 
-        String line;
-        StringBuilder statement = new StringBuilder();
         AtomicInteger counter = new AtomicInteger();
 
+        try {
+            executeStatements(is, dao, charset, counter);
+            LOG.info(counter.get() + " statements executed successfully.");
+        } catch (RuntimeException e) {
+            LOG.error(counter.get() + " statements executed before exception.");
+            throw e;
+        }
+    }
+
+    private static void executeStatements(
+            InputStream is, DAO dao, Charset charset, AtomicInteger counter) {
+
+        String line;
+        StringBuilder statement = new StringBuilder();
         try (Scanner scanner = new Scanner(is, charset.name())) {
             while (scanner.hasNextLine()) {
                 line = scanner.nextLine().trim();
 
+                // 整行为注释内容，略过
                 if (line.startsWith("//") || line.startsWith("--")) {
                     continue;
                 }
 
-                statement.append(line);
+                // 对于可能出现的行尾注释，如果 "--" 是出现在单引号内部，则不视为注释
+                line = fixInlineComments(line).trim();
+
+                statement.append(" ").append(line);
 
                 if (line.endsWith(";")) {
-                    executeStatement(dao, statement.toString(), counter);
+                    executeStatement(dao, statement.toString());
+                    counter.incrementAndGet();
                     statement = new StringBuilder();
                 }
             }
@@ -95,12 +114,28 @@ public class ScriptExecutor {
 
         String finalStatement = statement.toString();
         if (finalStatement.trim().length() > 0) {
-            executeStatement(dao, finalStatement, counter);
+            executeStatement(dao, finalStatement);
+            counter.incrementAndGet();
         }
     }
 
-    private static void executeStatement(DAO dao, String statement, AtomicInteger counter) {
+    private static String fixInlineComments(String line) {
+        int index = line.indexOf("--");
+        while (index != -1) {
+            if (isComment(line, index)) {
+                return line.substring(0, index);
+            }
+            index = line.indexOf("--", index + 2);
+        }
+        return line;
+    }
+
+    private static boolean isComment(String line, int index) {
+        int count = Str.countMatches(line.substring(0, index), "'");
+        return count % 2 == 0;
+    }
+
+    private static void executeStatement(DAO dao, String statement) {
         dao.execute(statement);
-        LOG.info(counter.incrementAndGet() + " statements executed.");
     }
 }

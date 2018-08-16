@@ -17,11 +17,13 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
+ * 用于单元测试的 Rule
+ *
  * @author yidin
  */
 public class HydrogenDAORule implements TestRule {
 
-    private static final String SCRIPT_FOLDER = "hydrogen-scripts";
+    private static final String SCRIPT_FOLDER = "junit-rule-scripts";
 
     private final Supplier<DAO> daoSupplier;
 
@@ -42,8 +44,11 @@ public class HydrogenDAORule implements TestRule {
     }
 
     private void init() {
+
+        // 搜索文件列表
         List<File> csvFiles = scanCsvFiles();
 
+        // 将文件内容插入到数据库
         for (File csvFile : csvFiles) {
             String fileName = csvFile.getName();
             String tableName = fileName.substring(0, fileName.length() - 4);
@@ -52,10 +57,15 @@ public class HydrogenDAORule implements TestRule {
         }
     }
 
+    /**
+     * 检查 {@link #scriptFolder} 目录下是否有 csv 文件
+     *
+     * @return csv 文件列表
+     */
     private List<File> scanCsvFiles() {
         String classPath = System.getProperty("java.class.path", ".");
         String[] classPathElements = classPath.split(System.getProperty("path.separator"));
-        List<File> csvFiles =new Page<>();
+        List<File> csvFiles = new Page<>();
 
         for (String pathElement : classPathElements) {
             File file = new File(pathElement);
@@ -88,6 +98,7 @@ public class HydrogenDAORule implements TestRule {
     @Override
     public Statement apply(Statement statement, Description description) {
         return new Statement() {
+
             @Override
             public void evaluate() throws Throwable {
                 before();

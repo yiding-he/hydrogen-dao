@@ -49,21 +49,23 @@ public class BatchCommand {
     }
 
     /**
+     * 构造函数
+     *
+     * @param command SQL 语句
+     * @param params  批量参数值
+     */
+    public BatchCommand(String command, List<List<Object>> params) {
+        this.command = command;
+        this.params = params;
+    }
+
+    /**
      * 获得 SQL 语句
      *
      * @return SQL 语句
      */
     public String getCommand() {
         return command;
-    }
-
-    /**
-     * 设置 SQL 语句
-     *
-     * @param command SQL 语句
-     */
-    public void setCommand(String command) {
-        this.command = command;
     }
 
     /**

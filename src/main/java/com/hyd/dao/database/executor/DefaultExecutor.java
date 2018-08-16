@@ -1,34 +1,25 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.BatchCommand;
-import com.hyd.dao.DAOException;
-import com.hyd.dao.Page;
-import com.hyd.dao.Row;
+import com.hyd.dao.*;
+import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
 import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.connection.ConnectionUtil;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProsedureHelper;
+import com.hyd.dao.util.Arr;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
 import com.hyd.dao.util.TypeUtil;
-import oracle.jdbc.OracleTypes;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -36,19 +27,22 @@ import java.util.function.Consumer;
  *
  * @author <a href="mailto:yiding.he@gmail.com">Yiding He</a>
  */
+@SuppressWarnings("MagicConstant")
 public class DefaultExecutor extends Executor {
 
     private static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
 
     private static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
 
-    private static final int TIMEOUT = Integer.parseInt(StringUtils.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
+    private static final int TIMEOUT = Integer.parseInt(Str.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
+
+    private static final int UNKNOWN_TYPE = Integer.MIN_VALUE;
 
     private Statement st;
 
     private ResultSet rs;
 
-    public DefaultExecutor(String dsName, Connection connection) {
+    public DefaultExecutor(String dsName, Connection connection) throws SQLException {
         super(dsName, connection);
     }
 
@@ -99,7 +93,7 @@ public class DefaultExecutor extends Executor {
      *
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
-    protected String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
+    private String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
         return CommandBuilderHelper.getHelper(connection).getRangedSql(sql, startPos, endPos);
     }
 
@@ -127,12 +121,12 @@ public class DefaultExecutor extends Executor {
         }
     }
 
-    protected String getCountSql(String sql) throws SQLException {
+    private String getCountSql(String sql) throws SQLException {
         return CommandBuilderHelper.getHelper(connection).getCountSql(sql);
     }
 
     @Override
-    public RowIterator queryIterator(String sql, List params, Consumer<Row> preProcessor) {
+    public RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor) {
         printCommand(sql, params);
         try {
             executeQuery(sql, params);
@@ -154,7 +148,7 @@ public class DefaultExecutor extends Executor {
      * @return 查询结果
      */
     @Override
-    public List query(Class clazz, String sql, List params, int startPosition, int endPosition) {
+    public List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition) {
 
         String rangedSql = null;
         try {
@@ -203,7 +197,7 @@ public class DefaultExecutor extends Executor {
     }
 
     // 执行语句并将结果赋值给 this.rs
-    private void executeQuery(String sql, List params) throws SQLException {
+    private void executeQuery(String sql, List<Object> params) throws SQLException {
 
         // PreparerdStatement 可以不用就不用，以免占用过多 Oracle 的指针。
         if (params == null || params.isEmpty()) {
@@ -239,7 +233,7 @@ public class DefaultExecutor extends Executor {
             PreparedStatement ps = createPreparedStatement(command.getCommand());
             st = ps;
 
-            for (List param : params) {
+            for (List<Object> param : params) {
                 insertBatchParams(command, param);
                 ps.addBatch();
             }
@@ -263,6 +257,36 @@ public class DefaultExecutor extends Executor {
         }
     }
 
+    @Override
+    public int execute(IteratorBatchCommand command) {
+
+        int batchSize = command.getBatchSize();
+        int counter = 0;
+        if (batchSize < 1) {
+            throw new IllegalStateException("Batch command size must > 0");
+        }
+
+        Iterator<List<Object>> params = command.getParams();
+        List<List<Object>> buffer = new ArrayList<>(batchSize);
+
+        while (params.hasNext()) {
+            List<Object> next = params.next();
+
+            buffer.add(next);
+            if (buffer.size() >= batchSize) {
+                counter += execute(new BatchCommand(command.getCommand(), buffer));
+                buffer = new ArrayList<>(batchSize);
+            }
+        }
+
+        // flush final data
+        if (!buffer.isEmpty()) {
+            counter += execute(new BatchCommand(command.getCommand(), buffer));
+        }
+
+        return counter;
+    }
+
     /**
      * 为批处理命令填入参数值
      *
@@ -271,7 +295,7 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果填入参数失败
      */
-    private void insertBatchParams(BatchCommand command, List params) throws SQLException {
+    private void insertBatchParams(BatchCommand command, List<Object> params) throws SQLException {
         int length = Str.countMatches(command.getCommand(), "?");
 
         List<Integer> paramTypes = new ArrayList<>();
@@ -285,11 +309,11 @@ public class DefaultExecutor extends Executor {
     }
 
     @Override
-    public int execute(String sql, List params) {
+    public int execute(String sql, List<Object> params) {
         return execute(sql, params, null);
     }
 
-    public int execute(String sql, List params, List paramTypes) throws DAOException {
+    public int execute(String sql, List<Object> params, List<Integer> paramTypes) throws DAOException {
         printCommand(sql, params);
         try {
             // 执行语句
@@ -318,7 +342,7 @@ public class DefaultExecutor extends Executor {
     }
 
     // 为普通 SQL 语句填入参数值
-    private void insertParams(List params) throws SQLException {
+    private void insertParams(List<Object> params) throws SQLException {
         insertParams(params, null);
     }
 
@@ -330,16 +354,18 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果插入参数失败
      */
-    private void insertParams(List params, List paramTypes) throws SQLException {
+    private void insertParams(List<Object> params, List<Integer> paramTypes) throws SQLException {
         PreparedStatement ps = (PreparedStatement) st;
         for (int i = 0; i < params.size(); i++) {
+            int paramType = paramTypes != null && paramTypes.size() > i ? paramTypes.get(i) : UNKNOWN_TYPE;
             Object value = params.get(i);
+
             if (value != null) {
-                value = TypeUtil.cconvertParamValue(value);
+                value = TypeUtil.convertParamValue(value, paramType);
                 ps.setObject(i + 1, value);
             } else {
-                if (paramTypes != null && paramTypes.size() > i) {
-                    ps.setNull(i + 1, (Integer) paramTypes.get(i));
+                if (paramType != UNKNOWN_TYPE) {
+                    ps.setNull(i + 1, paramType);
                 } else {
                     ps.setObject(i + 1, null); // this will cause exception
                 }
@@ -406,7 +432,7 @@ public class DefaultExecutor extends Executor {
             }
             cs.executeQuery();
             return readResult(spParams, cs);
-        } catch (IOException | SQLException e) {
+        } catch (SQLException e) {
             throw new DAOException("Procedure failed: " + e.getMessage(), e, name, Arrays.asList(params));
         }
     }
@@ -415,16 +441,12 @@ public class DefaultExecutor extends Executor {
     public List callFunction(String name, Object[] params) {
 
         try {
-            if (!ConnectionUtil.isOracle(connection)) {
-                throw new DAOException("Target database is not oracle.");
-            }
-
             LOG.debug(findCaller() + "(function)" + name + Arrays.asList(params));
             SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, connection);
             int resultType = spParams[0].getSqlType();
 
             // 去掉第一个
-            spParams = ArrayUtils.subarray(spParams, 1, spParams.length);
+            spParams = Arr.subarray(spParams, 1, spParams.length);
 
             CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, connection);
             if (TIMEOUT != -1) {
@@ -461,11 +483,8 @@ public class DefaultExecutor extends Executor {
      * @param cs     执行过的 CallableStatement
      *
      * @return 调用结果（数字值将被统一转为 BigDecimal）
-     *
-     * @throws SQLException        如果读取结果失败
-     * @throws java.io.IOException 如果读取 LOB 对象失败
      */
-    private List readResult(SpParam[] params, CallableStatement cs) throws SQLException, IOException {
+    private List readResult(SpParam[] params, CallableStatement cs) {
         List<Object> result = new ArrayList<>();
         try {
             for (int i = 0; i < params.length; i++) {
@@ -474,7 +493,7 @@ public class DefaultExecutor extends Executor {
                     Object value = cs.getObject(i + 1);
 
                     // 对 Oracle 的 CURSOR 类型进行特殊处理
-                    if (ConnectionUtil.isOracle(connection) && param.getSqlType() == OracleTypes.CURSOR) {
+                    if (databaseType == DatabaseType.Oracle && param.getSqlType() == -10) {
                         ResultSet rs1 = (ResultSet) value;
                         result.add(ResultSetUtil.readResultSet(rs1, null, -1, -1));
 
@@ -496,21 +515,21 @@ public class DefaultExecutor extends Executor {
      *
      * @throws SQLException 如果创建失败
      */
-    protected Statement createNormalStatement() throws SQLException {
+    private Statement createNormalStatement() throws SQLException {
         return connection.createStatement(getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
-    protected PreparedStatement createPreparedStatement(String sql) throws SQLException {
+    private PreparedStatement createPreparedStatement(String sql) throws SQLException {
         return connection.prepareStatement(sql, getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
-    protected int getResultSetType() throws SQLException {
+    private int getResultSetType() {
 
         // Oracle 可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
         // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
         // 但是 SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
 
-        if (ConnectionUtil.isSqlServer(connection)) {
+        if (databaseType == DatabaseType.SQLServer) {
             return ResultSet.TYPE_SCROLL_SENSITIVE;
         } else {
             return ResultSet.TYPE_FORWARD_ONLY;
@@ -528,15 +547,17 @@ public class DefaultExecutor extends Executor {
     }
 
     private String findCaller() {
+
         StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
-        boolean daostarted = false;
+        boolean daoStarted = false;
+
         for (StackTraceElement traceElement : traceElements) {
             String className = traceElement.getClassName();
             int lineNumber = traceElement.getLineNumber();
 
-            if (!daostarted) {
+            if (!daoStarted) {
                 if (className.startsWith("com.hyd.dao.")) {
-                    daostarted = true;
+                    daoStarted = true;
                 }
             } else {
                 if (!className.startsWith("com.hyd.dao.")) {
@@ -552,7 +573,7 @@ public class DefaultExecutor extends Executor {
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 
-        List<List<Object>> params = command.getParams() == null ? new ArrayList<List<Object>>() : command.getParams();
+        List<List<Object>> params = command.getParams() == null ? new ArrayList<>() : command.getParams();
 
         if (BATCH_LOG.isEnabled(Logger.Level.Debug)) {
             BATCH_LOG.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");

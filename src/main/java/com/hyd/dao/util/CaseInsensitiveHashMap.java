@@ -7,6 +7,8 @@ import java.util.HashMap;
  */
 public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * 根据 key 获取值
      *
