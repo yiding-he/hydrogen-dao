@@ -83,7 +83,7 @@ public class SpringAutoConfiguration {
         if (dataSource == null) {
             return;
         } else {
-            LOG.info("DAO instance '" + dataSourceName + "' initiated.");
+            LOG.info(() -> "DAO instance '" + dataSourceName + "' initiated.");
         }
 
         dataSources.setDataSource(dataSourceName, dataSource);

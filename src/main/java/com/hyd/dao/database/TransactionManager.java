@@ -139,7 +139,7 @@ public class TransactionManager {
             executor.close();
         }
 
-        LOG.info("Transaction level " + _level + " commited.");
+        LOG.info(() -> "Transaction level " + _level + " commited.");
         level.set(_level - 1);
     }
 
@@ -157,7 +157,7 @@ public class TransactionManager {
             executor.rollbackAndClose();
         }
 
-        LOG.info("Transaction level " + _level + " rollbacked.");
+        LOG.info(() -> "Transaction level " + _level + " rollbacked.");
         level.set(_level - 1);
     }
 

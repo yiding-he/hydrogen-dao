@@ -3,6 +3,7 @@ package com.hyd.dao.log;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * 支持 logback, log4j 和 log4j2 的日志框架
@@ -122,7 +123,8 @@ public class Logger {
     ////////////////////////////////////////////////////////////////
 
     public enum Level {
-        Trace, Debug, Info, Warn, Error,;
+        Trace, Debug, Info, Warn, Error,
+        ;
     }
 
     public enum LoggerType {
@@ -148,7 +150,8 @@ public class Logger {
                 java.util.logging.Level.INFO,
                 java.util.logging.Level.WARNING,
                 java.util.logging.Level.SEVERE
-        }),;
+        }),
+        ;
 
         public final String checkClass;
 
@@ -333,7 +336,18 @@ public class Logger {
         }
     }
 
+    private void log(Object level, Supplier<Object> messageSupplier, Throwable t) {
+        if (isEnabled(level)) {
+            log(level, messageSupplier.get(), t);
+        }
+    }
+
     private void log(Object level, Object message, Throwable t) {
+
+        if (!isEnabled(level)) {
+            return;
+        }
+
         if (type == LoggerType.LOGBACK) {
             logLogback(message, level, t);
         } else if (type == LoggerType.LOG4J) {
@@ -345,12 +359,20 @@ public class Logger {
         }
     }
 
+    public void trace(Supplier<Object> messageSupplier) {
+        log(type.trace, messageSupplier, null);
+    }
+
     public void trace(Object message) {
         log(type.trace, message, null);
     }
 
     public void trace(Object message, Throwable t) {
         log(type.trace, message, t);
+    }
+
+    public void trace(Supplier<Object> messageSupplier, Throwable t) {
+        log(type.trace, messageSupplier, t);
     }
 
     public void debug(Object message) {
@@ -361,12 +383,28 @@ public class Logger {
         log(type.debug, message, t);
     }
 
+    public void debug(Supplier<Object> messageSupplier) {
+        log(type.debug, messageSupplier, null);
+    }
+
+    public void debug(Supplier<Object> messageSupplier, Throwable t) {
+        log(type.debug, messageSupplier, t);
+    }
+
     public void info(Object message) {
         log(type.info, message, null);
     }
 
     public void info(Object message, Throwable t) {
         log(type.info, message, t);
+    }
+
+    public void info(Supplier<Object> messageSupplier) {
+        log(type.info, messageSupplier, null);
+    }
+
+    public void info(Supplier<Object> messageSupplier, Throwable t) {
+        log(type.info, messageSupplier, t);
     }
 
     public void warn(Object message) {
@@ -377,12 +415,46 @@ public class Logger {
         log(type.warn, message, t);
     }
 
+    public void warn(Supplier<Object> messageSupplier) {
+        log(type.warn, messageSupplier, null);
+    }
+
+    public void warn(Supplier<Object> messageSupplier, Throwable t) {
+        log(type.warn, messageSupplier, t);
+    }
+
     public void error(Object message) {
         log(type.error, message, null);
     }
 
     public void error(Object message, Throwable t) {
         log(type.error, message, t);
+    }
+
+    public void error(Supplier<Object> messageSupplier) {
+        log(type.error, messageSupplier, null);
+    }
+
+    public void error(Supplier<Object> messageSupplier, Throwable t) {
+        log(type.error, messageSupplier, t);
+    }
+
+    private Level getLevel(Object levelObject) {
+        if (levelObject == type.trace) {
+            return Level.Trace;
+        } else if (levelObject == type.debug) {
+            return Level.Debug;
+        } else if (levelObject == type.info) {
+            return Level.Info;
+        } else if (levelObject == type.warn) {
+            return Level.Warn;
+        } else {
+            return Level.Error;
+        }
+    }
+
+    private boolean isEnabled(Object levelObject) {
+        return isEnabled(getLevel(levelObject));
     }
 
     public boolean isEnabled(Level level) {

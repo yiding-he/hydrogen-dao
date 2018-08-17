@@ -51,7 +51,7 @@ public class ScriptExecutor {
 
     public static void execute(String path, DAO dao, Charset charset) {
 
-        LOG.info("Executing script '" + path + "'...");
+        LOG.info(() -> "Executing script '" + path + "'...");
         InputStream inputStream;
 
         if (path.startsWith(CLASSPATH)) {
@@ -78,9 +78,9 @@ public class ScriptExecutor {
 
         try {
             executeStatements(is, dao, charset, counter);
-            LOG.info(counter.get() + " statements executed successfully.");
+            LOG.info(() -> counter.get() + " statements executed successfully.");
         } catch (RuntimeException e) {
-            LOG.error(counter.get() + " statements executed before exception.");
+            LOG.error(() -> counter.get() + " statements executed before exception.");
             throw e;
         }
     }
