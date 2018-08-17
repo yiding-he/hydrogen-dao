@@ -7,7 +7,7 @@ import com.hyd.dao.database.NonPooledDataSource;
  */
 public class NonPooledDataSourceFactory {
 
-    static NonPooledDataSource createDataSource(DataSourceProperties props) {
+    static NonPooledDataSource createDataSource(DataSourceConfig props) {
         return new NonPooledDataSource(
                 props.getDriverClassName(), props.getUrl(), props.getUsername(), props.getPassword());
     }

@@ -1,7 +1,6 @@
 package com.hyd.dao.spring;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 
@@ -22,7 +21,7 @@ public class DruidDataSourceFactory {
         }
     }
 
-    static DataSource createDataSource(DataSourceProperties dataSourceProperties) {
+    static DataSource createDataSource(DataSourceConfig dataSourceProperties) {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriverClassName(dataSourceProperties.getDriverClassName());
         druidDataSource.setUrl(dataSourceProperties.getUrl());

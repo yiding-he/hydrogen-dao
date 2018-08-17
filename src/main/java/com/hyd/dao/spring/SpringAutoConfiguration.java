@@ -7,12 +7,12 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.Str;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 import static org.springframework.util.StringUtils.hasText;
@@ -23,7 +23,6 @@ import static org.springframework.util.StringUtils.hasText;
 @Configuration
 @AutoConfigureOrder()
 @ConditionalOnMissingBean(DAO.class)
-@ConditionalOnProperty("spring.datasource.url")
 @EnableConfigurationProperties(value = DataSourceProperties.class)
 public class SpringAutoConfiguration {
 
@@ -41,15 +40,29 @@ public class SpringAutoConfiguration {
             DataSources dataSources
     ) {
 
-        if (!hasText(props.getUrl()) ||
-                !hasText(props.getUsername())) {
+        Map<String, DataSourceConfig> dataSourceConfigs = props.getDataSources();
+        if (dataSourceConfigs == null || dataSourceConfigs.isEmpty()) {
             return null;
         }
 
-        JDBCDriver driver = JDBCDriver.getDriverByUrl(props.getUrl());
-        if (Str.isEmpty(props.getDriverClassName())) {
+        dataSourceConfigs.forEach((dataSourceName, dataSourceConfig) ->
+                setupDao(dataSourceName, dataSourceConfig, dataSources));
+
+        return dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
+    }
+
+    private void setupDao(
+            String dataSourceName, DataSourceConfig config, DataSources dataSources) {
+
+        if (!hasText(config.getUrl()) ||
+                !hasText(config.getUsername())) {
+            return;
+        }
+
+        JDBCDriver driver = JDBCDriver.getDriverByUrl(config.getUrl());
+        if (Str.isEmpty(config.getDriverClassName())) {
             if (driver != null) {
-                props.setDriverClassName(driver.getDriverClass());
+                config.setDriverClassName(driver.getDriverClass());
             } else {
                 LOG.info("bean 'dao' not initialized: missing driver class");
             }
@@ -58,24 +71,22 @@ public class SpringAutoConfiguration {
         DataSource dataSource;
 
         if (DBCP2DatasourceFactory.isAvailable()) {
-            dataSource = DBCP2DatasourceFactory.createDataSource(props);
+            dataSource = DBCP2DatasourceFactory.createDataSource(config);
         } else if (DruidDataSourceFactory.isAvailable()) {
-            dataSource = DruidDataSourceFactory.createDataSource(props);
+            dataSource = DruidDataSourceFactory.createDataSource(config);
         } else {
             LOG.warn("Warning: using non-pooled datasource, " +
                     "do not use this in production environment!");
-            dataSource = NonPooledDataSourceFactory.createDataSource(props);
+            dataSource = NonPooledDataSourceFactory.createDataSource(config);
         }
 
         if (dataSource == null) {
-            LOG.info("bean 'dao' not initialized: ");
-            return null;
+            return;
         } else {
-            LOG.info("bean 'dao' initialized as " + dataSource.getClass() + ".");
+            LOG.info("DAO instance '" + dataSourceName + "' initiated.");
         }
 
-        dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, dataSource);
-        return dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
+        dataSources.setDataSource(dataSourceName, dataSource);
     }
 
 }

@@ -22,7 +22,7 @@ public class DBCP2DatasourceFactory {
         }
     }
 
-    static DataSource createDataSource(@Autowired DataSourceProperties dataSourceProperties) {
+    static DataSource createDataSource(@Autowired DataSourceConfig dataSourceProperties) {
         BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName(dataSourceProperties.getDriverClassName());
         basicDataSource.setUrl(dataSourceProperties.getUrl());
