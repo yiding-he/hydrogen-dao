@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class BlogRepository {
@@ -20,40 +19,21 @@ public class BlogRepository {
         this.dao = dao;
     }
 
-    public Blog queryById(Integer id) {
+    public Blog queryById(Long id) {
         return dao.queryFirst(Blog.class, 
             SQL.Select("*")
-            .From("BLOG")
-            .Where("ID = ?", id)
+            .From("blog")
+            .Where("id = ?", id)
         );
     }
 
-    public List<Blog> queryAll() {
+    public List<Blog> queryByCreateTime(Date minCreateTime, Date maxCreateTime) {
         return dao.query(Blog.class, 
             SQL.Select("*")
-            .From("BLOG")
+            .From("blog")
+            .Where("create_time >= ?", minCreateTime)
+            .And("create_time <= ?", maxCreateTime)
         );
-    }
-
-    public List<Blog> queryByLastUpdate(Date minLastUpdate, Date maxLastUpdate) {
-        return dao.query(Blog.class,
-            SQL.Select("*")
-            .From("BLOG")
-            .Where("LAST_UPDATE >= ?", minLastUpdate)
-            .And("LAST_UPDATE <= ?", maxLastUpdate)
-        );
-    }
-
-    public void insert(Blog blog) {
-        dao.insert(blog, "BLOG");
-    }
-
-    public void insert(List<Blog> blogList) {
-        dao.insert(blogList, "BLOG");
-    }
-
-    public void insert(Map<String, Object> map) {
-        dao.insert(map, "BLOG");
     }
 
 }

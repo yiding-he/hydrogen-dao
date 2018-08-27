@@ -393,7 +393,7 @@ public class CodeGeneratorApp extends Application {
                 return;
             }
 
-            CodeWriter.writeClass(classDef);
+            CodeWriter.writeClass(classDef, currentProfile.getCodeRootDir());
 
             ////////////////////////////////////////////////////////////// Unit Test Class
 
@@ -402,7 +402,7 @@ public class CodeGeneratorApp extends Application {
             }
 
             ClassDef unitClassDef = buildRepoUnitTestClassDef(classDef);
-            CodeWriter.writeUnitTestClass(unitClassDef);
+            CodeWriter.writeUnitTestClass(unitClassDef, currentProfile.getTestRootDir());
 
         } catch (IOException e) {
             LOG.error("写入文件失败", e);
@@ -452,7 +452,7 @@ public class CodeGeneratorApp extends Application {
                 return;
             }
 
-            CodeWriter.writeClass(classDef);
+            CodeWriter.writeClass(classDef, currentProfile.getCodeRootDir());
         } catch (IOException e) {
             LOG.error("写入文件失败", e);
             error(e);
@@ -583,7 +583,7 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void exit() {
-
+        primaryStage.close();
     }
 
     private void saveFile() {
