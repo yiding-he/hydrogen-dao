@@ -290,6 +290,7 @@ public class CodeGeneratorApp extends Application {
                 textField("用户名:", Profile::usernameProperty),
                 textField("密码:", Profile::passwordProperty),
                 directoryField("源码根目录:", Profile::codeRootDirProperty),
+                directoryField("测试根目录:", Profile::testRootDirProperty),
                 textField("Model 包名:", Profile::modelPackageProperty),
                 textField("Repo 包名:", Profile::repoPackageProperty)
         ));
