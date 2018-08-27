@@ -187,6 +187,8 @@ public class Fx {
         };
     }
 
+    ////////////////////////////////////////////////////////////
+
     public static <T> Form<T> form(int labelWidth, List<FormField<T>> fields) {
         return new Form<>(labelWidth, fields);
     }
@@ -206,6 +208,12 @@ public class Fx {
         setComboBoxContent(field.getComboBox(), toString);
         return field;
     }
+
+    public static <T> DirectoryFormField<T> directoryField(String text, Function<T, StringProperty> extractor) {
+        return new DirectoryFormField<>(text, extractor);
+    }
+
+    ////////////////////////////////////////////////////////////
 
     public static ButtonType alert(AlertType alertType, String title, String message, ButtonType... buttons) {
         Alert alert = new Alert(alertType, message, buttons);

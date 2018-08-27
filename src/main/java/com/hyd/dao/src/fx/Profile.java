@@ -19,6 +19,8 @@ public class Profile {
 
     private StringProperty url = new SimpleStringProperty();
 
+    private StringProperty codeRootDir = new SimpleStringProperty();
+
     private StringProperty modelPackage = new SimpleStringProperty();
 
     private StringProperty repoPackage = new SimpleStringProperty();
@@ -38,6 +40,18 @@ public class Profile {
 
     public Profile(String name) {
         this.setName(name);
+    }
+
+    public String getCodeRootDir() {
+        return codeRootDir.get();
+    }
+
+    public StringProperty codeRootDirProperty() {
+        return codeRootDir;
+    }
+
+    public void setCodeRootDir(String codeRootDir) {
+        this.codeRootDir.set(codeRootDir);
     }
 
     public String getRepoPackage() {

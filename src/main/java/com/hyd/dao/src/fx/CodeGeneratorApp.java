@@ -17,6 +17,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,6 +25,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -57,6 +59,8 @@ public class CodeGeneratorApp extends Application {
 
     public static final String APP_NAME = "代码生成工具";
 
+    private static Stage primaryStage;
+
     ///////////////////////////////////////////////
 
     private String profilePath = DEFAULT_PROFILE_PATH;
@@ -68,8 +72,6 @@ public class CodeGeneratorApp extends Application {
     private Form<Profile> profileForm;
 
     private TextFormField<Profile> txtProfileName;
-
-    private Stage primaryStage;
 
     private ConnectionManager connectionManager;
 
@@ -93,7 +95,7 @@ public class CodeGeneratorApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
+        CodeGeneratorApp.primaryStage = primaryStage;
         Scene scene = new Scene(root(), 1000, 700);
 
         initControls();
@@ -104,9 +106,23 @@ public class CodeGeneratorApp extends Application {
         primaryStage.show();
     }
 
+    public static Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
     private void onStageShown() {
-        primaryStage.setMaximized(true);
+        resizeWindow();
         loadProfiles();
+    }
+
+    private void resizeWindow() {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double width = Math.min(1000, visualBounds.getWidth() - 40);
+        double height = Math.min(700, visualBounds.getHeight() - 40);
+        primaryStage.setX(visualBounds.getMinX() + (visualBounds.getWidth() - width) / 2);
+        primaryStage.setY(visualBounds.getMinY() + (visualBounds.getHeight() - height) / 2);
+        primaryStage.setWidth(width);
+        primaryStage.setHeight(height);
     }
 
     private void initControls() {
@@ -243,7 +259,7 @@ public class CodeGeneratorApp extends Application {
                 }
             }
 
-            this.primaryStage.setTitle(APP_NAME + " - " + profilePath);
+            primaryStage.setTitle(APP_NAME + " - " + profilePath);
         } catch (Exception e) {
             LOG.error("读取配置文件错误", e);
             error(e);
@@ -273,8 +289,9 @@ public class CodeGeneratorApp extends Application {
                 textField("URL:", Profile::urlProperty),
                 textField("用户名:", Profile::usernameProperty),
                 textField("密码:", Profile::passwordProperty),
+                directoryField("源码根目录:", Profile::codeRootDirProperty),
                 textField("Model 包名:", Profile::modelPackageProperty),
-                textField("Repository 包名:", Profile::repoPackageProperty)
+                textField("Repo 包名:", Profile::repoPackageProperty)
         ));
 
         Button deleteButton = button("删除", this::deleteProfile);
