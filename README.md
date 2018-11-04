@@ -9,7 +9,8 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前版本为 `3.1.0-SNAPSHOT`
+- latest available version: `3.1.0-SNAPSHOT`(branch [3.1.0](https://github.com/yiding-he/hydrogen-dao/tree/3.1.0))
+- currently developing vesion: `3.2.0-SNAPSHOT`(branch [3.2.0](https://github.com/yiding-he/hydrogen-dao/tree/3.2.0))
 
 ## 示例
 
