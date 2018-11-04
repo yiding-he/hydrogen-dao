@@ -137,39 +137,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>Personal</id>
-            <distributionManagement>
-                <repository>
-                    <id>heyiding.com</id>
-                    <name>public</name>
-                    <url>https://heyiding.com:666/nexus/content/repositories/releases/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>heyiding.com</id>
-                    <name>Snapshots</name>
-                    <url>https://heyiding.com:666/nexus/content/repositories/snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>Work</id>
-            <distributionManagement>
-                <repository>
-                    <id>znxunzhi</id>
-                    <name>public</name>
-                    <url>http://120.25.145.102:8081/nexus/content/repositories/releases/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>znxunzhi</id>
-                    <name>Snapshots</name>
-                    <url>http://120.25.145.102:8081/nexus/content/repositories/snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-        </profile>
-    </profiles>
-
-
 </project>
