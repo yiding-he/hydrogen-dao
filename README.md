@@ -23,9 +23,9 @@ List<User> userList = dao.query(
         "select * from USER where NAME like ? and ROLE=?",  // 语句
         "admin%", 3);                                       // 参数（可选）
         
-for (User user: userList) {
+userList.forEach(user -> {
     System.out.println("user name: " + user.getName());
-}
+});
 ```
 
 ### 执行带参数名的 SQL
