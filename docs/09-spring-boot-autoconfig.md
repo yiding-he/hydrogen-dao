@@ -1,6 +1,3 @@
-
-> 注：这种配置方式会在将来的版本中废除，改为适应多个数据源的配置方式。
-
 对于 Spring Boot 项目，hydrogen-dao 提供了开箱即用的 DAO 对象。你可以在
  application.properties 当中配置单个或多个数据源，然后得到可用的 DAO 对象。
  
