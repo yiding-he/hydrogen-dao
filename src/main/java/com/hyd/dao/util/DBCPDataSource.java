@@ -55,8 +55,7 @@ public class DBCPDataSource {
     }
 
     public static BasicDataSource newMySqlDataSource(
-            String url, String username, String password,
-            boolean useUnicode, String charEncoding) {
+            String url, String username, String password) {
 
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
