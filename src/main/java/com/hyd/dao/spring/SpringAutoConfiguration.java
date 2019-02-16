@@ -21,16 +21,14 @@ import static org.springframework.util.StringUtils.hasText;
  * @author yidin
  */
 @Configuration
-@AutoConfigureOrder()
-@ConditionalOnMissingBean(DAO.class)
 @EnableConfigurationProperties(value = DataSourceProperties.class)
 public class SpringAutoConfiguration {
 
     private static final Logger LOG = Logger.getLogger(SpringAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnMissingBean(DataSources.class)
     public DataSources dataSources() {
+        LOG.debug("DataSources initialized.");
         return new DataSources();
     }
 
@@ -42,6 +40,7 @@ public class SpringAutoConfiguration {
 
         Map<String, DataSourceConfig> dataSourceConfigs = props.getDataSources();
         if (dataSourceConfigs == null || dataSourceConfigs.isEmpty()) {
+            LOG.debug("DataSourceProperties is empty.");
             return null;
         }
 

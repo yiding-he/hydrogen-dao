@@ -457,7 +457,7 @@ public class DAO {
 
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
-            return queryIterator(sql, list.toArray(new Object[list.size()]));
+            return queryIterator(sql, preProcessor, list.toArray(new Object[0]));
         }
 
         String fixedSql = fixSql(sql);

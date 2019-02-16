@@ -17,6 +17,17 @@ public class DBCPDataSource {
 
     }
 
+    public static BasicDataSource newDataSource(
+            String driverClass, String url, String username, String password) {
+
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName(driverClass);
+        ds.setUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
+        return ds;
+    }
+
     public static BasicDataSource newH2MemDataSource() {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");
@@ -27,7 +38,7 @@ public class DBCPDataSource {
     public static BasicDataSource newH2FileDataSource(String filePath, boolean onlyIfExists) {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");
-        ds.setUrl("jdbc:h2:" + filePath + (onlyIfExists? ";IFEXISTS=TRUE": ""));
+        ds.setUrl("jdbc:h2:" + filePath + (onlyIfExists ? ";IFEXISTS=TRUE" : ""));
         return ds;
     }
 
@@ -40,6 +51,17 @@ public class DBCPDataSource {
         ds.setUsername(username);
         ds.setPassword(password);
 
+        return ds;
+    }
+
+    public static BasicDataSource newMySqlDataSource(
+            String url, String username, String password) {
+
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("com.mysql.jdbc.Driver");
+        ds.setUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
         return ds;
     }
 
