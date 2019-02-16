@@ -62,24 +62,21 @@ public class DataSources {
     }
 
     /**
-     * 操作数据库连接。使用本方法无需在 ConnectionExecutor 中手动关闭连接。即使出现异常，连接也会关闭。
+     * 操作数据库，连接然后自动关闭连接。
      *
-     * @param dataSourceName 数据源名称
-     * @param executor       要进行的操作
+     * @param dataSourceName     数据源名称
+     * @param connectionConsumer 要进行的操作
      *
      * @throws SQLException 如果操作数据库失败
      */
-    public void withConnection(String dataSourceName, ConnectionExecutor executor) throws SQLException {
+    public void withConnection(String dataSourceName, Consumer<Connection> connectionConsumer) throws SQLException {
 
         if (!dataSources.containsKey(dataSourceName)) {
             throw new DAOException("Data source '" + dataSourceName + "' not found.");
         }
 
-        Connection connection = dataSources.get(dataSourceName).getConnection();
-        try {
-            executor.execute(connection);
-        } finally {
-            connection.close();
+        try (Connection connection = dataSources.get(dataSourceName).getConnection()) {
+            connectionConsumer.accept(connection);
         }
     }
 
