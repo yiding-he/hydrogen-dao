@@ -7,6 +7,7 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.util.DBCPDataSource;
 import com.hyd.dao.util.ResultSetUtil;
+import java.sql.SQLException;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.Test;
 
@@ -50,10 +51,14 @@ public class H2InMemoryDBTest {
         });
 
         dataSources.withConnection("h2", connection -> {
-            CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
-            ColumnInfo[] columnInfos = helper.getColumnInfos("PUBLIC", "table1");
-            for (ColumnInfo columnInfo : columnInfos) {
-                System.out.println(columnInfo);
+            try {
+                CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
+                ColumnInfo[] columnInfos = helper.getColumnInfos("PUBLIC", "table1");
+                for (ColumnInfo columnInfo : columnInfos) {
+                    System.out.println(columnInfo);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
     }
