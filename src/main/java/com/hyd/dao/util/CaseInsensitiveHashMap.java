@@ -1,6 +1,7 @@
 package com.hyd.dao.util;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 对 key 忽略大小写的 HashMap
@@ -8,6 +9,13 @@ import java.util.HashMap;
 public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = 1L;
+
+    // lowercase -> original
+    private Map<String, String> originalKeys = new HashMap<>();
+
+    private String originalKey(String key) {
+        return originalKeys.get(key.toLowerCase());
+    }
 
     /**
      * 根据 key 获取值
@@ -19,7 +27,12 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
      * @throws IllegalArgumentException 如果 key 不是一个字符串
      */
     public V get(String key) {
-        return super.get(key.toLowerCase());
+        String originalKey = originalKeys.get(key.toLowerCase());
+        if (originalKey == null) {
+            return null;
+        } else {
+            return super.get(originalKey);
+        }
     }
 
     /**
@@ -32,7 +45,13 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
      */
     @SuppressWarnings({"unchecked"})
     public V put(String key, V value) {
-        key = key.toLowerCase();
+        String lcKey = key.toLowerCase();
+        String originalKey = originalKeys.get(lcKey);
+        if (originalKey != null) {
+            super.remove(originalKey);
+        }
+
+        originalKeys.put(lcKey, key);
         return super.put(key, value);
     }
 
@@ -49,7 +68,38 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
             throw new IllegalArgumentException("Key must be a string.");
         }
 
-        key = ((String) key).toLowerCase();
-        return super.containsKey(key);
+        String lcKey = ((String) key).toLowerCase();
+        return originalKeys.containsKey(lcKey);
+    }
+
+    @Override
+    public V remove(Object key) {
+        if (!(key instanceof String)) {
+            throw new IllegalArgumentException("Key must be a string.");
+        }
+
+        String lcKey = ((String) key).toLowerCase();
+        String originalKey = originalKeys.get(lcKey);
+        originalKeys.remove(lcKey);
+        return super.remove(originalKey);
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        if (!(key instanceof String)) {
+            throw new IllegalArgumentException("Key must be a string.");
+        }
+
+        String lcKey = ((String) key).toLowerCase();
+        String originalKey = originalKeys.get(lcKey);
+        boolean found = super.remove(originalKey, value);
+        if (found) {
+            originalKeys.remove(lcKey);
+        }
+        return found;
+    }
+
+    public String getOriginalKey(String key) {
+        return originalKeys.get(key);
     }
 }
