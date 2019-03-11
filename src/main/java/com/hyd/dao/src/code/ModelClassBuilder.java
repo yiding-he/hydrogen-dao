@@ -2,6 +2,7 @@ package com.hyd.dao.src.code;
 
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.Str;
 
 /**
@@ -13,8 +14,9 @@ import com.hyd.dao.util.Str;
 public class ModelClassBuilder extends ClassDefBuilder {
 
     public ModelClassBuilder(
-            String packageName, String tableName, ColumnInfo[] columnInfos, DatabaseType databaseType) {
-        super(packageName, tableName, columnInfos, databaseType);
+            String packageName, String tableName, ColumnInfo[] columnInfos,
+            DatabaseType databaseType, NameConverter nameConverter) {
+        super(packageName, tableName, columnInfos, databaseType, nameConverter);
     }
 
     @Override
@@ -30,7 +32,7 @@ public class ModelClassBuilder extends ClassDefBuilder {
 
         for (ColumnInfo columnInfo : columnInfos) {
             FieldDef field = new FieldDef();
-            field.name = Str.uncapitalize(Str.underscore2Property(columnInfo.getColumnName()));
+            field.name = nameConverter.column2Field(columnInfo.getColumnName());
             field.type = getJavaType(columnInfo);
             field.access = AccessType.Private;
 

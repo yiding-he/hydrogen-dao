@@ -1,14 +1,18 @@
 package com.hyd.dao.sp;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.util.BeanUtil;
+import com.hyd.dao.Row;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 执行存储过程帮助类
@@ -77,12 +81,9 @@ public class StorageProsedureHelper {
      * @return 调用存储过程的语句
      */
     private static String generateCallStatement(String name, SpParam[] params) {
-        String call_str = "{call " + name + "(";
-        for (int i = 0; i < params.length; i++) {
-            call_str += "?" + (i == params.length - 1 ? "" : ",");
-        }
-        call_str += ")}";
-        return call_str;
+        return "{call " + name + "(" +
+                Stream.of(params).map(p -> "?").collect(Collectors.joining(",")) +
+                ")}";
     }
 
     /**
@@ -98,13 +99,13 @@ public class StorageProsedureHelper {
      */
     public static SpParam[] createSpParams(String name, Object[] params, Connection conn) throws SQLException {
         try {
-            HashMap[] rows = getSpParamDefinitions(conn, name);
+            List<Row> rows = getSpParamDefinitions(conn, name);
 
-            SpParam[] sp_params = new SpParam[rows.length];
+            SpParam[] sp_params = new SpParam[rows.size()];
             int param_counter = 0;
-            for (int i = 0; i < rows.length; i++) {
-                HashMap row = rows[i];
 
+            for (int i = 0; i < rows.size(); i++) {
+                Row row = rows.get(i);
                 int data_type = getIntegerValue(row, "data_type");
                 int column_type = getIntegerValue(row, "column_type");
 
@@ -147,12 +148,12 @@ public class StorageProsedureHelper {
      *
      * @throws Exception 如果获取存储过程信息失败
      */
-    private static HashMap[] getSpParamDefinitions(Connection conn, String spName) throws Exception {
+    private static List<Row> getSpParamDefinitions(Connection conn, String spName) throws Exception {
         DatabaseMetaData metaData = conn.getMetaData();
 
         String schema;
 
-        if (spName.indexOf(".") == -1) {
+        if (!spName.contains(".")) {
             schema = metaData.getUserName().toUpperCase();
         } else {
             schema = spName.split("\\.")[0].toUpperCase();
@@ -161,8 +162,8 @@ public class StorageProsedureHelper {
 
         ResultSet procedures = metaData.getProcedureColumns(null, schema, spName.toUpperCase(), "%");
 
-        HashMap[] rows = ResultSetUtil.readResultSet(procedures);
-        BeanUtil.sort(rows, "sequence");    // 按参数的顺序排列
+        List<Row> rows = ResultSetUtil.readResultSet(procedures);
+        rows.sort(Comparator.comparing(m -> m.getIntegerObject("sequence")));
         return rows;
     }
 }

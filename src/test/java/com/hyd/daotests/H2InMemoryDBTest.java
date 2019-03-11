@@ -37,8 +37,8 @@ public class H2InMemoryDBTest {
         dataSources.withConnection("h2", connection -> {
             try {
                 ResultSet columns = connection.getMetaData().getColumns(null, "PUBLIC", "TABLE1", "%");
-                HashMap[] maps = ResultSetUtil.readResultSet(columns);
-                if (maps.length > 0) {
+                List<Row> maps = ResultSetUtil.readResultSet(columns);
+                if (!maps.isEmpty()) {
                     for (HashMap map : maps) {
                         System.out.println(map);
                     }

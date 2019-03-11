@@ -2,7 +2,7 @@ package com.hyd.dao.database.type;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.Str;
+import com.hyd.dao.util.TypeUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -72,24 +72,27 @@ public class TypeConverter {
      * @throws Exception 如果封装失败
      */
     @SuppressWarnings({"unchecked"})
-    public static List<Object> convert(Class clazz, List<Object> simpleResult) throws Exception { // NOSONAR
+    public static List<Object> convert(
+            Class clazz, List<Object> simpleResult, NameConverter nameConverter
+    ) throws Exception {
         ArrayList<Object> result = new ArrayList<Object>();
 
         for (Object obj : simpleResult) {
             Map<String, Object> row = (Map<String, Object>) obj;
-            Object converted = convertRow(clazz, row);
+            Object converted = convertRow(clazz, row, nameConverter);
             result.add(converted);
         }
 
-        warnedMsgs.set(new ArrayList<String>());
+        warnedMsgs.set(new ArrayList<>());
         return result;
     }
 
     /**
      * 将一条查询记录包装为一个对象
      *
-     * @param clazz 包装类
-     * @param row   查询记录
+     * @param clazz         包装类
+     * @param row           查询记录
+     * @param nameConverter 名称转换类
      *
      * @return 包装后的对象
      *
@@ -100,7 +103,9 @@ public class TypeConverter {
      * @throws SQLException              如果读取 LOB 数据失败
      * @throws IOException               如果读取 LOB 数据失败
      */
-    public static Object convertRow(Class clazz, Map<String, Object> row)
+    public static Object convertRow(
+            Class clazz, Map<String, Object> row, NameConverter nameConverter
+    )
             throws IllegalAccessException, InstantiationException, SQLException, IOException,
             NoSuchMethodException, InvocationTargetException {
 
@@ -108,27 +113,20 @@ public class TypeConverter {
         Object result = clazz.getDeclaredConstructor().newInstance();
 
         for (String colName : row.keySet()) {
-            String fieldName = getFieldName(colName);
-            if (fieldName == null) {
-                warn("无法获取字段" + colName + "的属性名");
+            String fieldName = nameConverter.column2Field(colName);
+            Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
+            if (field == null) {
+                warn("Unable to convert column '" + colName + "' to field name.");
                 continue;
             }
 
-            Class fieldType;
-            try {
-                fieldType = getFieldType(clazz, fieldName);
-            } catch (IllegalAccessException e) {
-                warn(clazz + " 中没有属性 '" + fieldName + "'");
-                continue;
-            }
-
-            Object value = convertProperty(row.get(colName), fieldType);
+            Object value = convertProperty(row.get(colName), field.getType());
             if (value != null) {
                 try {
-                    BeanUtil.setValue(result, fieldName, value);
+                    BeanUtil.setValueIgnoreCase(result, fieldName, value);
                 } catch (Exception e) {
-                    warn("设置" + clazz + " 的属性 \"" + fieldName
-                            + "\"(" + value.getClass().getName() + ")失败: " + e.toString());
+                    warn(String.format("Error setting value of field '%s#%s' (%s)",
+                            clazz.getCanonicalName(), fieldName, value.getClass().getCanonicalName()));
                 }
             }
         }
@@ -136,20 +134,13 @@ public class TypeConverter {
     }
 
     private static Class getFieldType(Class clazz, String fieldName) throws IllegalAccessException {
-        Class tracingType = clazz;
-
-        while (tracingType != null && tracingType != Object.class) {
-            try {
-                Field field = tracingType.getDeclaredField(fieldName);
-                if (field == null) {
-                    throw new IllegalAccessException("找不到 " + clazz + " 的成员：" + fieldName);
-                }
-                return field.getType();
-            } catch (NoSuchFieldException e) {
-                tracingType = tracingType.getSuperclass();
-            }
+        Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
+        if (field != null) {
+            return field.getType();
+        } else {
+            throw new IllegalAccessException(
+                    "Field '" + fieldName + "' not found in class " + clazz.getCanonicalName());
         }
-        throw new IllegalAccessException("找不到 " + clazz + " 的成员：" + fieldName);
     }
 
     /**
@@ -170,7 +161,7 @@ public class TypeConverter {
 
         if (fieldType == Boolean.TYPE) {
             String str = String.valueOf(o);
-            if (str.matches("^\\-?\\d+\\.?\\d+$")) {    // 如果该字段存储的是数字
+            if (str.matches("^-?\\d+\\.?\\d+$")) {    // 如果该字段存储的是数字
                 return !"0".equals(str);
             } else {
                 return "true".equalsIgnoreCase(str) || "yes".equalsIgnoreCase(str);
@@ -233,22 +224,4 @@ public class TypeConverter {
             list.add(msg);
         }
     }
-
-    /**
-     * 将字段名转换成属性名。该方法首先从缓存中取相应的属性名。如果取不到，则调用
-     * {@link Str#columnToProperty(String)}
-     * 方法获取属性名，并放入缓存。
-     *
-     * @param columnName 字段名
-     *
-     * @return 属性名
-     */
-    public static String getFieldName(String columnName) {
-        if (convertBuffer.get(columnName) == null) {
-            String fieldName = Str.columnToProperty(columnName);
-            convertBuffer.put(columnName, fieldName);
-        }
-        return convertBuffer.get(columnName);
-    }
-
 }

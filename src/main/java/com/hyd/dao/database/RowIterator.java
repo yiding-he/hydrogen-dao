@@ -2,6 +2,7 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.util.ResultSetUtil;
@@ -42,6 +43,8 @@ public class RowIterator implements Closeable {
 
     private ResultSet rs;
 
+    private NameConverter nameConverter;
+
     private Consumer<Row> rowPreProcessor;
 
     private boolean closed;
@@ -61,6 +64,10 @@ public class RowIterator implements Closeable {
 
     public void setRowPreProcessor(Consumer<Row> rowPreProcessor) {
         this.rowPreProcessor = rowPreProcessor;
+    }
+
+    public void setNameConverter(NameConverter nameConverter) {
+        this.nameConverter = nameConverter;
     }
 
     /**
@@ -156,7 +163,7 @@ public class RowIterator implements Closeable {
             while (this.next()) {
                 try {
                     Row row = this.getRow();
-                    T t = (T) TypeConverter.convertRow(type, row);
+                    T t = (T) TypeConverter.convertRow(type, row, nameConverter);
                     consumer.accept(t);
                 } catch (Exception e) {
                     throw new DAOException(e);

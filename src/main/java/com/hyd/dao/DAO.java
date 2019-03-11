@@ -5,6 +5,7 @@ import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.executor.Executor;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
@@ -49,6 +50,8 @@ public class DAO {
     private String dsName;
 
     private ExecutorFactory executorFactory;
+
+    private NameConverter nameConverter;
 
     /**
      * If it is out of current transaction
@@ -145,6 +148,10 @@ public class DAO {
 
     void setExecutorFactory(ExecutorFactory executorFactory) {
         this.executorFactory = executorFactory;
+    }
+
+    public void setNameConverter(NameConverter nameConverter) {
+        this.nameConverter = nameConverter;
     }
 
     /**
@@ -762,7 +769,9 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     private Executor getExecutor(boolean standalone) throws DAOException {
-        return executorFactory.getExecutor(standalone);
+        Executor executor = executorFactory.getExecutor(standalone);
+        executor.setNameConverter(nameConverter);
+        return executor;
     }
 
     /**

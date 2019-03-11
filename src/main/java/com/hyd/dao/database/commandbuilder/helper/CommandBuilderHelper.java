@@ -1,9 +1,6 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import com.hyd.dao.DAO;
-import com.hyd.dao.DAOException;
-import com.hyd.dao.DataConversionException;
-import com.hyd.dao.Sequence;
+import com.hyd.dao.*;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.log.Logger;
@@ -20,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 用于构造 SQL 命令的帮助类，隐藏不同数据库之间的区别
@@ -78,8 +74,8 @@ public class CommandBuilderHelper {
     public List<String> getTableNames() throws SQLException {
         try {
             ResultSet tables = this.connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
-            HashMap[] maps = ResultSetUtil.readResultSet(tables);
-            return Stream.of(maps).map(m -> (String) m.get("table_name")).collect(Collectors.toList());
+            List<Row> tableRows = ResultSetUtil.readResultSet(tables);
+            return tableRows.stream().map(m -> (String) m.get("table_name")).collect(Collectors.toList());
         } catch (SQLException e) {
             throw e;
         } catch (Exception e) {

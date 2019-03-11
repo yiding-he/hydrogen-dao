@@ -1,6 +1,8 @@
 package com.hyd.dao.src.fx;
 
 import com.hyd.dao.src.code.ClassDef;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -33,6 +35,8 @@ public class Profile {
 
     private StringProperty database = new SimpleStringProperty();
 
+    private ObjectProperty<String> nameConverter = new SimpleObjectProperty<>();
+
     private Map<String, ClassDef> repoClassMap = new HashMap<>();
 
     private Map<String, ClassDef> modelClassMap = new HashMap<>();
@@ -42,6 +46,18 @@ public class Profile {
 
     public Profile(String name) {
         this.setName(name);
+    }
+
+    public String getNameConverter() {
+        return nameConverter.get();
+    }
+
+    public ObjectProperty<String> nameConverterProperty() {
+        return nameConverter;
+    }
+
+    public void setNameConverter(String nameConverter) {
+        this.nameConverter.set(nameConverter);
     }
 
     public String getTestRootDir() {

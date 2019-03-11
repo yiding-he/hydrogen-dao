@@ -5,6 +5,7 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.JDBCDriver;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
 import com.hyd.dao.src.code.*;
@@ -59,6 +60,8 @@ public class CodeGeneratorApp extends Application {
 
     public static final String APP_NAME = "代码生成工具";
 
+    public static final String[] NAME_CONVERTERS = {"属性大小写 <-> 字段下划线", "不转换"};
+
     private static Stage primaryStage;
 
     ///////////////////////////////////////////////
@@ -96,7 +99,7 @@ public class CodeGeneratorApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         CodeGeneratorApp.primaryStage = primaryStage;
-        Scene scene = new Scene(root(), 1000, 700);
+        Scene scene = new Scene(root(), 1200, 700);
 
         initControls();
 
@@ -182,19 +185,28 @@ public class CodeGeneratorApp extends Application {
         ClassDef repoClass = currentProfile.getRepoClass(tableName);
         String repoPackage = currentProfile.getRepoPackage();
         String modelPackage = currentProfile.getModelPackage();
+        NameConverter nameConverter = getNameConverter(currentProfile);
 
         if (repoClass != null) {
             return repoClass;
         } else {
             RepoClassDefBuilder classDefBuilder = new RepoClassDefBuilder(
-                    repoPackage, modelPackage,
-                    tableName, currentTableColumns, databaseType);
+                    repoPackage, modelPackage, tableName, currentTableColumns, databaseType, nameConverter
+            );
 
             repoClass = classDefBuilder.build(tableName);
             currentProfile.setRepoClass(tableName, repoClass);
         }
 
         return repoClass;
+    }
+
+    private NameConverter getNameConverter(Profile currentProfile) {
+        if (currentProfile.getNameConverter().equals(NAME_CONVERTERS[0])) {
+            return NameConverter.CAMEL_UNDERSCORE;
+        } else {
+            return NameConverter.NONE;
+        }
     }
 
     private ClassDef buildModelClassDef(String tableName, Profile currentProfile) {
@@ -204,12 +216,14 @@ public class CodeGeneratorApp extends Application {
 
         ClassDef modelClass = currentProfile.getModelClass(tableName);
         String modelPackage = currentProfile.getModelPackage();
+        NameConverter nameConverter = getNameConverter(currentProfile);
 
         if (modelClass != null) {
             return modelClass;
         } else {
-            ClassDefBuilder classDefBuilder =
-                    new ModelClassBuilder(modelPackage, tableName, currentTableColumns, databaseType);
+            ClassDefBuilder classDefBuilder = new ModelClassBuilder(
+                    modelPackage, tableName, currentTableColumns, databaseType, nameConverter
+            );
 
             modelClass = classDefBuilder.build(tableName);
             currentProfile.setModelClass(tableName, modelClass);
@@ -292,7 +306,8 @@ public class CodeGeneratorApp extends Application {
                 directoryField("源码根目录:", Profile::codeRootDirProperty),
                 directoryField("测试根目录:", Profile::testRootDirProperty),
                 textField("Model 包名:", Profile::modelPackageProperty),
-                textField("Repo 包名:", Profile::repoPackageProperty)
+                textField("Repo 包名:", Profile::repoPackageProperty),
+                comboField("命名转换", Profile::nameConverterProperty, NAME_CONVERTERS)
         ));
 
         Button deleteButton = button("删除", this::deleteProfile);
@@ -326,7 +341,7 @@ public class CodeGeneratorApp extends Application {
                                                         connectButton
                                                 )
                                         )),
-                                titledPane(250, "档案选项", profileForm)
+                                titledPane(350, "档案选项", profileForm)
                         ),
                         vbox(LastExpand, 0, 0,
                                 titledPane(-1, "数据库表",
@@ -553,7 +568,7 @@ public class CodeGeneratorApp extends Application {
         repoMethodTableView.setPrefHeight(150);
         repoMethodTableView.getColumns().add(column("方法名", method -> method.name));
         repoMethodTableView.getColumns().add(column("返回类型",
-                method -> method.returnType == null? "": method.returnType.getName()));
+                method -> method.returnType == null ? "" : method.returnType.getName()));
         repoMethodTableView.getColumns().add(column("参数", MethodDef::args2String));
         repoMethodTableView.getItems().addListener((ListChangeListener<? super RepoMethodDef>) c -> updateRepoCode());
         return repoMethodTableView;

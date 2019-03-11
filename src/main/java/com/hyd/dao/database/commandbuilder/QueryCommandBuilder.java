@@ -3,7 +3,7 @@ package com.hyd.dao.database.commandbuilder;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.type.TypeConverter;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.BeanUtil;
 
 import java.sql.Connection;
@@ -53,7 +53,10 @@ public class QueryCommandBuilder {
         return new Command(statement, values);
     }
 
-    public static Command build(Connection connection, String tableName, Object obj) throws SQLException {
+    public static Command build(
+            Connection connection, String tableName, Object obj, NameConverter nameConverter
+    ) throws SQLException {
+
         FQN fqn = new FQN(connection, tableName);
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
@@ -63,7 +66,8 @@ public class QueryCommandBuilder {
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
                 statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
-                values.add(BeanUtil.getValue(obj, TypeConverter.getFieldName(info.getColumnName())));
+                String fieldName = nameConverter.column2Field(info.getColumnName());
+                values.add(BeanUtil.getValue(obj, fieldName));
                 break;
             }
         }

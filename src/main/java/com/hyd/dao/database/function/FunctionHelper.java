@@ -1,14 +1,18 @@
 package com.hyd.dao.database.function;
 
 import com.hyd.dao.DAOException;
+import com.hyd.dao.Row;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProsedureHelper;
-import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.ResultSetUtil;
 
 import java.sql.*;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据库 function 处理帮助类
@@ -37,12 +41,9 @@ public class FunctionHelper {
     }
 
     private static String generateFunctionStatement(String name, SpParam[] params) {
-        String call_str = "{? = call " + name + "(";
-        for (int i = 0; i < params.length; i++) {
-            call_str += "?" + (i == params.length - 1 ? "" : ",");
-        }
-        call_str += ")}";
-        return call_str;
+        return "{? = call " + name + "(" +
+                Stream.of(params).map(p -> "?").collect(Collectors.joining(",")) +
+                ")}";
     }
 
     public static SpParam[] createFunctionParams(String name, Object[] params, Connection connection) throws Exception {
@@ -56,24 +57,25 @@ public class FunctionHelper {
         }
 
         ResultSet rs = metaData.getProcedureColumns(null, schema, name.toUpperCase(), "%");
-        HashMap[] function_columns = ResultSetUtil.readResultSet(rs);
+        List<Row> functionColumns = ResultSetUtil.readResultSet(rs);
 
-        if (function_columns.length == 0) {
+        if (functionColumns.isEmpty()) {
             throw new DAOException("存储过程 " + name + " 没有找到任何参数。");
         }
 
         // 按照 sequence 的值对 map 数组进行排序
-        BeanUtil.sort(function_columns, "sequence");
+        functionColumns.sort(Comparator.comparing(m -> m.getIntegerObject("sequence")));
 
-        SpParam[] result = new SpParam[function_columns.length];
+        SpParam[] result = new SpParam[functionColumns.size()];
 
-        for (int i = 0; i < function_columns.length; i++) {
-            HashMap row = function_columns[i];
+        for (int i = 0; i < functionColumns.size(); i++) {
+            Row row = functionColumns.get(i);
             // function_columns 的第一行是方法的返回值
-            // 注意，params 的长度可能小于 function 参数列表的长度，这时候假设多余的参数是有缺省值的。 
+            // 注意，params 的长度可能小于 function 参数列表的长度，这时候假设多余的参数是有缺省值的。
             Object param_value = (i > 0 && i <= params.length) ? params[i - 1] : null;
             result[i] = createSpParam(row, param_value);
         }
+
         return result;
     }
 

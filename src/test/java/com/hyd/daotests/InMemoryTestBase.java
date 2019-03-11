@@ -2,6 +2,7 @@ package com.hyd.daotests;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.DBCPDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.BeforeClass;
@@ -15,10 +16,17 @@ public abstract class InMemoryTestBase {
 
     protected static DAO dao;
 
+    protected static DAO dao2;
+
     @BeforeClass
     public static void beforeClass() {
         BasicDataSource dataSource = DBCPDataSource.newH2MemDataSource();
-        dataSources.setDataSource("h2", dataSource);
-        dao = dataSources.getDAO("h2");
+        dataSources.setDataSource("h20", dataSource);
+        dataSources.setDataSource("h21", dataSource);
+
+        dataSources.setColumnNameConverter("h21", NameConverter.NONE);
+
+        dao = dataSources.getDAO("h20");
+        dao2 = dataSources.getDAO("h21");
     }
 }

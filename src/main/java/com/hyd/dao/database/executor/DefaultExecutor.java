@@ -9,6 +9,7 @@ import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.function.FunctionHelper;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
@@ -66,9 +67,9 @@ public class DefaultExecutor extends Executor {
             // 如果生成了分页语句，则读取所有结果，否则读取部分结果。
             Page result;
             if (rangedSql != null) {
-                result = ResultSetUtil.readPageResultSet(rs, clazz, -1, -1);
+                result = ResultSetUtil.readPageResultSet(rs, clazz, nameConverter, -1, -1);
             } else {
-                result = ResultSetUtil.readPageResultSet(rs, clazz, pageSize, pageIndex);
+                result = ResultSetUtil.readPageResultSet(rs, clazz, nameConverter, pageSize, pageIndex);
             }
 
             result.setTotal(queryCount(sql, params));
@@ -133,7 +134,9 @@ public class DefaultExecutor extends Executor {
         } catch (SQLException e) {
             throw new DAOException("Query failed:", e, sql, params);
         }
-        return new RowIterator(rs, preProcessor);
+        RowIterator rowIterator = new RowIterator(rs, preProcessor);
+        rowIterator.setNameConverter(nameConverter);
+        return rowIterator;
     }
 
     /**
@@ -160,9 +163,9 @@ public class DefaultExecutor extends Executor {
 
             List<Object> result;
             if (rangedSql != null) {
-                result = ResultSetUtil.readResultSet(rs, clazz, -1, -1);
+                result = ResultSetUtil.readResultSet(rs, clazz, nameConverter, -1, -1);
             } else {
-                result = ResultSetUtil.readResultSet(rs, clazz, startPosition, endPosition);
+                result = ResultSetUtil.readResultSet(rs, clazz, nameConverter, startPosition, endPosition);
             }
 
             LOG.debug(findCaller() + "|Query result: " + result.size() + " records.");
@@ -189,7 +192,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public boolean exists(Object obj, String tableName) {
         try {
-            Command command = QueryCommandBuilder.build(connection, tableName, obj);
+            Command command = QueryCommandBuilder.build(connection, tableName, obj, nameConverter);
             return !query(null, command.getStatement(), command.getParams(), -1, -1).isEmpty();
         } catch (SQLException e) {
             throw new DAOException("Delete failed: " + e.getMessage(), e);
@@ -495,7 +498,7 @@ public class DefaultExecutor extends Executor {
                     // 对 Oracle 的 CURSOR 类型进行特殊处理
                     if (databaseType == DatabaseType.Oracle && param.getSqlType() == -10) {
                         ResultSet rs1 = (ResultSet) value;
-                        result.add(ResultSetUtil.readResultSet(rs1, null, -1, -1));
+                        result.add(ResultSetUtil.readResultSet(rs1, null, NameConverter.DEFAULT, -1, -1));
 
                     } else {
                         result.add(TypeUtil.convertDatabaseValue(param.getSqlType(), value));

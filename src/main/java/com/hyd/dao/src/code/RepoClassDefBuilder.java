@@ -2,6 +2,7 @@ package com.hyd.dao.src.code;
 
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.Str;
 
 /**
@@ -15,9 +16,9 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
     private String modelPackage;
 
     public RepoClassDefBuilder(
-            String packageName, String modelPackage, String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType) {
-        super(packageName, tableName, columnInfos, databaseType);
+            String repoPackage, String modelPackage, String tableName, ColumnInfo[] columnInfos,
+            DatabaseType databaseType, NameConverter nameConverter) {
+        super(repoPackage, tableName, columnInfos, databaseType, nameConverter);
         this.modelPackage = modelPackage;
     }
 

@@ -1,6 +1,7 @@
 package com.hyd.dao;
 
 import com.hyd.dao.database.ExecutorFactory;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.Locker;
 
 import javax.sql.DataSource;
@@ -20,14 +21,19 @@ public class DataSources {
     public static final String DEFAULT_DATA_SOURCE_NAME = "default";
 
     /**
-     * 持有 {@link javax.sql.DataSource} 对象的集合
+     * dsName -> DataSource
      */
-    private Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+    private Map<String, DataSource> dataSources = new HashMap<>();
 
     /**
-     * “数据源名称 -> ExecutorFactory对象” 映射关系
+     * dsName -> ExecutorFactory
      */
-    private Map<String, ExecutorFactory> executorFactories = new HashMap<String, ExecutorFactory>();
+    private Map<String, ExecutorFactory> executorFactories = new HashMap<>();
+
+    /**
+     * dsName -> NameConverter
+     */
+    private Map<String, NameConverter> columnNameConverters = new HashMap<>();
 
     /**
      * 删除指定的数据源
@@ -55,6 +61,10 @@ public class DataSources {
 
     public void setDataSource(String dataSourceName, DataSource dataSource) {
         this.dataSources.put(dataSourceName, dataSource);
+    }
+
+    public void setColumnNameConverter(String dataSourceName, NameConverter nameConverter) {
+        this.columnNameConverters.put(dataSourceName, nameConverter);
     }
 
     public boolean contains(String dsName) {
@@ -107,6 +117,7 @@ public class DataSources {
 
         DAO dao = new DAO(dsName, standAlone);
         dao.setExecutorFactory(getExecutorFactory(dsName));
+        dao.setNameConverter(columnNameConverters.getOrDefault(dsName, NameConverter.DEFAULT));
         return dao;
     }
 
@@ -128,6 +139,7 @@ public class DataSources {
         try {
             T dao = subclassType.getConstructor(String.class, Boolean.TYPE).newInstance(dsName, standAlone);
             dao.setExecutorFactory(getExecutorFactory(dsName));
+            dao.setNameConverter(columnNameConverters.getOrDefault(dsName, NameConverter.DEFAULT));
             return dao;
         } catch (Exception e) {
             throw new DAOException(e);

@@ -7,6 +7,7 @@ import com.hyd.dao.Row;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.TransactionManager;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.snapshot.ExecutorInfo;
 
 import java.sql.Connection;
@@ -32,6 +33,8 @@ public abstract class Executor {
 
     protected DatabaseType databaseType;
 
+    protected NameConverter nameConverter;
+
     /**
      * 构造函数
      *
@@ -42,6 +45,10 @@ public abstract class Executor {
         this.info = new ExecutorInfo(dsName);
         this.connection = connection;
         this.databaseType = DatabaseType.of(connection);
+    }
+
+    public void setNameConverter(NameConverter nameConverter) {
+        this.nameConverter = nameConverter;
     }
 
     /**

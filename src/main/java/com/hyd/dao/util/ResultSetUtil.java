@@ -2,6 +2,7 @@ package com.hyd.dao.util;
 
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用于处理 ResultSet 的辅助类
@@ -20,7 +22,7 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class ResultSetUtil {
 
-    public static final String PAGNATION_WRAPPER_COLUMN_NAME = "pagnation_wrapper_column_name";
+    public static final String PAGINATION_WRAPPER_COLUMN_NAME = "pagination_wrapper_column_name";
 
     /**
      * 查询 ResultSet 中有哪些字段
@@ -58,7 +60,7 @@ public class ResultSetUtil {
             int columnType = meta.getColumnType(i + 1);
             Object o = rs.getObject(i + 1);
             Object value = TypeUtil.convertDatabaseValue(columnType, o);
-            row.put(colName.toLowerCase(), value);
+            row.put(colName, value);
         }
         return row;
     }
@@ -76,7 +78,8 @@ public class ResultSetUtil {
      * @throws java.sql.SQLException 如果查询失败
      */
     public static List<Object> readResultSet(
-            ResultSet rs, Class clazz, int startPosition, int endPosition) throws Exception { // NOSONAR
+            ResultSet rs, Class clazz, NameConverter nameConverter,
+            int startPosition, int endPosition) throws Exception {
 
         ArrayList<Object> result = new ArrayList<Object>();
 
@@ -92,13 +95,13 @@ public class ResultSetUtil {
             Map row = readRow(rs);
 
             // 如果是包含分页字段，则去掉
-            row.remove(PAGNATION_WRAPPER_COLUMN_NAME);
+            row.remove(PAGINATION_WRAPPER_COLUMN_NAME);
 
             result.add(row);
             counter++;
         }
 
-        return clazz == null ? result : TypeConverter.convert(clazz, result);
+        return clazz == null ? result : TypeConverter.convert(clazz, result, nameConverter);
     }
 
     // 将 ResultSet 扫描位置重置为第0位
@@ -126,20 +129,21 @@ public class ResultSetUtil {
      * @throws java.sql.SQLException 如果查询失败
      */
     public static Page readPageResultSet(
-            ResultSet rs, Class clazz, int pageSize, int pageIndex) throws Exception { // NOSONAR
+            ResultSet rs, Class clazz, NameConverter nameConverter,
+            int pageSize, int pageIndex) throws Exception {
 
         Page result = new Page();
 
         int startPos = pageSize < 0 ? -1 : pageIndex * pageSize;
         int endPos = startPos + pageSize;
 
-        result.addAll(readResultSet(rs, clazz, startPos, endPos));
+        result.addAll(readResultSet(rs, clazz,  nameConverter, startPos, endPos));
 
         return result;
     }
 
-    public static HashMap[] readResultSet(ResultSet rs) throws Exception { // NOSONAR
-        List list = readResultSet(rs, null, -1, -1);
-        return (HashMap[]) list.toArray(new HashMap[list.size()]);
+    public static List<Row> readResultSet(ResultSet rs) throws Exception {
+        List<Object> list = readResultSet(rs, null, NameConverter.DEFAULT, -1, -1);
+        return list.stream().map(o -> (Row)o).collect(Collectors.toList());
     }
 }

@@ -6,6 +6,7 @@ import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.text.ParseException;
@@ -184,4 +185,18 @@ public class TypeUtil {
         return "String";
     }
 
+    public static Field getFieldIgnoreCase(Class type, String fieldName) {
+        if (type == Object.class) {
+            return null;
+        }
+
+        Field[] fields = type.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getName().equalsIgnoreCase(fieldName)) {
+                return field;
+            }
+        }
+
+        return getFieldIgnoreCase(type.getSuperclass(), fieldName);
+    }
 }

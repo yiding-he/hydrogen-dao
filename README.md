@@ -9,7 +9,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前版本为 `3.2.0-SNAPSHOT`
+当前版本为 `3.3.0-SNAPSHOT`
 
 ## 示例
 
@@ -68,6 +68,11 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ```
 
 ## 更新
+
+#### 2019-03-11
+
+* 版本号升级到 3.3.0-SNAPSHOT
+* 允许自定义数据库字段名和类属性名之间的映射规则，参见 `DataSources.setColumnNameConverter()`
 
 #### 2019-01-17
 
