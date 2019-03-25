@@ -2,21 +2,66 @@ package com.hyd.dao.sql;
 
 public class SQL3 {
 
-    public static Table Table(String name) {
+    protected Table Table(String name) {
         return new Table();
     }
 
-    public static Select Select(Column... columns) {
+    protected Select Select(Selectable... selectables) {
         return new Select();
     }
 
-    public static class Column {
+    protected Select Select(String... columns) {
+        return new Select();
+    }
+
+    protected Select Any(Selectable selectable) {
+        return new Select();
+    }
+
+    protected Select All(Selectable selectable) {
+        return new Select();
+    }
+
+    protected Expression Expr(String expression) {
+        return new Expression();
+    }
+
+    protected Column Column(String column) {
+        return new Column();
+    }
+
+    protected Condition Where(String expression, Object... args) {
+        if (args.length == 1 && args[0].getClass().isArray()) {
+            return Where(expression, (Object[]) args[0]);
+        }
+        return new Condition();
+    }
+
+    protected JoiningContext LeftJoin(String table1) {
+        return new JoiningContext();
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    public static abstract class Selectable {
+
+    }
+
+    public static class Expression extends Selectable {
+
+    }
+
+    public static class Column extends Selectable {
 
         public Condition In(Object... values) {
             return new Condition();
         }
 
         public Condition LessOrEqual(Object value) {
+            return new Condition();
+        }
+
+        public Condition Equals(Object value) {
             return new Condition();
         }
     }
@@ -38,15 +83,19 @@ public class SQL3 {
 
     public static class Select {
 
-        public Select WithJoining(Joining... joinings) {
+        public Select Joins(Joining... joinings) {
             return this;
         }
 
-        public Select WithAllMatch(Condition... conditions) {
+        public Select Match(Condition condition) {
             return this;
         }
 
-        public Select WithAnyMatch(Condition... conditions) {
+        public Select MatchAll(Condition... conditions) {
+            return this;
+        }
+
+        public Select MatchAny(Condition... conditions) {
             return this;
         }
     }
@@ -57,8 +106,19 @@ public class SQL3 {
             return this;
         }
 
-        public Joining OnMatch(Column column1, Column column2) {
+        public Joining On(Condition condition) {
             return this;
+        }
+
+        public Joining On(String expression) {
+            return this;
+        }
+    }
+
+    public static class JoiningContext {
+
+        public Joining With(String table2) {
+            return new Joining();
         }
     }
 
