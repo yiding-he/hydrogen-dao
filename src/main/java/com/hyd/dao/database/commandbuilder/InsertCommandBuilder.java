@@ -6,6 +6,7 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.Str;
 
 import java.sql.Connection;
@@ -18,8 +19,10 @@ import java.util.List;
  */
 public class InsertCommandBuilder {
 
-    private InsertCommandBuilder() {
+    private NameConverter nameConverter;
 
+    public InsertCommandBuilder(NameConverter nameConverter) {
+        this.nameConverter = nameConverter;
     }
 
     /**
@@ -74,8 +77,9 @@ public class InsertCommandBuilder {
     }
 
     // 获取要批量插入的表字段信息
-    private static ColumnInfo[] getBatchColumnInfo(Connection conn, String tableName,
-                                                   CommandBuilderHelper helper, Object sample) throws SQLException {
+    private static ColumnInfo[] getBatchColumnInfo(
+            Connection conn, String tableName,
+            CommandBuilderHelper helper, Object sample) throws SQLException {
 
         FQN fqn = new FQN(conn, tableName);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());

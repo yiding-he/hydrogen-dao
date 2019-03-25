@@ -1,4 +1,4 @@
-package com.hyd.dao;
+package com.hyd.dao.sql;
 
 public class SQL2 {
 
@@ -16,6 +16,10 @@ public class SQL2 {
 
     public static Condition AnyMatch(Condition... conditions) {
         return new Condition();
+    }
+
+    public static Joining LeftJoin(String table1, String table2) {
+        return new Joining(table1, table2);
     }
 
     ////////////////////////////////////////////////////////////
@@ -62,6 +66,30 @@ public class SQL2 {
         public Condition Equals(Object value) {
             return new Condition();
         }
+
+        public Condition Equals(Selectable selectable) {
+            return new Condition();
+        }
+    }
+
+    public static class Joining {
+
+        private String table1, table2;
+
+        private Condition joinCondition;
+
+        public Joining(String table1, String table2) {
+            this.table1 = table1;
+            this.table2 = table2;
+        }
+
+        public Joining Using(String column) {
+            return this;
+        }
+
+        public Joining On(Condition condition) {
+            return this;
+        }
     }
 
     public static class Select extends Selectable {
@@ -70,7 +98,7 @@ public class SQL2 {
             return this;
         }
 
-        public Select WithJoining(Column column1, Column column2) {
+        public Select WithJoining(Joining... joinings) {
             return this;
         }
 

@@ -25,4 +25,14 @@ public class DaoNoNameConvertTest extends JUnitRuleTestBase {
         assertNotNull(blogs.get(0).getCreateTime());
         System.out.println(blogs.get(0).getCreateTime());
     }
+
+    @Test
+    public void insert() throws Exception {
+        Blog blog = new Blog();
+        blog.setId(6L);
+        blog.setTitle("ddd");
+        blog.setContent("dfasdfasdf");
+
+        dao2.insert(blog, "blog2");
+    }
 }
