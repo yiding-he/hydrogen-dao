@@ -1,6 +1,14 @@
 package com.hyd.dao.sql;
 
+import com.hyd.dao.database.commandbuilder.Command;
+
+import java.util.Date;
+
 public class SQL3Test {
+
+    public static void main(String[] args) throws Exception {
+        new SQL3Test().test1();
+    }
 
     /*
      * select
@@ -48,9 +56,12 @@ public class SQL3Test {
                     All(login_user_id).Match(
                             last_login_time.LessOrEqual("2019-01-01")));
 
-            Select(selections)
+            Select select = Select(selections)
                     .Joins(user_role, user_login)
                     .MatchAll(roleCondition, userIdCondition, loginTimeCondition);
+
+            Command command = select.toCommand();
+            System.out.println(command.getStatement());
         }};
     }
 
@@ -91,7 +102,11 @@ public class SQL3Test {
         new SQL3() {{
             Select("user.*").MatchAll(
                     Where("user.user_id <= ?", maxUserId),
-                    Where("user.role_id in ?", roles)
+                    Where("user.role_id in ?", roles),
+                    MatchAny(
+                            Where("user.login_time > ?", new Date()),
+                            Where("user.login_time < ?", new Date())
+                    )
             );
         }};
 
