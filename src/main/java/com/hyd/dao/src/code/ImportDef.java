@@ -2,6 +2,7 @@ package com.hyd.dao.src.code;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,8 +21,19 @@ public class ImportDef implements Code {
         this.packages = new ArrayList<>(Arrays.asList(packages));
     }
 
-    public void addPackage(String pack) {
-        this.packages.add(pack);
+    public ImportDef add(String fullClassName) {
+        this.packages.add(fullClassName);
+        return this;
+    }
+
+    public ImportDef remove(String fullClassName) {
+        this.packages.remove(fullClassName);
+        return this;
+    }
+
+    public ImportDef addAll(Collection<String> packages) {
+        this.packages.addAll(packages);
+        return this;
     }
 
     @Override

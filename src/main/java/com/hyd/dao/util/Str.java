@@ -52,13 +52,13 @@ public class Str {
     public static String columnToProperty(String columnName) {
 
         if (columnName.equalsIgnoreCase("abstract")
-                || columnName.equalsIgnoreCase("private")
-                || columnName.equalsIgnoreCase("protected")
-                || columnName.equalsIgnoreCase("static")
-                || columnName.equalsIgnoreCase("void")
-                || columnName.equalsIgnoreCase("interface")
-                || columnName.equalsIgnoreCase("enum")
-                || columnName.equalsIgnoreCase("class")) {
+            || columnName.equalsIgnoreCase("private")
+            || columnName.equalsIgnoreCase("protected")
+            || columnName.equalsIgnoreCase("static")
+            || columnName.equalsIgnoreCase("void")
+            || columnName.equalsIgnoreCase("interface")
+            || columnName.equalsIgnoreCase("enum")
+            || columnName.equalsIgnoreCase("class")) {
 
             return columnName.toUpperCase();
         }
@@ -68,8 +68,8 @@ public class Str {
 
     public static String underscore2Property(String underscore) {
         return uncapitalize(Stream.of(underscore.toLowerCase().split("_"))
-                .map(Str::capitalize)
-                .collect(Collectors.joining()));
+            .map(Str::capitalize)
+            .collect(Collectors.joining()));
     }
 
     public static String underscore2Class(String underscore) {
@@ -180,6 +180,21 @@ public class Str {
 
         int index = s.lastIndexOf(search);
         return index == -1 ? s : s.substring(0, index);
+    }
+
+    public static String subStringAfterLast(String s, String search) {
+        if (s == null || search == null) {
+            return s;
+        }
+
+        int index = s.lastIndexOf(search);
+        if (index == -1) {
+            return s;
+        } else if (index + search.length() >= s.length()) {
+            return "";
+        } else {
+            return s.substring(index + search.length());
+        }
     }
 
     public static String defaultIfEmpty(String s, String defaultValue) {

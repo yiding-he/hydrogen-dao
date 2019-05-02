@@ -1,6 +1,7 @@
 package com.hyd.dao.src.fx;
 
 import com.hyd.dao.log.Logger;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -78,6 +79,12 @@ public class Fx {
         Tab tab = new Tab(text, content);
         tab.setClosable(false);
         return tab;
+    }
+
+    public static CheckBox checkBox(String text, BooleanProperty bindProperty) {
+        CheckBox checkBox = new CheckBox(text);
+        checkBox.selectedProperty().bindBidirectional(bindProperty);
+        return checkBox;
     }
 
     public static Button button(String text, Runnable action) {

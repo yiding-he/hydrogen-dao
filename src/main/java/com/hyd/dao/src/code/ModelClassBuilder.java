@@ -19,12 +19,25 @@ public class ModelClassBuilder extends ClassDefBuilder {
         super(packageName, tableName, columnInfos, databaseType, nameConverter);
     }
 
+    private boolean settersEnabled = true;
+
+    private boolean gettersEnabled = true;
+
+    public void setSettersEnabled(boolean settersEnabled) {
+        this.settersEnabled = settersEnabled;
+    }
+
+    public void setGettersEnabled(boolean gettersEnabled) {
+        this.gettersEnabled = gettersEnabled;
+    }
+
     @Override
     public ClassDef build(String tableName) {
 
         ClassDef classDef = new ClassDef();
-        classDef.imports = new ImportDef("java.util.Date");
+        classDef.imports = new ImportDef("java.util.Date").addAll(this.imports);
         classDef.className = Str.underscore2Class(tableName);
+        classDef.annotations.addAll(this.annotations);
 
         if (!Str.isEmptyString(packageName)) {
             classDef.packageDef = new PackageDef(packageName);
@@ -37,8 +50,12 @@ public class ModelClassBuilder extends ClassDefBuilder {
             field.access = AccessType.Private;
 
             classDef.addFieldIfNotExists(field);
-            classDef.addMethod(field.toGetterMethod());
-            classDef.addMethod(field.toSetterMethod());
+            if (gettersEnabled) {
+                classDef.addMethod(field.toGetterMethod());
+            }
+            if (settersEnabled) {
+                classDef.addMethod(field.toSetterMethod());
+            }
         }
 
         return classDef;

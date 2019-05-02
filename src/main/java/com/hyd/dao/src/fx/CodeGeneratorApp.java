@@ -15,6 +15,8 @@ import com.hyd.dao.util.Str;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -37,7 +39,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import static com.hyd.dao.src.fx.Fx.*;
 import static com.hyd.dao.src.fx.Fx.Expand.*;
@@ -96,6 +101,56 @@ public class CodeGeneratorApp extends Application {
 
     private DatabaseType databaseType;
 
+    //////////////////////////////////////////////////////////////
+
+    private Map<AnnotationType, AnnotationProperty> annotations = new HashMap<>();
+
+    {
+        annotations.put(AnnotationType.Lombok_Data,
+            new AnnotationProperty("lombok.Data").setExtra(builder -> {
+                ((ModelClassBuilder) builder).setGettersEnabled(false);
+                ((ModelClassBuilder) builder).setSettersEnabled(false);
+            }));
+
+        annotations.put(AnnotationType.Lombok_ToString, new AnnotationProperty("lombok.ToString"));
+        annotations.put(AnnotationType.Lombok_NoArgsConstructor, new AnnotationProperty("lombok.NoArgsConstructor"));
+        annotations.put(AnnotationType.Lombok_AllArgsConstructor, new AnnotationProperty("lombok.AllArgsConstructor"));
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    private enum AnnotationType {
+        Lombok_Data, Lombok_NoArgsConstructor, Lombok_AllArgsConstructor, Lombok_ToString
+    }
+
+    private class AnnotationProperty {
+
+        private String fullClassName;
+
+        private AnnotationDef annotationDef;
+
+        private BooleanProperty enabledProperty = new SimpleBooleanProperty();
+
+        private Consumer<ClassDefBuilder> extra;
+
+        public AnnotationProperty(String fullClassName) {
+            this.fullClassName = fullClassName;
+            this.annotationDef = new AnnotationDef(Str.subStringAfterLast(fullClassName, "."));
+            this.enabledProperty.addListener((_ob, _old, _new) -> updateCode());
+        }
+
+        public AnnotationProperty setExtra(Consumer<ClassDefBuilder> extra) {
+            this.extra = extra;
+            return this;
+        }
+
+        public void runExtra(ClassDefBuilder classDefBuilder) {
+            if (this.extra != null) {
+                this.extra.accept(classDefBuilder);
+            }
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         CodeGeneratorApp.primaryStage = primaryStage;
@@ -114,8 +169,18 @@ public class CodeGeneratorApp extends Application {
     }
 
     private void onStageShown() {
+        checkFastJson();
         resizeWindow();
         loadProfiles();
+    }
+
+    private void checkFastJson() {
+        try {
+            Class.forName("com.alibaba.fastjson.JSON");
+        } catch (ClassNotFoundException e) {
+            error("请将 fastjson 添加到依赖关系再运行。");
+            System.exit(0);
+        }
     }
 
     private void resizeWindow() {
@@ -153,24 +218,30 @@ public class CodeGeneratorApp extends Application {
         repoMethodDefs.clear();
 
         if (tableName != null) {
-            List<MethodDef> methods = buildRepoClassDef(currentTableName, currentProfile).methods;
-            for (MethodDef method : methods) {
-                if (method instanceof RepoMethodDef) {
-                    repoMethodDefs.add((RepoMethodDef) method);
+            ClassDef repoClassDef = buildRepoClassDef(currentTableName, currentProfile);
+            if (repoClassDef != null) {
+                List<MethodDef> methods = repoClassDef.methods;
+                for (MethodDef method : methods) {
+                    if (method instanceof RepoMethodDef) {
+                        repoMethodDefs.add((RepoMethodDef) method);
+                    }
                 }
             }
         }
     }
 
-    private void updateCode(String tableName) {
-        ClassDef repoClassDef = null;
-        ClassDef modelClassDef = null;
+    private void updateCode() {
+        updateCode(currentTableName);
+    }
 
-        if (tableName != null) {
-            Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
-            repoClassDef = buildRepoClassDef(tableName, currentProfile);
-            modelClassDef = buildModelClassDef(tableName, currentProfile);
+    private void updateCode(String tableName) {
+        if (tableName == null) {
+            return;
         }
+
+        Profile currentProfile = profileList.getSelectionModel().getSelectedItem();
+        ClassDef repoClassDef = buildRepoClassDef(tableName, currentProfile);
+        ClassDef modelClassDef = buildModelClassDef(tableName, currentProfile);
 
         loadToModelCode(modelClassDef);
         loadToRepoTable(repoClassDef);
@@ -191,7 +262,7 @@ public class CodeGeneratorApp extends Application {
             return repoClass;
         } else {
             RepoClassDefBuilder classDefBuilder = new RepoClassDefBuilder(
-                    repoPackage, modelPackage, tableName, currentTableColumns, databaseType, nameConverter
+                repoPackage, modelPackage, tableName, currentTableColumns, databaseType, nameConverter
             );
 
             repoClass = classDefBuilder.build(tableName);
@@ -214,20 +285,23 @@ public class CodeGeneratorApp extends Application {
             return null;
         }
 
-        ClassDef modelClass = currentProfile.getModelClass(tableName);
         String modelPackage = currentProfile.getModelPackage();
         NameConverter nameConverter = getNameConverter(currentProfile);
 
-        if (modelClass != null) {
-            return modelClass;
-        } else {
-            ClassDefBuilder classDefBuilder = new ModelClassBuilder(
-                    modelPackage, tableName, currentTableColumns, databaseType, nameConverter
-            );
+        ClassDefBuilder classDefBuilder = new ModelClassBuilder(
+            modelPackage, tableName, currentTableColumns, databaseType, nameConverter
+        );
 
-            modelClass = classDefBuilder.build(tableName);
-            currentProfile.setModelClass(tableName, modelClass);
-        }
+        annotations.values().forEach(annotationProperty -> {
+            if (annotationProperty.enabledProperty.get()) {
+                classDefBuilder.addImports(annotationProperty.fullClassName);
+                classDefBuilder.addAnnotation(annotationProperty.annotationDef);
+                annotationProperty.runExtra(classDefBuilder);
+            }
+        });
+
+        ClassDef modelClass = classDefBuilder.build(tableName);
+        currentProfile.setModelClass(tableName, modelClass);
 
         return modelClass;
     }
@@ -299,22 +373,22 @@ public class CodeGeneratorApp extends Application {
         txtProfileName.setOnTextChanged(text -> profileList.refresh());
 
         profileForm = Fx.form(75, Arrays.asList(
-                txtProfileName,
-                textField("URL:", Profile::urlProperty),
-                textField("用户名:", Profile::usernameProperty),
-                textField("密码:", Profile::passwordProperty),
-                directoryField("源码根目录:", Profile::codeRootDirProperty),
-                directoryField("测试根目录:", Profile::testRootDirProperty),
-                textField("Model 包名:", Profile::modelPackageProperty),
-                textField("Repo 包名:", Profile::repoPackageProperty),
-                comboField("命名转换", Profile::nameConverterProperty, NAME_CONVERTERS)
+            txtProfileName,
+            textField("URL:", Profile::urlProperty),
+            textField("用户名:", Profile::usernameProperty),
+            textField("密码:", Profile::passwordProperty),
+            directoryField("源码根目录:", Profile::codeRootDirProperty),
+            directoryField("测试根目录:", Profile::testRootDirProperty),
+            textField("Model 包名:", Profile::modelPackageProperty),
+            textField("Repo 包名:", Profile::repoPackageProperty),
+            comboField("命名转换", Profile::nameConverterProperty, NAME_CONVERTERS)
         ));
 
         Button deleteButton = button("删除", this::deleteProfile);
         Button connectButton = button("连接", this::connectProfile);
 
         BooleanBinding selectedProfileIsNull =
-                Bindings.isNull(profileList.getSelectionModel().selectedItemProperty());
+            Bindings.isNull(profileList.getSelectionModel().selectedItemProperty());
 
         profileForm.disableProperty().bind(selectedProfileIsNull);
         deleteButton.disableProperty().bind(selectedProfileIsNull);
@@ -323,68 +397,76 @@ public class CodeGeneratorApp extends Application {
         chkGenerateUnitTest = new CheckBox("生成单元测试");
 
         return vbox(LastExpand, 0, 0,
-                new MenuBar(new Menu("文件(_F)", null,
-                        menuItem("打开(_O)...", "Shortcut+O", this::openFile),
-                        menuItem("保存(_S)", "Shortcut+S", this::saveFile),
-                        new SeparatorMenuItem(),
-                        menuItem("退出(_X)", this::exit)
-                )),
-                hbox(LastExpand, PADDING, PADDING,
-                        vbox(FirstExpand, 0, PADDING,
-                                titledPane(-1, "档案列表",
-                                        vbox(FirstExpand, PADDING, PADDING,
-                                                profileList,
-                                                hbox(Expand.NoExpand, 0, PADDING,
-                                                        button("创建档案", this::createProfile),
-                                                        deleteButton,
-                                                        new Pane(),
-                                                        connectButton
-                                                )
-                                        )),
-                                titledPane(350, "档案选项", profileForm)
+            new MenuBar(new Menu("文件(_F)", null,
+                menuItem("打开(_O)...", "Shortcut+O", this::openFile),
+                menuItem("保存(_S)", "Shortcut+S", this::saveFile),
+                new SeparatorMenuItem(),
+                menuItem("退出(_X)", this::exit)
+            )),
+            hbox(LastExpand, PADDING, PADDING,
+                vbox(FirstExpand, 0, PADDING,
+                    titledPane(-1, "档案列表",
+                        vbox(FirstExpand, PADDING, PADDING,
+                            profileList,
+                            hbox(Expand.NoExpand, 0, PADDING,
+                                button("创建档案", this::createProfile),
+                                deleteButton,
+                                new Pane(),
+                                connectButton
+                            )
+                        )),
+                    titledPane(350, "档案选项", profileForm)
+                ),
+                vbox(LastExpand, 0, 0,
+                    titledPane(-1, "数据库表",
+                        vbox(LastExpand, 0, 0, tableNamesList))
+                ),
+                vbox(LastExpand, 0, 0, tabPane(
+                    tab("Model 类", vbox(NthExpand.set(-2), 0, PADDING,
+                        tabPane(
+                            tab("lombok", vbox(NoExpand, PADDING, PADDING,
+                                checkBox("@Data", annotations.get(AnnotationType.Lombok_Data).enabledProperty),
+                                checkBox("@ToString", annotations.get(AnnotationType.Lombok_ToString).enabledProperty),
+                                checkBox("@NoArgsConstructor", annotations.get(AnnotationType.Lombok_NoArgsConstructor).enabledProperty),
+                                checkBox("@AllArgsConstructor", annotations.get(AnnotationType.Lombok_AllArgsConstructor).enabledProperty)
+                            )),
+                            tab("mybatis-plus", pane(0, 100))
                         ),
-                        vbox(LastExpand, 0, 0,
-                                titledPane(-1, "数据库表",
-                                        vbox(LastExpand, 0, 0, tableNamesList))
+                        titledPane(-1, "代码预览", vbox(FirstExpand, 0, 0, modelCodeArea())),
+                        hbox(NoExpand, 0, PADDING,
+                            button("复制代码", this::copyModelCode),
+                            button("写入项目", this::writeModelCode)
+                        )
+                    )),
+                    tab("Repository 类", vbox(NthExpand.set(-2), 0, PADDING,
+                        pane(0, PADDING),
+                        methodTable(),
+                        hbox(NoExpand, 0, PADDING,
+                            menuButton("添加方法",
+                                menuItem("查询单条记录", this::addQueryOneMethod),
+                                menuItem("查询多条记录", this::addQueryListMethod),
+                                menuItem("查询计数", null),
+                                menuItem("分页查询", this::addPageQueryMethod),
+                                new SeparatorMenuItem(),
+                                menuItem("插入实体对象", this::addInsertBeanMethod),
+                                menuItem("插入 Map 对象", this::addInsertMapMethod),
+                                menuItem("批量插入记录", null),
+                                new SeparatorMenuItem(),
+                                menuItem("更新记录", null),
+                                menuItem("删除记录", this::addDeleteMethod)
+                            ),
+                            button("删除方法", this::deleteMethod)
                         ),
-                        vbox(LastExpand, 0, 0, tabPane(
-                                tab("Model 类", vbox(NthExpand.set(-2), 0, PADDING,
-                                        pane(0, PADDING),
-                                        titledPane(-1, "代码预览", vbox(FirstExpand, 0, 0, modelCodeArea())),
-                                        hbox(NoExpand, 0, PADDING,
-                                                button("复制代码", this::copyModelCode),
-                                                button("写入项目", this::writeModelCode)
-                                        )
-                                )),
-                                tab("Repository 类", vbox(NthExpand.set(-2), 0, PADDING,
-                                        pane(0, PADDING),
-                                        methodTable(),
-                                        hbox(NoExpand, 0, PADDING,
-                                                menuButton("添加方法",
-                                                        menuItem("查询单条记录", this::addQueryOneMethod),
-                                                        menuItem("查询多条记录", this::addQueryListMethod),
-                                                        menuItem("查询计数", null),
-                                                        menuItem("分页查询", this::addPageQueryMethod),
-                                                        new SeparatorMenuItem(),
-                                                        menuItem("插入实体对象", this::addInsertBeanMethod),
-                                                        menuItem("插入 Map 对象", this::addInsertMapMethod),
-                                                        menuItem("批量插入记录", null),
-                                                        new SeparatorMenuItem(),
-                                                        menuItem("更新记录", null),
-                                                        menuItem("删除记录", this::addDeleteMethod)
-                                                ),
-                                                button("删除方法", this::deleteMethod)
-                                        ),
-                                        titledPane(-1, "代码预览",
-                                                vbox(FirstExpand, 0, 0, repoCodeArea())),
-                                        hbox(NoExpand, Pos.BASELINE_LEFT, 0, PADDING,
-                                                button("复制代码", this::copyRepoCode),
-                                                button("写入项目", this::writeRepoCode),
-                                                chkGenerateUnitTest
-                                        )
-                                ))
-                        ))
-                )
+                        titledPane(-1, "代码预览",
+                            vbox(FirstExpand, 0, 0, repoCodeArea())),
+                        hbox(NoExpand, Pos.BASELINE_LEFT, 0, PADDING,
+                            button("复制代码", this::copyRepoCode),
+                            button("写入项目", this::writeRepoCode),
+                            chkGenerateUnitTest
+                        )
+                    ))
+                ))
+            )
         );
     }
 
@@ -428,11 +510,11 @@ public class CodeGeneratorApp extends Application {
     private ClassDef buildRepoUnitTestClassDef(ClassDef repoClassDef) {
         ClassDef classDef = new ClassDef();
         classDef.imports = new ImportDef(
-                "org.junit.runner.RunWith",
-                "org.springframework.test.context.junit4.SpringRunner",
-                "org.springframework.boot.test.context.SpringBootTest",
-                "org.springframework.beans.factory.annotation.Autowired",
-                "org.junit.Test"
+            "org.junit.runner.RunWith",
+            "org.springframework.test.context.junit4.SpringRunner",
+            "org.springframework.boot.test.context.SpringBootTest",
+            "org.springframework.beans.factory.annotation.Autowired",
+            "org.junit.Test"
         );
         classDef.packageDef = repoClassDef.packageDef;
         classDef.className = repoClassDef.className + "Test";
@@ -480,7 +562,7 @@ public class CodeGeneratorApp extends Application {
         }
 
         RepoMethodDef methodDef = new AddDeleteMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+            primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -493,7 +575,7 @@ public class CodeGeneratorApp extends Application {
         }
 
         RepoMethodDef methodDef = new AddQueryPageMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+            primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -506,7 +588,7 @@ public class CodeGeneratorApp extends Application {
         }
 
         RepoMethodDef methodDef = new AddQueryOneMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+            primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -519,7 +601,7 @@ public class CodeGeneratorApp extends Application {
         }
 
         RepoMethodDef methodDef = new AddQueryListMethodDialog(
-                primaryStage, databaseType, currentTableName, currentTableColumns).show();
+            primaryStage, databaseType, currentTableName, currentTableColumns).show();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -528,7 +610,7 @@ public class CodeGeneratorApp extends Application {
 
     private void addInsertBeanMethod() {
         RepoMethodDef methodDef = new InsertBeanMethodBuilder(
-                currentTableName, databaseType, null, null).build();
+            currentTableName, databaseType, null, null).build();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -537,7 +619,7 @@ public class CodeGeneratorApp extends Application {
 
     private void addInsertMapMethod() {
         RepoMethodDef methodDef = new InsertMapMethodBuilder(
-                currentTableName, databaseType, null, null).build();
+            currentTableName, databaseType, null, null).build();
 
         if (methodDef != null) {
             repoMethodTableView.getItems().add(methodDef);
@@ -568,7 +650,7 @@ public class CodeGeneratorApp extends Application {
         repoMethodTableView.setPrefHeight(150);
         repoMethodTableView.getColumns().add(column("方法名", method -> method.name));
         repoMethodTableView.getColumns().add(column("返回类型",
-                method -> method.returnType == null ? "" : method.returnType.getName()));
+            method -> method.returnType == null ? "" : method.returnType.getName()));
         repoMethodTableView.getColumns().add(column("参数", MethodDef::args2String));
         repoMethodTableView.getItems().addListener((ListChangeListener<? super RepoMethodDef>) c -> updateRepoCode());
         return repoMethodTableView;
@@ -608,7 +690,7 @@ public class CodeGeneratorApp extends Application {
     private void openFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("."));
-        File selectedFile = fileChooser.showOpenDialog(this.primaryStage);
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
         if (selectedFile != null) {
             this.profilePath = selectedFile.getAbsolutePath();
@@ -644,15 +726,15 @@ public class CodeGeneratorApp extends Application {
             }
 
             connectionManager = new ConnectionManager(() ->
-                    DriverManager.getConnection(
-                            selectedItem.getUrl(),
-                            selectedItem.getUsername(),
-                            selectedItem.getPassword()
-                    )
+                DriverManager.getConnection(
+                    selectedItem.getUrl(),
+                    selectedItem.getUsername(),
+                    selectedItem.getPassword()
+                )
             );
 
             connectionManager.withConnection(
-                    connection -> databaseType = DatabaseType.of(connection));
+                connection -> databaseType = DatabaseType.of(connection));
 
         } catch (Exception e) {
             LOG.error("", e);
@@ -686,7 +768,4 @@ public class CodeGeneratorApp extends Application {
         profileList.getSelectionModel().select(profile);
     }
 
-    private ListView<String> tableList() {
-        return new ListView<>();
-    }
 }

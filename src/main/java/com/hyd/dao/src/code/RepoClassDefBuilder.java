@@ -16,8 +16,8 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
     private String modelPackage;
 
     public RepoClassDefBuilder(
-            String repoPackage, String modelPackage, String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType, NameConverter nameConverter) {
+        String repoPackage, String modelPackage, String tableName, ColumnInfo[] columnInfos,
+        DatabaseType databaseType, NameConverter nameConverter) {
         super(repoPackage, tableName, columnInfos, databaseType, nameConverter);
         this.modelPackage = modelPackage;
     }
@@ -31,22 +31,23 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         classDef.addAnnotation(new AnnotationDef("Repository"));
         classDef.className = className;
         classDef.imports = new ImportDef(
-                "org.springframework.beans.factory.annotation.Autowired",
-                "org.springframework.stereotype.Repository",
-                "com.hyd.dao.DAO",
-                "com.hyd.dao.SQL",
-                "com.hyd.dao.Page",
-                "java.math.BigDecimal",
-                "java.util.Date",
-                "java.util.Map",
-                "java.util.List");
+            "org.springframework.beans.factory.annotation.Autowired",
+            "org.springframework.stereotype.Repository",
+            "com.hyd.dao.DAO",
+            "com.hyd.dao.SQL",
+            "com.hyd.dao.Page",
+            "java.math.BigDecimal",
+            "java.util.Date",
+            "java.util.Map",
+            "java.util.List")
+            .addAll(this.imports);
 
         if (!Str.isEmptyString(packageName)) {
             classDef.packageDef = new PackageDef(packageName);
         }
 
         if (!Str.isEmptyString(modelPackage)) {
-            classDef.imports.addPackage(modelPackage + "." + modelClassName);
+            classDef.imports.add(modelPackage + "." + modelClassName);
         }
 
         FieldDef daoField = new FieldDef();
