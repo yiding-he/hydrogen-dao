@@ -3,3 +3,4 @@ target
 *.iml
 nb-configuration.xml
 pom-private.xml
+hydrogen-generator-profiles.json
