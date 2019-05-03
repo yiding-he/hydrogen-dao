@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * 执行存储过程帮助类
  */
-public class StorageProsedureHelper {
+public class StorageProcedureHelper {
 
     public static final Map<Integer, SpParamType> sp_param_types = new HashMap<Integer, SpParamType>() {
 

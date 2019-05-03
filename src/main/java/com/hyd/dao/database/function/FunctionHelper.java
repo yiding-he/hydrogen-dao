@@ -4,7 +4,7 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
-import com.hyd.dao.sp.StorageProsedureHelper;
+import com.hyd.dao.sp.StorageProcedureHelper;
 import com.hyd.dao.util.ResultSetUtil;
 
 import java.sql.*;
@@ -80,7 +80,7 @@ public class FunctionHelper {
     }
 
     private static SpParam createSpParam(HashMap row, Object param_value) {
-        SpParamType param_type = StorageProsedureHelper.sp_param_types.get(((Double) row.get("column_type")).intValue());
+        SpParamType param_type = StorageProcedureHelper.sp_param_types.get(((Double) row.get("column_type")).intValue());
         int data_type = ((Double) row.get("data_type")).intValue();
         return new SpParam(param_type, data_type, param_value);
     }

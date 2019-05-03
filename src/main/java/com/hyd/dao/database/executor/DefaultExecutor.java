@@ -13,7 +13,7 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
-import com.hyd.dao.sp.StorageProsedureHelper;
+import com.hyd.dao.sp.StorageProcedureHelper;
 import com.hyd.dao.util.Arr;
 import com.hyd.dao.util.ResultSetUtil;
 import com.hyd.dao.util.Str;
@@ -427,9 +427,9 @@ public class DefaultExecutor extends Executor {
     @Override
     public List call(String name, Object[] params) {
         try {
-            SpParam[] spParams = StorageProsedureHelper.createSpParams(name, params, connection);
+            SpParam[] spParams = StorageProcedureHelper.createSpParams(name, params, connection);
             LOG.debug(findCaller() + "(procedure)" + name + Arrays.asList(spParams));
-            CallableStatement cs = StorageProsedureHelper.createCallableStatement(name, spParams, connection);
+            CallableStatement cs = StorageProcedureHelper.createCallableStatement(name, spParams, connection);
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
             }
