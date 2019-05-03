@@ -54,7 +54,7 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
         daoField.access = AccessType.Private;
         daoField.name = "dao";
         daoField.type = "DAO";
-        daoField.addAnnotation(new AnnotationDef("Autowired"));
+        daoField.addAnnotation("Autowired");
         classDef.addFieldIfNotExists(daoField);
 
         classDef.addMethod(daoField.toSetterMethod());

@@ -39,9 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.hyd.dao.src.fx.Fx.*;
@@ -103,53 +101,59 @@ public class CodeGeneratorApp extends Application {
 
     //////////////////////////////////////////////////////////////
 
-    private Map<AnnotationType, AnnotationProperty> annotations = new HashMap<>();
-
-    {
-        annotations.put(AnnotationType.Lombok_Data,
-            new AnnotationProperty("lombok.Data").setExtra(builder -> {
-                ((ModelClassBuilder) builder).setGettersEnabled(false);
-                ((ModelClassBuilder) builder).setSettersEnabled(false);
-            }));
-
-        annotations.put(AnnotationType.Lombok_ToString, new AnnotationProperty("lombok.ToString"));
-        annotations.put(AnnotationType.Lombok_NoArgsConstructor, new AnnotationProperty("lombok.NoArgsConstructor"));
-        annotations.put(AnnotationType.Lombok_AllArgsConstructor, new AnnotationProperty("lombok.AllArgsConstructor"));
+    private BooleanProperty updateCodeOnChange() {
+        SimpleBooleanProperty property = new SimpleBooleanProperty();
+        property.addListener((_ob, _old, _new) -> updateCode());
+        return property;
     }
+
+    private class BooleanExt extends ClassDefBuilderExt<Boolean> {
+
+        public BooleanExt(Consumer<ClassDefBuilder> consumer) {
+            super(updateCodeOnChange(), consumer);
+        }
+    }
+
+    private ClassDefBuilderExt[] extensions = {
+        new BooleanExt(builder -> {
+            builder.addAnnotation("Data");
+            builder.addImports("lombok.Data");
+            ((ModelClassBuilder) builder).setGettersEnabled(false);
+            ((ModelClassBuilder) builder).setSettersEnabled(false);
+        }),
+        new BooleanExt(builder -> {
+            builder.addAnnotation("ToString");
+            builder.addImports("lombok.ToString");
+        }),
+        new BooleanExt(builder -> {
+            builder.addAnnotation("NoArgsConstructor");
+            builder.addImports("lombok.NoArgsConstructor");
+        }),
+        new BooleanExt(builder -> {
+            builder.addAnnotation("AllArgsConstructor");
+            builder.addImports("lombok.AllArgsConstructor");
+        }),
+        new BooleanExt(builder -> {
+            builder.addImports("com.baomidou.mybatisplus.annotation.*");
+
+            builder.addAnnotation(
+                new AnnotationDef("TableName").setProperty("\"" + builder.getTableName() + "\""));
+
+            ((ModelClassBuilder) builder).addAfterFieldListener(
+                (columnInfo, fieldDef) -> {
+                    if (columnInfo.isPrimary()) {
+                        fieldDef.addAnnotation("TableId")
+                            .setProperty("\"" + columnInfo.getColumnName() + "\"");
+                    } else {
+                        fieldDef.addAnnotation("TableField")
+                            .setProperty("\"" + columnInfo.getColumnName() + "\"");
+                    }
+                }
+            );
+        }),
+    };
 
     //////////////////////////////////////////////////////////////
-
-    private enum AnnotationType {
-        Lombok_Data, Lombok_NoArgsConstructor, Lombok_AllArgsConstructor, Lombok_ToString
-    }
-
-    private class AnnotationProperty {
-
-        private String fullClassName;
-
-        private AnnotationDef annotationDef;
-
-        private BooleanProperty enabledProperty = new SimpleBooleanProperty();
-
-        private Consumer<ClassDefBuilder> extra;
-
-        public AnnotationProperty(String fullClassName) {
-            this.fullClassName = fullClassName;
-            this.annotationDef = new AnnotationDef(Str.subStringAfterLast(fullClassName, "."));
-            this.enabledProperty.addListener((_ob, _old, _new) -> updateCode());
-        }
-
-        public AnnotationProperty setExtra(Consumer<ClassDefBuilder> extra) {
-            this.extra = extra;
-            return this;
-        }
-
-        public void runExtra(ClassDefBuilder classDefBuilder) {
-            if (this.extra != null) {
-                this.extra.accept(classDefBuilder);
-            }
-        }
-    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -292,15 +296,15 @@ public class CodeGeneratorApp extends Application {
             modelPackage, tableName, currentTableColumns, databaseType, nameConverter
         );
 
-        annotations.values().forEach(annotationProperty -> {
-            if (annotationProperty.enabledProperty.get()) {
-                classDefBuilder.addImports(annotationProperty.fullClassName);
-                classDefBuilder.addAnnotation(annotationProperty.annotationDef);
-                annotationProperty.runExtra(classDefBuilder);
+        for (ClassDefBuilderExt<?> extension : extensions) {
+            if (extension.property() instanceof BooleanProperty) {
+                if (((BooleanProperty) extension.property()).get()) {
+                    extension.consumer().accept(classDefBuilder);
+                }
             }
-        });
+        }
 
-        ClassDef modelClass = classDefBuilder.build(tableName);
+        ClassDef modelClass = classDefBuilder.buildClassDef(tableName);
         currentProfile.setModelClass(tableName, modelClass);
 
         return modelClass;
@@ -367,6 +371,7 @@ public class CodeGeneratorApp extends Application {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Parent root() {
 
         txtProfileName = textField("名称:", Profile::nameProperty);
@@ -425,12 +430,14 @@ public class CodeGeneratorApp extends Application {
                     tab("Model 类", vbox(NthExpand.set(-2), 0, PADDING,
                         tabPane(
                             tab("lombok", vbox(NoExpand, PADDING, PADDING,
-                                checkBox("@Data", annotations.get(AnnotationType.Lombok_Data).enabledProperty),
-                                checkBox("@ToString", annotations.get(AnnotationType.Lombok_ToString).enabledProperty),
-                                checkBox("@NoArgsConstructor", annotations.get(AnnotationType.Lombok_NoArgsConstructor).enabledProperty),
-                                checkBox("@AllArgsConstructor", annotations.get(AnnotationType.Lombok_AllArgsConstructor).enabledProperty)
+                                checkBox("@Data", extensions[0].property()),
+                                checkBox("@ToString", extensions[1].property()),
+                                checkBox("@NoArgsConstructor", extensions[2].property()),
+                                checkBox("@AllArgsConstructor", extensions[3].property())
                             )),
-                            tab("mybatis-plus", pane(0, 100))
+                            tab("mybatis-plus", vbox(NoExpand, PADDING, PADDING,
+                                checkBox("添加注解", extensions[4].property())
+                            ))
                         ),
                         titledPane(-1, "代码预览", vbox(FirstExpand, 0, 0, modelCodeArea())),
                         hbox(NoExpand, 0, PADDING,
@@ -522,7 +529,7 @@ public class CodeGeneratorApp extends Application {
         classDef.addAnnotation(new AnnotationDef("SpringBootTest"));
 
         FieldDef repoField = new FieldDef();
-        repoField.addAnnotation(new AnnotationDef("Autowired"));
+        repoField.addAnnotation("Autowired");
         repoField.access = AccessType.Private;
         repoField.type = repoClassDef.className;
         repoField.name = Str.uncapitalize(repoClassDef.className);

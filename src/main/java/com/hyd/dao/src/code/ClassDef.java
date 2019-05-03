@@ -1,11 +1,12 @@
 package com.hyd.dao.src.code;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
- * (description)
- * created at 2018/4/10
+ * 类的定义
  *
  * @author yidin
  */
@@ -75,11 +76,27 @@ public class ClassDef implements Code {
         this.fields.add(fieldDef);
     }
 
+    public void forEachField(Consumer<FieldDef> fieldDefConsumer) {
+        this.fields.forEach(fieldDefConsumer);
+    }
+
+    public void setImports(ImportDef imports) {
+        this.imports = imports;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
     public void addMethod(MethodDef methodDef) {
         this.methods.add(methodDef);
     }
 
     public void addAnnotation(AnnotationDef annotationDef) {
         this.annotations.add(annotationDef);
+    }
+
+    public void addAnnotations(Collection<AnnotationDef> defs) {
+        this.annotations.addAll(defs);
     }
 }

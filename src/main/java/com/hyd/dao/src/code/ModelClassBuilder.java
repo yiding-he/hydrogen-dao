@@ -5,6 +5,10 @@ import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.util.Str;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 /**
  * (description)
  * created at 2018/4/12
@@ -23,6 +27,11 @@ public class ModelClassBuilder extends ClassDefBuilder {
 
     private boolean gettersEnabled = true;
 
+    /**
+     * 每个 field 创建后的额外处理
+     */
+    private List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
+
     public void setSettersEnabled(boolean settersEnabled) {
         this.settersEnabled = settersEnabled;
     }
@@ -31,13 +40,17 @@ public class ModelClassBuilder extends ClassDefBuilder {
         this.gettersEnabled = gettersEnabled;
     }
 
+    public void addAfterFieldListener(BiConsumer<ColumnInfo, FieldDef> afterFieldListener) {
+        this.afterFieldListeners.add(afterFieldListener);
+    }
+
     @Override
     public ClassDef build(String tableName) {
 
         ClassDef classDef = new ClassDef();
-        classDef.imports = new ImportDef("java.util.Date").addAll(this.imports);
-        classDef.className = Str.underscore2Class(tableName);
-        classDef.annotations.addAll(this.annotations);
+        classDef.setImports(new ImportDef("java.util.Date").addAll(this.imports));
+        classDef.setClassName(Str.underscore2Class(tableName));
+        classDef.addAnnotations(this.annotations);
 
         if (!Str.isEmptyString(packageName)) {
             classDef.packageDef = new PackageDef(packageName);
@@ -50,6 +63,11 @@ public class ModelClassBuilder extends ClassDefBuilder {
             field.access = AccessType.Private;
 
             classDef.addFieldIfNotExists(field);
+
+            for (BiConsumer<ColumnInfo, FieldDef> listener : afterFieldListeners) {
+                listener.accept(columnInfo, field);
+            }
+
             if (gettersEnabled) {
                 classDef.addMethod(field.toGetterMethod());
             }

@@ -3,9 +3,7 @@ package com.hyd.dao.src.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * (description)
@@ -15,31 +13,35 @@ import java.util.stream.Stream;
  */
 public class ImportDef implements Code {
 
-    private List<String> packages;
+    private Collection<String> imports;
 
-    public ImportDef(String... packages) {
-        this.packages = new ArrayList<>(Arrays.asList(packages));
+    public ImportDef(String... imports) {
+        this.imports = new ArrayList<>(Arrays.asList(imports));
+    }
+
+    public ImportDef(Collection<String> imports) {
+        this.imports = new ArrayList<>(imports);
     }
 
     public ImportDef add(String fullClassName) {
-        this.packages.add(fullClassName);
+        this.imports.add(fullClassName);
         return this;
     }
 
     public ImportDef remove(String fullClassName) {
-        this.packages.remove(fullClassName);
+        this.imports.remove(fullClassName);
         return this;
     }
 
     public ImportDef addAll(Collection<String> packages) {
-        this.packages.addAll(packages);
+        this.imports.addAll(packages);
         return this;
     }
 
     @Override
     public CodeBlock toCodeBlock() {
         CodeBlock codeBlock = new CodeBlock();
-        codeBlock.addLines(packages.stream()
+        codeBlock.addLines(imports.stream()
                 .map(p -> "import " + p + ";")
                 .collect(Collectors.toList()));
         return codeBlock;

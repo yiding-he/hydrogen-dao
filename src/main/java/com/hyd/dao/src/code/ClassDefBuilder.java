@@ -8,6 +8,7 @@ import com.hyd.dao.util.TypeUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * (description)
@@ -31,6 +32,10 @@ public abstract class ClassDefBuilder {
 
     protected List<String> imports = new ArrayList<>();
 
+    protected List<Consumer<ClassDefBuilder>> beforeClassListeners = new ArrayList<>();
+
+    protected List<Consumer<ClassDef>> afterClassListeners = new ArrayList<>();
+
     public ClassDefBuilder(
             String packageName, String tableName, ColumnInfo[] columnInfos,
             DatabaseType databaseType, NameConverter nameConverter
@@ -41,6 +46,12 @@ public abstract class ClassDefBuilder {
         this.databaseType = databaseType;
         this.nameConverter = nameConverter;
     }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    //////////////////////////////////////////////////////////////
 
     public void addImports(String... imports) {
         this.imports.addAll(Arrays.asList(imports));
@@ -55,7 +66,33 @@ public abstract class ClassDefBuilder {
         return annotationDef;
     }
 
-    public abstract ClassDef build(String tableName);
+    public ClassDefBuilder addBeforeClassListener(Consumer<ClassDefBuilder> beforeListener) {
+        this.beforeClassListeners.add(beforeListener);
+        return this;
+    }
+
+    public ClassDefBuilder addAfterClassListener(Consumer<ClassDef> afterListener) {
+        this.afterClassListeners.add(afterListener);
+        return this;
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    public ClassDef buildClassDef(String tableName) {
+        for (Consumer<ClassDefBuilder> listener : beforeClassListeners) {
+            listener.accept(this);
+        }
+
+        ClassDef classDef = build(tableName);
+
+        for (Consumer<ClassDef> listener : afterClassListeners) {
+            listener.accept(classDef);
+        }
+
+        return classDef;
+    }
+
+    protected abstract ClassDef build(String tableName);
 
     protected String getJavaType(ColumnInfo columnInfo) {
         return TypeUtil.getJavaType(databaseType, columnInfo);

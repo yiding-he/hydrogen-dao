@@ -58,7 +58,9 @@ public class FieldDef implements Code {
         return method;
     }
 
-    public void addAnnotation(AnnotationDef annotationDef) {
-        this.annotations.add(annotationDef);
+    public AnnotationDef addAnnotation(String name) {
+        AnnotationDef a = new AnnotationDef(name);
+        this.annotations.add(a);
+        return a;
     }
 }

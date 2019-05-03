@@ -1,8 +1,8 @@
 package com.hyd.dao.src.fx;
 
 import com.hyd.dao.log.Logger;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
@@ -18,8 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * (description)
- * created at 2018/4/8
+ * 对构建界面元素过程的包装
  *
  * @author yidin
  */
@@ -81,9 +80,11 @@ public class Fx {
         return tab;
     }
 
-    public static CheckBox checkBox(String text, BooleanProperty bindProperty) {
+    public static CheckBox checkBox(String text, Property<Boolean> bindProperty) {
         CheckBox checkBox = new CheckBox(text);
-        checkBox.selectedProperty().bindBidirectional(bindProperty);
+        if (bindProperty != null) {
+            checkBox.selectedProperty().bindBidirectional(bindProperty);
+        }
         return checkBox;
     }
 
