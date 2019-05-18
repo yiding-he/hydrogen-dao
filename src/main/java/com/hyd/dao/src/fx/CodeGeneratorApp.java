@@ -1,5 +1,32 @@
 package com.hyd.dao.src.fx;
 
+import static com.hyd.dao.src.fx.Fx.Expand;
+import static com.hyd.dao.src.fx.Fx.Expand.FirstExpand;
+import static com.hyd.dao.src.fx.Fx.Expand.LastExpand;
+import static com.hyd.dao.src.fx.Fx.Expand.NoExpand;
+import static com.hyd.dao.src.fx.Fx.Expand.NthExpand;
+import static com.hyd.dao.src.fx.Fx.PADDING;
+import static com.hyd.dao.src.fx.Fx.button;
+import static com.hyd.dao.src.fx.Fx.checkBox;
+import static com.hyd.dao.src.fx.Fx.column;
+import static com.hyd.dao.src.fx.Fx.comboField;
+import static com.hyd.dao.src.fx.Fx.confirm;
+import static com.hyd.dao.src.fx.Fx.directoryField;
+import static com.hyd.dao.src.fx.Fx.error;
+import static com.hyd.dao.src.fx.Fx.hbox;
+import static com.hyd.dao.src.fx.Fx.menuButton;
+import static com.hyd.dao.src.fx.Fx.menuItem;
+import static com.hyd.dao.src.fx.Fx.pane;
+import static com.hyd.dao.src.fx.Fx.setListViewContent;
+import static com.hyd.dao.src.fx.Fx.setListViewSelectionChanged;
+import static com.hyd.dao.src.fx.Fx.tab;
+import static com.hyd.dao.src.fx.Fx.tabPane;
+import static com.hyd.dao.src.fx.Fx.textField;
+import static com.hyd.dao.src.fx.Fx.titledPane;
+import static com.hyd.dao.src.fx.Fx.vbox;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+
 import com.alibaba.fastjson.JSON;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
@@ -8,10 +35,29 @@ import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.src.RepoMethodDef;
-import com.hyd.dao.src.code.*;
+import com.hyd.dao.src.code.AccessType;
+import com.hyd.dao.src.code.AnnotationDef;
+import com.hyd.dao.src.code.ClassDef;
+import com.hyd.dao.src.code.ClassDefBuilder;
+import com.hyd.dao.src.code.ClassDefBuilderExt;
+import com.hyd.dao.src.code.FieldDef;
+import com.hyd.dao.src.code.ImportDef;
+import com.hyd.dao.src.code.MethodDef;
+import com.hyd.dao.src.code.ModelClassBuilder;
+import com.hyd.dao.src.code.RepoClassDefBuilder;
 import com.hyd.dao.src.code.method.InsertBeanMethodBuilder;
 import com.hyd.dao.src.code.method.InsertMapMethodBuilder;
 import com.hyd.dao.util.Str;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.DriverManager;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -23,29 +69,20 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.DriverManager;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static com.hyd.dao.src.fx.Fx.*;
-import static com.hyd.dao.src.fx.Fx.Expand.*;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 /**
  * (description)
@@ -134,7 +171,7 @@ public class CodeGeneratorApp extends Application {
             builder.addImports("lombok.AllArgsConstructor");
         }),
         new BooleanExt(builder -> {
-            builder.addImports("com.baomidou.mybatisplus.annotation.*");
+            builder.addImports("com.baomidou.mybatisplus.annotations.*");
 
             builder.addAnnotation(
                 new AnnotationDef("TableName").setProperty("\"" + builder.getTableName() + "\""));
