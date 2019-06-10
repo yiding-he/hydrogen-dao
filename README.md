@@ -18,7 +18,28 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前版本为 `3.3.0-SNAPSHOT`
+当前分支的版本为 `3.3.0-SNAPSHOT`。
+
+## 添加依赖关系
+
+请在 pom.xml 的 `<repositories>` 元素当中添加下面的内容：
+
+```xml
+<repository>
+    <id>hydrogen-dao-github</id>
+    <url>https://raw.githubusercontent.com/yiding-he/mvn-repo/master</url>
+</repository>
+```
+
+然后在 `<dependencies>` 元素当中添加下面的内容：
+
+```xml
+<dependency>
+    <groupId>com.hyd</groupId>
+    <artifactId>hydrogen-dao</artifactId>
+    <version>3.3.0-SNAPSHOT</version>
+</dependency>
+```
 
 ## 示例
 
@@ -46,6 +67,8 @@ MappedCommand cmd =
         .setParam("userid", 1, 2, 3, 4);  // 数组或 List 都可以
 dao.execute(cmd);
 ```
+
+> `MappedCommand` 并非用字符串替换来生成最终 SQL，而仍然使用 PreparedStatement 并设置每个参数，以保证安全性。
 
 另一个例子：
 
