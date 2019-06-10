@@ -26,7 +26,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ```xml
 <repository>
-    <id>hydrogen-dao-github</id>
+    <id>yiding-he-github</id>
     <url>https://raw.githubusercontent.com/yiding-he/mvn-repo/master</url>
 </repository>
 ```
