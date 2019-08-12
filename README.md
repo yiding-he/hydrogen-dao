@@ -108,7 +108,7 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 
 #### 2019-01-17
 
-* 修改 Spring Boot 自动配置部分的[相关文档](https://github.com/yiding-he/hydrogen-dao/blob/3.2.0/docs/09-spring-boot-autoconfig.md)
+* 修改 Spring Boot 自动配置部分的[相关文档](docs/09-spring-boot-autoconfig.md)
 
 #### 2018-07-09
 

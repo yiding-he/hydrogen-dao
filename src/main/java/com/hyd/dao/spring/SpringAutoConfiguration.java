@@ -1,27 +1,27 @@
 package com.hyd.dao.spring;
 
+import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
+
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
-import com.hyd.dao.database.JDBCDriver;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.util.Str;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import javax.sql.DataSource;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
-import java.util.Map;
-
-import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
-import static org.springframework.util.StringUtils.hasText;
+import org.springframework.core.annotation.Order;
 
 /**
+ * Spring Boot 的自动化配置，目前只支持单个 DataSource。
+ * 需要有以下依赖关系：spring-boot-autoconfigure, spring-jdbc
+ *
  * @author yidin
  */
 @Configuration
-@EnableConfigurationProperties(value = DataSourceProperties.class)
+@ImportAutoConfiguration(DataSourceAutoConfiguration.class)
+@Order
 public class SpringAutoConfiguration {
 
     private static final Logger LOG = Logger.getLogger(SpringAutoConfiguration.class);
@@ -33,59 +33,13 @@ public class SpringAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(DataSource.class)
     public DAO dao(
-            DataSourceProperties props,
-            DataSources dataSources
+        DataSource dataSource,
+        DataSources dataSources
     ) {
-
-        Map<String, DataSourceConfig> dataSourceConfigs = props.getDataSources();
-        if (dataSourceConfigs == null || dataSourceConfigs.isEmpty()) {
-            LOG.debug("DataSourceProperties is empty.");
-            return null;
-        }
-
-        dataSourceConfigs.forEach((dataSourceName, dataSourceConfig) ->
-                setupDao(dataSourceName, dataSourceConfig, dataSources));
-
+        dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, dataSource);
         return dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
-    }
-
-    private void setupDao(
-            String dataSourceName, DataSourceConfig config, DataSources dataSources) {
-
-        if (!hasText(config.getUrl()) ||
-                !hasText(config.getUsername())) {
-            return;
-        }
-
-        JDBCDriver driver = JDBCDriver.getDriverByUrl(config.getUrl());
-        if (Str.isEmpty(config.getDriverClassName())) {
-            if (driver != null) {
-                config.setDriverClassName(driver.getDriverClass());
-            } else {
-                LOG.info("bean 'dao' not initialized: missing driver class");
-            }
-        }
-
-        DataSource dataSource;
-
-        if (DBCP2DatasourceFactory.isAvailable()) {
-            dataSource = DBCP2DatasourceFactory.createDataSource(config);
-        } else if (DruidDataSourceFactory.isAvailable()) {
-            dataSource = DruidDataSourceFactory.createDataSource(config);
-        } else {
-            LOG.warn("Warning: using non-pooled datasource, " +
-                    "do not use this in production environment!");
-            dataSource = NonPooledDataSourceFactory.createDataSource(config);
-        }
-
-        if (dataSource == null) {
-            return;
-        } else {
-            LOG.info(() -> "DAO instance '" + dataSourceName + "' initiated.");
-        }
-
-        dataSources.setDataSource(dataSourceName, dataSource);
     }
 
 }
