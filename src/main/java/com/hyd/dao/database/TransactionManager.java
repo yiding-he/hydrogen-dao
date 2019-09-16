@@ -3,7 +3,6 @@ package com.hyd.dao.database;
 import com.hyd.dao.TransactionException;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -16,12 +15,11 @@ import java.util.Map;
  * 多级事务会占用大量连接（每个线程的每一级事务中对每个数据源都会占用一个连接），
  * 连接池不够用的情况下可能会造成假死，所以请慎重使用
  */
-@SuppressWarnings({"unchecked"})
 public class TransactionManager {
 
     public static final int DEFAULT_ISOLATION_LEVEL = Connection.TRANSACTION_READ_COMMITTED;
 
-    static final Logger LOG = Logger.getLogger(TransactionManager.class);
+    private static final Logger LOG = Logger.getLogger(TransactionManager.class);
 
     /////////////////////////////////////////////////////////
 
@@ -33,11 +31,11 @@ public class TransactionManager {
      * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
      */
     private static ThreadLocal<Map<Integer, Map<String, Executor>>>
-            executorCache = new ThreadLocal<Map<Integer, Map<String, Executor>>>();
+            executorCache = new ThreadLocal<>();
 
-    private static ThreadLocal<Integer> level = new ThreadLocal<Integer>();
+    private static ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
-    private static ThreadLocal<Map<Integer, Integer>> isolations = new ThreadLocal<Map<Integer, Integer>>();
+    private static ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
 
     /**
      * 判断当前线程是否处于事务当中
@@ -97,14 +95,7 @@ public class TransactionManager {
     }
 
     private static int getIsolation(int level) {
-        Map<Integer, Integer> isolationMap = isolations.get();
-
-        if (isolationMap == null) {
-            isolationMap = new HashMap<Integer, Integer>();
-            isolations.set(isolationMap);
-        }
-
-        return isolationMap.containsKey(level) ? isolationMap.get(level) : DEFAULT_ISOLATION_LEVEL;
+        return isolations.get().getOrDefault(level, DEFAULT_ISOLATION_LEVEL);
     }
 
     /**
@@ -114,7 +105,7 @@ public class TransactionManager {
         int _level;
 
         if (!isInTransaction()) {
-            executorCache.set(new HashMap<Integer, Map<String, Executor>>()); // start level1 transaction
+            executorCache.set(new HashMap<>()); // start level1 transaction
             _level = 1;
         } else {
             _level = level.get() + 1;
@@ -122,7 +113,7 @@ public class TransactionManager {
 
         LOG.debug("Starting transaction level " + _level);
         level.set(_level);
-        executorCache.get().put(_level, new HashMap<String, Executor>());
+        executorCache.get().put(_level, new HashMap<>());
     }
 
     /**
@@ -171,14 +162,8 @@ public class TransactionManager {
             return;
         }
 
-        Map<Integer, Integer> map = isolations.get();
-        if (map == null) {
-            map = new HashMap<Integer, Integer>();
-            isolations.set(map);
-        }
-
         int _level = getLevel();
-        map.put(_level, isolation);
+        isolations.get().put(_level, isolation);
     }
 
 }
