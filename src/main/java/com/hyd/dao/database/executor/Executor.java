@@ -1,15 +1,9 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.BatchCommand;
-import com.hyd.dao.IteratorBatchCommand;
-import com.hyd.dao.Page;
-import com.hyd.dao.Row;
-import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.database.TransactionManager;
+import com.hyd.dao.*;
+import com.hyd.dao.database.*;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.snapshot.ExecutorInfo;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -27,28 +21,21 @@ import java.util.function.Consumer;
  */
 public abstract class Executor {
 
-    protected Connection connection;    // 数据库连接
+    protected ExecutorInfo info;            // 当前状态
 
-    protected ExecutorInfo info;        // 当前状态
+    protected DatabaseType databaseType;    // 数据库类型
 
-    protected DatabaseType databaseType;
-
-    protected NameConverter nameConverter;
+    protected ExecutionContext context;
 
     /**
      * 构造函数
      *
-     * @param dsName     数据源名称
-     * @param connection 数据库连接
+     * @param context 数据库操作上下文
      */
-    public Executor(String dsName, Connection connection) throws SQLException {
-        this.info = new ExecutorInfo(dsName);
-        this.connection = connection;
-        this.databaseType = DatabaseType.of(connection);
-    }
-
-    public void setNameConverter(NameConverter nameConverter) {
-        this.nameConverter = nameConverter;
+    public Executor(ExecutionContext context) throws SQLException {
+        this.info = new ExecutorInfo(context.getDataSourceName());
+        this.databaseType = DatabaseType.of(context.getConnection());
+        this.context = context;
     }
 
     /**
@@ -184,12 +171,50 @@ public abstract class Executor {
      */
     public abstract RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor);
 
-    public void setInfo(ExecutorInfo info) {
-        this.info = info;
+    /**
+     * 将一个 List 中的所有元素插入数据库
+     *
+     * @param list      List 对象
+     * @param tableName 表名
+     */
+    public abstract void insertList(List list, String tableName);
+
+    /**
+     * 根据主键从指定表中删除记录
+     *
+     * @param key       主键值
+     * @param tableName 表名
+     *
+     * @return 受影响行数
+     */
+    public abstract int deleteByKey(Object key, String tableName);
+
+    /**
+     * 根据对象属性判断数据库记录是否存在
+     *
+     * @param obj       包含查询条件的对象
+     * @param tableName 表名
+     *
+     * @return 记录是否存在
+     */
+    public abstract boolean exists(Object obj, String tableName);
+
+    //////////////////////////////////////////////////////////////
+
+    protected NameConverter getNameConverter() {
+        return this.context.getNameConverter();
+    }
+
+    protected Connection getConnection() {
+        return this.context.getConnection();
     }
 
     public void setTransactionIsolation(int level) throws SQLException {
-        connection.setTransactionIsolation(level);
+        this.context.getConnection().setTransactionIsolation(level);
+    }
+
+    public void setNameConverter(NameConverter nameConverter) {
+        this.context.setNameConverter(nameConverter);
     }
 
     /**
@@ -200,17 +225,5 @@ public abstract class Executor {
             close();
         }
     }
-
-    /**
-     * 将一个 List 中的所有元素插入数据库
-     *
-     * @param list      List 对象
-     * @param tableName 表名
-     */
-    public abstract void insertList(List list, String tableName);
-
-    public abstract int deleteByKey(Object key, String tableName);
-
-    public abstract boolean exists(Object obj, String tableName);
 
 }

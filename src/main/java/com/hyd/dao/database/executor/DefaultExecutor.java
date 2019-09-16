@@ -3,22 +3,13 @@ package com.hyd.dao.database.executor;
 import com.hyd.dao.*;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.database.commandbuilder.Command;
-import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
-import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
-import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
+import com.hyd.dao.database.commandbuilder.*;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.sp.SpParam;
-import com.hyd.dao.sp.SpParamType;
-import com.hyd.dao.sp.StorageProcedureHelper;
-import com.hyd.dao.util.Arr;
-import com.hyd.dao.util.ResultSetUtil;
-import com.hyd.dao.util.Str;
-import com.hyd.dao.util.TypeUtil;
-
+import com.hyd.dao.sp.*;
+import com.hyd.dao.util.*;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -43,8 +34,8 @@ public class DefaultExecutor extends Executor {
 
     private ResultSet rs;
 
-    public DefaultExecutor(String dsName, Connection connection) throws SQLException {
-        super(dsName, connection);
+    public DefaultExecutor(ExecutionContext context) throws SQLException {
+        super(context);
     }
 
     @Override
@@ -67,9 +58,9 @@ public class DefaultExecutor extends Executor {
             // 如果生成了分页语句，则读取所有结果，否则读取部分结果。
             Page result;
             if (rangedSql != null) {
-                result = ResultSetUtil.readPageResultSet(rs, clazz, nameConverter, -1, -1);
+                result = ResultSetUtil.readPageResultSet(rs, clazz, getNameConverter(), -1, -1);
             } else {
-                result = ResultSetUtil.readPageResultSet(rs, clazz, nameConverter, pageSize, pageIndex);
+                result = ResultSetUtil.readPageResultSet(rs, clazz, getNameConverter(), pageSize, pageIndex);
             }
 
             result.setTotal(queryCount(sql, params));
@@ -95,7 +86,7 @@ public class DefaultExecutor extends Executor {
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
     private String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
-        return CommandBuilderHelper.getHelper(connection).getRangedSql(sql, startPos, endPos);
+        return CommandBuilderHelper.getHelper(context).getRangedSql(sql, startPos, endPos);
     }
 
     /**
@@ -123,7 +114,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private String getCountSql(String sql) throws SQLException {
-        return CommandBuilderHelper.getHelper(connection).getCountSql(sql);
+        return CommandBuilderHelper.getHelper(context).getCountSql(sql);
     }
 
     @Override
@@ -135,7 +126,7 @@ public class DefaultExecutor extends Executor {
             throw new DAOException("Query failed:", e, sql, params);
         }
         RowIterator rowIterator = new RowIterator(rs, preProcessor);
-        rowIterator.setNameConverter(nameConverter);
+        rowIterator.setNameConverter(getNameConverter());
         return rowIterator;
     }
 
@@ -163,9 +154,9 @@ public class DefaultExecutor extends Executor {
 
             List<Object> result;
             if (rangedSql != null) {
-                result = ResultSetUtil.readResultSet(rs, clazz, nameConverter, -1, -1);
+                result = ResultSetUtil.readResultSet(rs, clazz, getNameConverter(), -1, -1);
             } else {
-                result = ResultSetUtil.readResultSet(rs, clazz, nameConverter, startPosition, endPosition);
+                result = ResultSetUtil.readResultSet(rs, clazz, getNameConverter(), startPosition, endPosition);
             }
 
             LOG.debug(findCaller() + "|Query result: " + result.size() + " records.");
@@ -181,7 +172,7 @@ public class DefaultExecutor extends Executor {
     @SuppressWarnings({"unchecked"})
     public <T> T find(Class<T> wrapperClass, Object key, String tableName) {
         try {
-            Command command = QueryCommandBuilder.buildByKey(connection, tableName, key);
+            Command command = QueryCommandBuilder.buildByKey(context, tableName, key);
             List list = query(wrapperClass, command.getStatement(), command.getParams(), 0, 1);
             return (T) (list.isEmpty() ? null : list.get(0));
         } catch (SQLException e) {
@@ -192,7 +183,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public boolean exists(Object obj, String tableName) {
         try {
-            Command command = QueryCommandBuilder.build(connection, tableName, obj, nameConverter);
+            Command command = QueryCommandBuilder.build(context, tableName, obj);
             return !query(null, command.getStatement(), command.getParams(), -1, -1).isEmpty();
         } catch (SQLException e) {
             throw new DAOException("Delete failed: " + e.getMessage(), e);
@@ -380,7 +371,7 @@ public class DefaultExecutor extends Executor {
     public void insert(Object object, String tableName) {
         Command command = new Command();
         try {
-            command = InsertCommandBuilder.build(connection, tableName, object);
+            command = InsertCommandBuilder.build(context, tableName, object);
             execute(command.getStatement(), command.getParams());
         } catch (SQLException e) {
             throw new DAOException("Execution failed: " + e.getMessage(), e, command.getStatement(), command.getParams());
@@ -390,7 +381,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public void insertList(List list, String table) {
         try {
-            execute(InsertCommandBuilder.buildBatch(connection, table, list));
+            execute(InsertCommandBuilder.buildBatch(context, table, list));
         } catch (SQLException e) {
             throw new DAOException("Insert Failed: " + e.getMessage(), e);
         }
@@ -405,7 +396,7 @@ public class DefaultExecutor extends Executor {
     public int delete(Object obj, String tableName) {
         Command command = new Command();
         try {
-            command = DeleteCommandBuilder.build(connection, tableName, obj);
+            command = DeleteCommandBuilder.build(context, tableName, obj);
             return execute(command.getStatement(), command.getParams());
         } catch (SQLException e) {
             throw new DAOException("Delete failed: " + e.getMessage(), e, command.getStatement(), command.getParams());
@@ -415,7 +406,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public int deleteByKey(Object key, String tableName) {
         try {
-            Command command = DeleteCommandBuilder.buildByKey(connection, tableName, key);
+            Command command = DeleteCommandBuilder.buildByKey(context, tableName, key);
             return execute(command.getStatement(), command.getParams());
         } catch (SQLException e) {
             throw new DAOException("Delete failed: " + e.getMessage(), e);
@@ -427,9 +418,9 @@ public class DefaultExecutor extends Executor {
     @Override
     public List call(String name, Object[] params) {
         try {
-            SpParam[] spParams = StorageProcedureHelper.createSpParams(name, params, connection);
+            SpParam[] spParams = StorageProcedureHelper.createSpParams(name, params, getConnection());
             LOG.debug(findCaller() + "(procedure)" + name + Arrays.asList(spParams));
-            CallableStatement cs = StorageProcedureHelper.createCallableStatement(name, spParams, connection);
+            CallableStatement cs = StorageProcedureHelper.createCallableStatement(name, spParams, getConnection());
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
             }
@@ -445,13 +436,13 @@ public class DefaultExecutor extends Executor {
 
         try {
             LOG.debug(findCaller() + "(function)" + name + Arrays.asList(params));
-            SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, connection);
+            SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, getConnection());
             int resultType = spParams[0].getSqlType();
 
             // 去掉第一个
             spParams = Arr.subarray(spParams, 1, spParams.length);
 
-            CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, connection);
+            CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, getConnection());
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
             }
@@ -519,11 +510,11 @@ public class DefaultExecutor extends Executor {
      * @throws SQLException 如果创建失败
      */
     private Statement createNormalStatement() throws SQLException {
-        return connection.createStatement(getResultSetType(), ResultSet.CONCUR_READ_ONLY);
+        return getConnection().createStatement(getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
     private PreparedStatement createPreparedStatement(String sql) throws SQLException {
-        return connection.prepareStatement(sql, getResultSetType(), ResultSet.CONCUR_READ_ONLY);
+        return getConnection().prepareStatement(sql, getResultSetType(), ResultSet.CONCUR_READ_ONLY);
     }
 
     private int getResultSetType() {
@@ -614,6 +605,7 @@ public class DefaultExecutor extends Executor {
 
     private void closeConnection() {
         try {
+            Connection connection = getConnection();
             if (!connection.isClosed()) {
                 connection.close();
             }
@@ -624,6 +616,7 @@ public class DefaultExecutor extends Executor {
 
     @Override
     public void close() {
+        Connection connection = getConnection();
         if (connection != null) {
             try {
                 if (!connection.getAutoCommit()) {
@@ -640,6 +633,7 @@ public class DefaultExecutor extends Executor {
 
     @Override
     public void rollbackAndClose() {
+        Connection connection = getConnection();
         if (connection != null) {
             try {
                 if (!connection.getAutoCommit()) {
@@ -656,6 +650,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public boolean isClosed() {
         try {
+            Connection connection = getConnection();
             return connection == null || connection.isClosed();
         } catch (SQLException e) {
             LOG.error("Error checking connection: " + e.getMessage(), e);

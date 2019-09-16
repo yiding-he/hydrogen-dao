@@ -1,14 +1,11 @@
 package com.hyd.dao.database.commandbuilder;
 
-import com.hyd.dao.BatchCommand;
-import com.hyd.dao.DAO;
-import com.hyd.dao.DAOException;
+import com.hyd.dao.*;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.util.Str;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +23,25 @@ public class InsertCommandBuilder {
      * 构造一个批处理命令。注意：批处理命令 SQL 语句中有哪些参数，是根据第一个要插入的记录生成的。
      * 这时候不能因为记录的某个属性值为 null 就不将该属性加入 SQL，因为后面的其他记录的属性值可能不是 null。
      *
-     * @param conn      数据库连接
+     * @param context   数据库操作上下文
      * @param tableName 表名
      * @param objects   要插入的记录对象
      *
      * @return 批处理插入命令
-     *
      * @throws java.sql.SQLException 如果获取数据库信息失败
      */
-    public static BatchCommand buildBatch(Connection conn, String tableName, List objects) throws SQLException {
+    public static BatchCommand buildBatch(ExecutionContext context, String tableName, List objects)
+        throws SQLException {
 
         if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
         }
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
-        ColumnInfo[] infos = getBatchColumnInfo(conn, tableName, helper, objects.get(0));
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, objects.get(0));
 
-        String statement = "insert into " + helper.getTableNameForSql(tableName) + "(";
-        String values = "";
+        StringBuilder statement = new StringBuilder("insert into " + helper.getTableNameForSql(tableName) + "(");
+        StringBuilder values = new StringBuilder();
         for (ColumnInfo info : infos) {
             String columnName;
 
@@ -55,31 +52,32 @@ public class InsertCommandBuilder {
                 columnName = helper.getColumnNameForSql(info.getColumnName());
             }
 
-            statement += columnName + ",";
-            values += "?,";
+            statement.append(columnName).append(",");
+            values.append("?,");
         }
 
-        statement = Str.removeEnd(statement, ",")
-                + ") values ("
-                + Str.removeEnd(values, ",") + ")";
+        statement = new StringBuilder(Str.removeEnd(statement.toString(), ",")
+            + ") values ("
+            + Str.removeEnd(values.toString(), ",") + ")");
 
         // 生成命令
-        BatchCommand bc = new BatchCommand(statement);
+        BatchCommand bc = new BatchCommand(statement.toString());
         bc.setColumnInfos(infos);
 
         for (Object object : objects) {
-            bc.addParams(CommandBuilderHelper.generateParams(infos, object));
+            bc.addParams(helper.generateParams(infos, object));
         }
         return bc;
     }
 
     // 获取要批量插入的表字段信息
-    private static ColumnInfo[] getBatchColumnInfo(Connection conn, String tableName,
-                                                   CommandBuilderHelper helper, Object sample) throws SQLException {
+    private static ColumnInfo[] getBatchColumnInfo(
+        ExecutionContext context, String tableName, CommandBuilderHelper helper, Object sample
+    ) throws SQLException {
 
-        FQN fqn = new FQN(conn, tableName);
+        FQN fqn = new FQN(context.getConnection(), tableName);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
-        List list = CommandBuilderHelper.generateParams(infos, sample);
+        List list = helper.generateParams(infos, sample);
 
         for (int i = 0, listSize = list.size(); i < listSize; i++) {
             Object propertyValue = list.get(i);
@@ -93,21 +91,19 @@ public class InsertCommandBuilder {
     /**
      * 构造一条插入命令
      *
-     * @param connection 数据库连接
-     * @param tableName  表名
-     * @param object     要插入的对象
+     * @param context   数据库操作上下文
+     * @param tableName 表名
+     * @param object    要插入的对象
      *
      * @return 插入命令
-     *
      * @throws SQLException 如果获取数据库信息失败
      */
-    public static Command build(Connection connection, String tableName, Object object) throws SQLException {
-        FQN fqn = new FQN(connection, tableName);
-
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(connection);
-
+    public static Command build(ExecutionContext context, String tableName, Object object) throws SQLException {
+        FQN fqn = new FQN(context.getConnection(), tableName);
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema(), fqn.getName());
-        return buildCommand(tableName, infos, object, connection);
+        List params = helper.generateParams(infos, object);
+        return buildCommand(tableName, infos, params, context);
     }
 
     /**
@@ -115,25 +111,23 @@ public class InsertCommandBuilder {
      *
      * @param tableName 表名
      * @param infos     表的字段信息
-     * @param object    要插入的对象
-     * @param conn      数据库连接
+     * @param params    参数值
+     * @param context   数据库操作上下文
      *
      * @return 插入命令
-     *
      * @throws java.sql.SQLException 如果获取数据库类型失败
      */
     private static Command buildCommand(
-            String tableName, ColumnInfo[] infos, Object object, Connection conn
+        String tableName, ColumnInfo[] infos, List params, ExecutionContext context
     ) throws SQLException {
 
-        DatabaseType databaseType = DatabaseType.of(conn);
-        List params = CommandBuilderHelper.generateParams(infos, object);
+        DatabaseType databaseType = DatabaseType.of(context.getConnection());
         List<Object> finalParams = new ArrayList<>();
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(conn);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
 
-        String command = "insert into " + tableName + "(";
-        String questionMarks = "";
+        StringBuilder command = new StringBuilder("insert into " + tableName + "(");
+        StringBuilder questionMarks = new StringBuilder();
 
         for (int i = 0; i < infos.length; i++) {
             Object value = params.get(i);
@@ -143,11 +137,11 @@ public class InsertCommandBuilder {
             }
 
             String columnName = helper.getColumnNameForSql(infos[i].getColumnName());
-            command += columnName + ",";
+            command.append(columnName).append(",");
 
             // 属性值是一个 sysdate 占位符
             if (value == DAO.SYSDATE) {
-                questionMarks += helper.getSysdateMark() + ",";
+                questionMarks.append(helper.getSysdateMark()).append(",");
                 continue;
             }
 
@@ -158,7 +152,7 @@ public class InsertCommandBuilder {
                 }
 
                 if (infos[i].getSequenceName() != null && databaseType.isSequenceSupported()) {
-                    questionMarks += infos[i].getSequenceName() + ".nextval,";
+                    questionMarks.append(infos[i].getSequenceName()).append(".nextval,");
                 }
 
                 // 如果没有指定 sequenceName，说明数据库会自动加1（例如 MySQL），所以语句中可以忽略该字段
@@ -167,19 +161,19 @@ public class InsertCommandBuilder {
 
             finalParams.add(value);
 
-            questionMarks += "?" + ",";
+            questionMarks.append("?" + ",");
         }
 
-        command = Str.removeEnd(command, ",");
-        questionMarks = Str.removeEnd(questionMarks, ",");
+        command = new StringBuilder(Str.removeEnd(command.toString(), ","));
+        questionMarks = new StringBuilder(Str.removeEnd(questionMarks.toString(), ","));
 
-        command += ") values (" + questionMarks + ")";
+        command.append(") values (").append(questionMarks).append(")");
 
-        List<Integer> paramTypes = new ArrayList<Integer>();
+        List<Integer> paramTypes = new ArrayList<>();
         for (ColumnInfo info : infos) {
             paramTypes.add(info.getDataType());
         }
-        return new Command(command, finalParams, paramTypes);
+        return new Command(command.toString(), finalParams, paramTypes);
     }
 
 }

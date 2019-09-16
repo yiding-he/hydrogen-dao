@@ -25,7 +25,9 @@ public class Str {
 
         int count = 0;
         Matcher matcher = Pattern.compile(regex).matcher(str);
-        while (matcher.find()) count++;
+        while (matcher.find()) {
+            count++;
+        }
         return count;
     }
 
@@ -45,7 +47,9 @@ public class Str {
     /**
      * 将字段名转换为属性名
      *
-     * @param columnName 字段名，如："name", "parent_node"。如果字段名属于 Java 关键字，则属性名为对应的全大写
+     * @param columnName 字段名，如："name", "parent_node"。
+     *                   如果字段名属于 Java 关键字，则属性名为对应的全大写；
+     *                   如果字段名不包含下划线，则认为不需要转换
      *
      * @return 属性名，如："name", "parentNode"
      */
@@ -63,7 +67,7 @@ public class Str {
             return columnName.toUpperCase();
         }
 
-        return underscore2Property(columnName);
+        return columnName.contains("_") ? underscore2Property(columnName) : columnName;
     }
 
     public static String underscore2Property(String underscore) {

@@ -1,6 +1,6 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import java.sql.Connection;
+import com.hyd.dao.database.executor.ExecutionContext;
 
 /**
  * (description)
@@ -10,13 +10,8 @@ import java.sql.Connection;
  */
 public class SQLServerCommandBuilderHelper extends CommandBuilderHelper {
 
-    /**
-     * 构造函数
-     *
-     * @param connection 数据库连接
-     */
-    protected SQLServerCommandBuilderHelper(Connection connection) {
-        super(connection);
+    public SQLServerCommandBuilderHelper(ExecutionContext context) {
+        super(context);
     }
 
     @Override

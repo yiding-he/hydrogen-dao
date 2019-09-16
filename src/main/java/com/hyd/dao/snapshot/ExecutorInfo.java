@@ -1,7 +1,5 @@
 package com.hyd.dao.snapshot;
 
-import com.hyd.dao.database.executor.Executor;
-
 import java.util.Date;
 
 /**
@@ -75,12 +73,4 @@ public class ExecutorInfo {
                 '}';
     }
 
-    public void addToExecutor(Executor executor) {
-        executor.setInfo(this);
-    }
-
-    public void addToSnapshot(Snapshot snapshot) {
-        snapshot.addExecutorInfo(this);
-        this.snapshot = snapshot;
-    }
 }

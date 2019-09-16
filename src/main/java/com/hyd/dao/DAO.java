@@ -1,8 +1,6 @@
 package com.hyd.dao;
 
-import com.hyd.dao.database.ExecutorFactory;
-import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.database.TransactionManager;
+import com.hyd.dao.database.*;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
@@ -10,7 +8,6 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.Str;
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
@@ -24,11 +21,6 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("unchecked")
 public class DAO {
-
-    // initialization
-    static {
-        // HydrogenDAOInitializer.init();
-    }
 
     public static final Date SYSDATE = new Date(0) {
 

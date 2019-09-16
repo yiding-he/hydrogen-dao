@@ -3,19 +3,15 @@ package com.hyd.dao.database.commandbuilder.helper;
 import com.hyd.dao.*;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.Locker;
-import com.hyd.dao.util.ResultSetUtil;
-import com.hyd.dao.util.Str;
-
+import com.hyd.dao.util.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -26,41 +22,40 @@ public class CommandBuilderHelper {
     private static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
 
     // 缓存已经生成的字段info
-    private static Map<String, ColumnInfo[]> cache = new HashMap<>();
+    private static Map<String, ColumnInfo[]> cache = new ConcurrentHashMap<>();
 
-    protected Connection connection;
+    protected ExecutionContext context;
 
     /**
      * 构造函数
      *
-     * @param connection 数据库连接
+     * @param context   数据库操作上下文
      */
-    protected CommandBuilderHelper(Connection connection) {
-        this.connection = connection;
+    protected CommandBuilderHelper(ExecutionContext context) {
+        this.context = context;
     }
 
     /**
      * 获取一个 CommandBuilderHelper 对象
      *
-     * @param conn 数据库连接
+     * @param context 数据库操作上下文
      *
      * @return 根据数据库类型产生的 CommandBuilderHelper 对象
-     *
      * @throws SQLException 如果获取数据库连接信息失败
      */
-    public static CommandBuilderHelper getHelper(Connection conn) throws SQLException {
-        DatabaseType databaseType = DatabaseType.of(conn);
+    public static CommandBuilderHelper getHelper(ExecutionContext context) throws SQLException {
+        DatabaseType databaseType = DatabaseType.of(context.getConnection());
         switch (databaseType) {
             case Oracle:
-                return new OracleCommandBuilderHelper(conn);
+                return new OracleCommandBuilderHelper(context);
             case HSQLDB:
-                return new HSQLDBCommandBuildHelper(conn);
+                return new HSQLDBCommandBuildHelper(context);
             case MySQL:
-                return new MySqlCommandBuilderHelper(conn);
+                return new MySqlCommandBuilderHelper(context);
             case SQLServer:
-                return new SQLServerCommandBuilderHelper(conn);
+                return new SQLServerCommandBuilderHelper(context);
             default:
-                return new CommandBuilderHelper(conn);
+                return new CommandBuilderHelper(context);
         }
     }
 
@@ -73,7 +68,8 @@ public class CommandBuilderHelper {
 
     public List<String> getTableNames() throws SQLException {
         try {
-            ResultSet tables = this.connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
+            Connection connection = this.context.getConnection();
+            ResultSet tables = connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
             List<Row> tableRows = ResultSetUtil.readResultSet(tables);
             return tableRows.stream().map(m -> (String) m.get("table_name")).collect(Collectors.toList());
         } catch (SQLException e) {
@@ -113,7 +109,7 @@ public class CommandBuilderHelper {
     }
 
     private ColumnInfo[] getColumnInfos(
-            String schema, String tableName, String fullTableName) {
+        String schema, String tableName, String fullTableName) {
         try {
             return getColumnInfos0(schema, tableName, fullTableName);
         } catch (SQLException e) {
@@ -122,7 +118,7 @@ public class CommandBuilderHelper {
     }
 
     private ColumnInfo[] getColumnInfos0(
-            String schema, String tableName, String fullTableName) throws SQLException {
+        String schema, String tableName, String fullTableName) throws SQLException {
 
         if (cache.get(fullTableName) != null) {
             return cache.get(fullTableName);
@@ -133,6 +129,7 @@ public class CommandBuilderHelper {
         String fixedSchema = schema.toUpperCase();
         String fixedTableName = getTableNameForMeta(tableName);
 
+        Connection connection = this.context.getConnection();
         ColumnMeta columnMeta = getColumnMeta();
         DatabaseMetaData dbMeta = connection.getMetaData();
         ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), fixedTableName, "%");
@@ -157,7 +154,7 @@ public class CommandBuilderHelper {
             infos.add(info);
         }
 
-        ColumnInfo[] result = infos.toArray(new ColumnInfo[infos.size()]);
+        ColumnInfo[] result = infos.toArray(new ColumnInfo[0]);
         cache.put(fullTableName, result);
 
         try {
@@ -169,7 +166,7 @@ public class CommandBuilderHelper {
     }
 
     private List<String> getPrimaryKeyColumns(
-            String fixedSchema, String fixedTableName, DatabaseMetaData dbMeta) throws SQLException {
+        String fixedSchema, String fixedTableName, DatabaseMetaData dbMeta) throws SQLException {
 
         ColumnMeta columnMeta = getColumnMeta();
         List<String> keyNames = new ArrayList<>();
@@ -189,7 +186,7 @@ public class CommandBuilderHelper {
 
     private boolean isPrimaryKey(String typeName, List<String> keyNames, String columnName) {
         return (typeName != null && typeName.toLowerCase().contains("identity"))
-                || keyNames.contains(columnName);
+            || keyNames.contains(columnName);
     }
 
     protected String getSchema(String schema) {
@@ -197,6 +194,7 @@ public class CommandBuilderHelper {
     }
 
     protected String getCatalog() throws SQLException {
+        Connection connection = this.context.getConnection();
         return connection.getCatalog();
     }
 
@@ -216,7 +214,6 @@ public class CommandBuilderHelper {
      * @param column column name
      *
      * @return fixed column name
-     *
      * @throws SQLException when fails
      */
     public String getColumnNameForSql(String column) throws SQLException {
@@ -231,8 +228,8 @@ public class CommandBuilderHelper {
      *
      * @return 生成的 SQL 语句参数
      */
-    public static List generateParams(ColumnInfo[] infos, Object object) {
-        List<Object> params = new ArrayList<Object>();
+    public List generateParams(ColumnInfo[] infos, Object object) {
+        List<Object> params = new ArrayList<>();
         for (ColumnInfo info : infos) {
             if (info.getDataType() != DAO.SYSDATE_TYPE) {
                 params.add(generateParamValue(object, info));
@@ -244,13 +241,14 @@ public class CommandBuilderHelper {
     /**
      * 根据字段信息，从对象中取得相应的属性值
      *
-     * @param object 对象
-     * @param info   字段信息
+     * @param object        对象
+     * @param info          字段信息
      *
      * @return 属性值。如果获取失败或需要跳过该字段则返回 null
      */
-    public static Object generateParamValue(Object object, ColumnInfo info) {
-        String fieldName = Str.columnToProperty(info.getColumnName());
+    public Object generateParamValue(Object object, ColumnInfo info) {
+        final NameConverter nameConverter = this.context.getNameConverter();
+        String fieldName = nameConverter.column2Field(info.getColumnName());
 
         String strValue;
         Object value;
@@ -258,9 +256,12 @@ public class CommandBuilderHelper {
         // 如果 object 是一个 Map，则根据字段名取值；否则根据属性名取值。
         if (object instanceof Map) {
             Map map = (Map) object;
-            value = map.get(info.getColumnName().toLowerCase());
+            value = map.get(info.getColumnName());
             if (value == null) {
                 value = map.get(info.getColumnName().toUpperCase());
+            }
+            if (value == null) {
+                value = map.get(info.getColumnName().toLowerCase());
             }
             if (value == null) {
                 return null;
@@ -305,7 +306,7 @@ public class CommandBuilderHelper {
                         return new BigDecimal(strValue);
                     } catch (NumberFormatException e) {
                         throw new DataConversionException(
-                                "Conversion from value '" + strValue + "' to column " + info + " failed.", e);
+                            "Conversion from value '" + strValue + "' to column " + info + " failed.", e);
                     }
                 }
 

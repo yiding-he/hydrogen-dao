@@ -1,7 +1,6 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.hyd.dao.database.executor.ExecutionContext;
 
 /**
  * (description)
@@ -11,13 +10,8 @@ import java.sql.SQLException;
  */
 public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
 
-    /**
-     * 构造函数
-     *
-     * @param connection 数据库连接
-     */
-    protected HSQLDBCommandBuildHelper(Connection connection) {
-        super(connection);
+    public HSQLDBCommandBuildHelper(ExecutionContext context) {
+        super(context);
     }
 
     @Override

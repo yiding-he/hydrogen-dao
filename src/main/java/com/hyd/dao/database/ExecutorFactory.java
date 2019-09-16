@@ -1,12 +1,11 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.database.executor.DefaultExecutor;
-import com.hyd.dao.database.executor.Executor;
-
-import javax.sql.DataSource;
+import com.hyd.dao.database.executor.*;
+import com.hyd.dao.database.type.NameConverter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
 /**
  * 构造 Executor 对象的工厂。
@@ -78,7 +77,13 @@ public class ExecutorFactory {
 
         try {
             Connection connection = getConnection(autoCommit);
-            return new DefaultExecutor(dataSourceName, connection);
+
+            ExecutionContext context = new ExecutionContext();
+            context.setDataSourceName(dataSourceName);
+            context.setConnection(connection);
+            context.setNameConverter(NameConverter.DEFAULT);
+
+            return new DefaultExecutor(context);
         } catch (SQLException e) {
             throw new DAOException(e);
         }

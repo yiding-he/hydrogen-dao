@@ -1,6 +1,6 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import java.sql.Connection;
+import com.hyd.dao.database.executor.ExecutionContext;
 
 /**
  * (description)
@@ -9,8 +9,8 @@ import java.sql.Connection;
  */
 public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
 
-    public MySqlCommandBuilderHelper(Connection conn) {
-        super(conn);
+    public MySqlCommandBuilderHelper(ExecutionContext context) {
+        super(context);
     }
 
     @Override

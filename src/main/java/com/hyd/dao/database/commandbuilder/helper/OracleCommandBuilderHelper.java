@@ -1,8 +1,7 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
+import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.util.ResultSetUtil;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -10,8 +9,8 @@ import java.sql.SQLException;
  */
 public class OracleCommandBuilderHelper extends CommandBuilderHelper {
 
-    public OracleCommandBuilderHelper(Connection connection) {
-        super(connection);
+    public OracleCommandBuilderHelper(ExecutionContext context) {
+        super(context);
     }
 
     @Override
