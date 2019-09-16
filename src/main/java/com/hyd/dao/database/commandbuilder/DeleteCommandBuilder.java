@@ -18,7 +18,7 @@ public class DeleteCommandBuilder {
     }
 
     /**
-     * 根据 object 构造参数
+     * 从 object 中提取主键值作为参数
      */
     public static Command build(ExecutionContext context, String tableName, Object object) throws SQLException {
         FQN fqn = new FQN(context.getConnection(), tableName);

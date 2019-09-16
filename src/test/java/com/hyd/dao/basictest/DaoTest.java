@@ -1,16 +1,14 @@
 package com.hyd.dao.basictest;
 
+import static org.junit.Assert.*;
+
 import com.hyd.dao.DAO;
 import com.hyd.dao.Row;
 import com.hyd.dao.src.models.Blog;
 import com.hyd.daotests.JUnitRuleTestBase;
-import org.junit.Test;
-
 import java.util.List;
 import java.util.function.Supplier;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 public class DaoTest extends JUnitRuleTestBase {
 
@@ -34,5 +32,11 @@ public class DaoTest extends JUnitRuleTestBase {
         assertNotNull(blogs.get(0).getContent());
         assertNotNull(blogs.get(0).getCreateTime());
         assertNotNull(blogs.get(0).getTitle());
+    }
+
+    @Test
+    public void deleteByPrimaryKey() throws Exception {
+        dao.deleteByKey(1, "blog");
+        assertEquals(0, dao.count("select count(1) from blog where id=?", 1));
     }
 }

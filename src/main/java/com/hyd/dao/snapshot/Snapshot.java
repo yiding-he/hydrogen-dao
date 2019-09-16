@@ -33,17 +33,17 @@ public class Snapshot {
     /**
      * 当前正在执行数据库命令的 Executor 列表
      */
-    private List<ExecutorInfo> executorInfoList = Collections.synchronizedList(new ArrayList<ExecutorInfo>());
+    private List<ExecutorInfo> executorInfoList = Collections.synchronizedList(new ArrayList<>());
 
-    public void addExecutorInfo(ExecutorInfo info) {
+    void addExecutorInfo(ExecutorInfo info) {
         executorInfoList.add(info);
     }
 
     public ExecutorInfo[] getExecutorInfos() {
-        return executorInfoList.toArray(new ExecutorInfo[executorInfoList.size()]);
+        return executorInfoList.toArray(new ExecutorInfo[0]);
     }
 
-    public void removeInfo(ExecutorInfo executorInfo) {
+    void removeInfo(ExecutorInfo executorInfo) {
         executorInfoList.remove(executorInfo);
     }
 }
