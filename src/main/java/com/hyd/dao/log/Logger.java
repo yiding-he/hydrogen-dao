@@ -35,7 +35,7 @@ public class Logger {
 
         public Object getLogger(String loggerName) {
             return executeMethod(null, "org.slf4j.LoggerFactory", "getLogger",
-                    new Object[]{loggerName}, new Class[]{String.class});
+                new Object[]{loggerName}, new Class[]{String.class});
         }
 
         public LoggerType getLoggerType() {
@@ -47,7 +47,7 @@ public class Logger {
 
         public Object getLogger(String loggerName) {
             return executeMethod(null, "org.apache.log4j.Logger", "getLogger",
-                    new Object[]{loggerName}, new Class[]{String.class});
+                new Object[]{loggerName}, new Class[]{String.class});
         }
 
         public LoggerType getLoggerType() {
@@ -59,7 +59,7 @@ public class Logger {
 
         public Object getLogger(String loggerName) {
             return executeMethod(null, "org.apache.logging.log4j.LogManager", "getLogger",
-                    new Object[]{loggerName}, new Class[]{String.class});
+                new Object[]{loggerName}, new Class[]{String.class});
         }
 
         public LoggerType getLoggerType() {
@@ -89,14 +89,14 @@ public class Logger {
     }
 
     public static Object executeMethod(
-            Object obj, String className, String methodName, Object[] args, Class[] types) {
+        Object obj, String className, String methodName, Object[] args, Class[] types) {
         try {
             Class<?> type = Class.forName(className);
             Method method = type.getMethod(methodName, types);
             return method.invoke(obj, args);
         } catch (Exception e) {
             System.err.println(obj + ", " + className + ", " + methodName + ", "
-                    + Arrays.toString(args) + ", " + Arrays.toString(types));
+                + Arrays.toString(args) + ", " + Arrays.toString(types));
             throw new RuntimeException(e);
         }
     }
@@ -130,26 +130,26 @@ public class Logger {
     public enum LoggerType {
         LOGBACK("ch.qos.logback.classic.Logger", new Object[]{0, 10, 20, 30, 40}),
         LOG4J(
-                "org.apache.log4j.Logger", new Object[]{
-                member(null, "org.apache.log4j.Level", "TRACE"),
-                member(null, "org.apache.log4j.Level", "DEBUG"),
-                member(null, "org.apache.log4j.Level", "INFO"),
-                member(null, "org.apache.log4j.Level", "WARN"),
-                member(null, "org.apache.log4j.Level", "ERROR")
+            "org.apache.log4j.Logger", new Object[]{
+            member(null, "org.apache.log4j.Level", "TRACE"),
+            member(null, "org.apache.log4j.Level", "DEBUG"),
+            member(null, "org.apache.log4j.Level", "INFO"),
+            member(null, "org.apache.log4j.Level", "WARN"),
+            member(null, "org.apache.log4j.Level", "ERROR")
         }),
         LOG4J2("org.apache.logging.log4j.core.Logger", new Object[]{
-                member(null, "org.apache.logging.log4j.Level", "TRACE"),
-                member(null, "org.apache.logging.log4j.Level", "DEBUG"),
-                member(null, "org.apache.logging.log4j.Level", "INFO"),
-                member(null, "org.apache.logging.log4j.Level", "WARN"),
-                member(null, "org.apache.logging.log4j.Level", "ERROR")
+            member(null, "org.apache.logging.log4j.Level", "TRACE"),
+            member(null, "org.apache.logging.log4j.Level", "DEBUG"),
+            member(null, "org.apache.logging.log4j.Level", "INFO"),
+            member(null, "org.apache.logging.log4j.Level", "WARN"),
+            member(null, "org.apache.logging.log4j.Level", "ERROR")
         }),
         JDK("java.util.logging.Logger", new Object[]{
-                java.util.logging.Level.FINER,
-                java.util.logging.Level.FINE,
-                java.util.logging.Level.INFO,
-                java.util.logging.Level.WARNING,
-                java.util.logging.Level.SEVERE
+            java.util.logging.Level.FINER,
+            java.util.logging.Level.FINE,
+            java.util.logging.Level.INFO,
+            java.util.logging.Level.WARNING,
+            java.util.logging.Level.SEVERE
         }),
         ;
 
@@ -271,10 +271,24 @@ public class Logger {
             return;
         }
 
+        String messageValue = String.valueOf(message);
         executeMethod(logger, "org.slf4j.spi.LocationAwareLogger", "log",
-                new Object[]{null, Logger.class.getName(), level, message, EMPTY_ARR, throwable},
-                new Class[]{cls("org.slf4j.Marker"), String.class, Integer.TYPE, String.class,
-                        EMPTY_ARR.getClass(), Throwable.class});
+            new Object[]{
+                null,
+                Logger.class.getName(),
+                level,
+                messageValue,
+                EMPTY_ARR,
+                throwable
+            },
+            new Class[]{
+                cls("org.slf4j.Marker"),
+                String.class,
+                Integer.TYPE,
+                String.class,
+                EMPTY_ARR.getClass(),
+                Throwable.class
+            });
     }
 
     private void logLog4j(Object message, Object level, Throwable throwable) {
@@ -283,8 +297,8 @@ public class Logger {
         }
 
         executeMethod(logger, "org.apache.log4j.Category", "log",
-                new Object[]{Logger.class.getName(), level, message, throwable},
-                new Class[]{String.class, cls("org.apache.log4j.Priority"), Object.class, Throwable.class});
+            new Object[]{Logger.class.getName(), level, message, throwable},
+            new Class[]{String.class, cls("org.apache.log4j.Priority"), Object.class, Throwable.class});
     }
 
     private void logLog4j2(Object message, Object level, Throwable throwable) {
@@ -296,11 +310,11 @@ public class Logger {
         Class<?> messageClass = cls("org.apache.logging.log4j.message.Message");
         Class<?> markerClass = cls("org.apache.logging.log4j.Marker");
         Object msg = create("org.apache.logging.log4j.message.SimpleMessage",
-                new Object[]{message}, new Class[]{String.class});
+            new Object[]{message}, new Class[]{String.class});
 
         executeMethod(logger, "org.apache.logging.log4j.core.Logger", "logMessage",
-                new Object[]{Logger.class.getName(), level, null, msg, throwable},
-                new Class[]{String.class, levelClass, markerClass, messageClass, Throwable.class});
+            new Object[]{Logger.class.getName(), level, null, msg, throwable},
+            new Class[]{String.class, levelClass, markerClass, messageClass, Throwable.class});
     }
 
     private void logJdk(Object message, Object level, Throwable throwable) {
@@ -329,10 +343,10 @@ public class Logger {
 
         if (throwable != null) {
             l.logp((java.util.logging.Level) level,
-                    sourceClassName, sourceMethodName, String.valueOf(message), throwable);
+                sourceClassName, sourceMethodName, String.valueOf(message), throwable);
         } else {
             l.logp((java.util.logging.Level) level,
-                    sourceClassName, sourceMethodName, String.valueOf(message));
+                sourceClassName, sourceMethodName, String.valueOf(message));
         }
     }
 

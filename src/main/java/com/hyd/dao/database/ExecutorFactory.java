@@ -3,6 +3,8 @@ package com.hyd.dao.database;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.database.executor.*;
 import com.hyd.dao.database.type.NameConverter;
+import com.hyd.dao.spring.SpringConnectionFactory;
+import com.hyd.dao.util.Cls;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -99,6 +101,11 @@ public class ExecutorFactory {
      * @throws SQLException 如果获取数据库连接失败
      */
     public Connection getConnection(boolean autoCommit) throws SQLException {
+
+        if (Cls.exists("org.springframework.jdbc.datasource.DataSourceUtils")) {
+            return SpringConnectionFactory.getConnection(this.dataSource);
+        }
+
         Connection connection = this.dataSource.getConnection();
         connection.setAutoCommit(autoCommit);
         return connection;
