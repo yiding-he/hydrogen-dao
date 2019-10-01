@@ -20,26 +20,17 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前分支的版本为 `3.3.0-SNAPSHOT`。
+当前分支的版本为 `3.3.0`。
 
 ## 添加依赖关系
 
-请在 pom.xml 的 `<repositories>` 元素当中添加下面的内容：
-
-```xml
-<repository>
-    <id>yiding-he-github</id>
-    <url>https://raw.githubusercontent.com/yiding-he/mvn-repo/master</url>
-</repository>
-```
-
-然后在 `<dependencies>` 元素当中添加下面的内容：
+请在 pom.xml 的 `<dependencies>` 元素当中添加下面的内容：
 
 ```xml
 <dependency>
-    <groupId>com.hyd</groupId>
+    <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -102,6 +93,10 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ```
 
 ## 更新
+
+#### 2019-10-01
+
+* hydrogen-dao 版本 3.3.0 发布到了 Maven 中心库。
 
 #### 2019-08-12
 
