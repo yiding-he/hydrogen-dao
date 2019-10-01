@@ -27,10 +27,10 @@ public class TypeUtil {
     /**
      * 根据字段数据类型将数据库中的值转化为 Java 类型，用于对简单查询结果的转换
      * 转换结果将放入 Row 对象，以帮助进行进一步转换。
-     * <p/>
-     * 数字类型 -> BigDecimal
-     * CLOB -> String
-     * BLOB -> byte[]
+     *
+     * 数字类型 -&gt; BigDecimal
+     * CLOB -&gt; String
+     * BLOB -&gt; byte[]
      * 其他类型保持原样
      *
      * @param columnType 值的 SQL 类型

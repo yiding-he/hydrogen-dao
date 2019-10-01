@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 /**
  * <p>查询结果迭代器。当查询返回大量结果，又没有足够的内存进行缓存时，可以使用 DAO.queryIterator
  * 方法。该方法返回一个迭代器，用来每次获取一行查询结果。当处理完毕后，请务必记得将其关闭。</p>
- * <p>使用示例：<br/><code>
+ * <p>使用示例：<br><code>
  * RowIterator it;<br>
  * try {<br>
  * &nbsp;&nbsp;&nbsp; it&nbsp;= dao.queryIterator("select

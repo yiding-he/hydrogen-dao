@@ -9,15 +9,15 @@ import java.util.List;
 
 /**
  * <p>批处理命令。一个批处理命令包含 SQL 语句和参数列表。</p>
- * <p>下面是一个例子：<br/><code><pre>
- *     BatchCommand cmd = new BatchCommand("delete * from tt_test where id>=? and id<=?");
- *     cmd.addParams("3", "4");
- *     cmd.addParams("100", "200");
- *     cmd.addParams("201", "205");
- *     dao.execute(cmd);
- * </pre></code></p>
- * <p>实际上，因为 select、update 和 delete 语句都可以一次性操作多行记录，而 insert
- * 语句只能一次操作一行。因此批处理语句的主要用途还是批量插入。</p>
+ * 下面是一个例子：<br><pre>
+ * BatchCommand cmd = new BatchCommand(
+ *     "delete * from tt_test where id&gt;=? and id&lt;=?"
+ * );
+ * cmd.addParams("3", "4");
+ * cmd.addParams("100", "200");
+ * cmd.addParams("201", "205");
+ * dao.execute(cmd);
+ * </pre>
  */
 public class BatchCommand {
 

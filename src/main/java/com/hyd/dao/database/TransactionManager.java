@@ -3,6 +3,7 @@ package com.hyd.dao.database;
 import com.hyd.dao.TransactionException;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 /**
  * 管理事务开始和结束，并缓存事务当中要用到的 Executor 对象
- * <p/>
+ *
  * 关于多级事务：
  * 多级事务会占用大量连接（每个线程的每一级事务中对每个数据源都会占用一个连接），
  * 连接池不够用的情况下可能会造成假死，所以请慎重使用

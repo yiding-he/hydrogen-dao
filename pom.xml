@@ -4,10 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.hyd</groupId>
+    <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
+    <version>3.3.0</version>
     <packaging>jar</packaging>
+
+    <name>hydrogen-dao</name>
+    <description>A Light Weight JDBC Access Framework</description>
+    <url>https://github.com/yiding-he/hydrogen-dao</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,29 +20,38 @@
         <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
     </properties>
 
+    <developers>
+        <developer>
+            <name>Yiding He</name>
+            <url>https://heyiding.com:666</url>
+            <email>yiding.he@gmail.com</email>
+            <roles>
+                <role>owner</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://git-scm.com/</url>
+        <connection>https://github.com/yiding-he/hydrogen-dao.git</connection>
+    </scm>
+
     <dependencies>
 
         <!-- Fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.54</version>
-        </dependency>
-
-        <!-- DataSource Optional -->
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-dbcp2</artifactId>
-            <version>2.5.0</version>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.1.12</version>
-            <optional>true</optional>
+            <version>1.2.61</version>
         </dependency>
 
         <!-- Logging -->
@@ -55,7 +68,21 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JDBC Drivers -->
+        <!-- Optional DataSource Libraries -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.5.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.1.12</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Optional JDBC Drivers -->
         <dependency>
             <groupId>com.oracle.driver</groupId>
             <artifactId>jdbc-driver</artifactId>
@@ -74,7 +101,7 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <!-- Supported Server: 5.5, 5.6, 5.7, 8.0 -->
-        <!-- https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html -->
+        <!-- @see https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -108,10 +135,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <!-- Needs to be provided for HydrogenDAORule -->
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring Boot -->
+        <!-- Provided Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
@@ -143,9 +171,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
                 <executions>
                     <execution>
+                        <id>attach-sources</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -154,16 +182,44 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>central-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>local</id>
-            <url>file:///D:/Projects/OpenSource/mvn-repo</url>
+            <id>central-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
     </distributionManagement>
 </project>

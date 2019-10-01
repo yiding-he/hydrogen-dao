@@ -11,7 +11,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,7 +72,7 @@ public class ResultSetUtil {
      * @param startPosition 开始位置（0 表示第一条记录）
      * @param endPosition   结束位置（不包含）
      *
-     * @return 包装好的查询结果。如果 startPosition < 0 或 endPosition < 0 则表示返回所有的查询结果
+     * @return 包装好的查询结果。如果 startPosition &lt; 0 或 endPosition &lt; 0 则表示返回所有的查询结果
      *
      * @throws java.sql.SQLException 如果查询失败
      */

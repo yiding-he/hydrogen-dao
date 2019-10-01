@@ -1,9 +1,15 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.*;
-import com.hyd.dao.database.*;
+import com.hyd.dao.BatchCommand;
+import com.hyd.dao.IteratorBatchCommand;
+import com.hyd.dao.Page;
+import com.hyd.dao.Row;
+import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.RowIterator;
+import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.snapshot.ExecutorInfo;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -12,7 +18,7 @@ import java.util.function.Consumer;
 
 /**
  * 执行数据库操作的接口
- * <p/>
+ *
  * Executor 持有 Connection 对象。如果没有在事务中，Executor 对象是一次性的，
  * 执行完第一个 SQL 命令后就会关闭连接（或返还给连接池），且不能再被使用；
  * 而如果在事务中，Executor 对象会被 TransactionManager 缓存起来，直到事务结束。
@@ -103,7 +109,7 @@ public abstract class Executor {
      * @param startPosition 获取查询结果的开始位置（包含）
      * @param endPosition   获取查询结果的结束位置（不包含）
      *
-     * @return 查询结果。如果 startPosition < 0 或 endPosition < 0 则表示返回所有的查询结果
+     * @return 查询结果。如果 startPosition &lt; 0 或 endPosition &lt; 0 则表示返回所有的查询结果
      */
     public abstract List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition);
 

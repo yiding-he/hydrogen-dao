@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  *
  * <pre>
  *     String sql = "select * from USER where USERNAME=#username# and ROLE in (#roles#)";
- *     Map&lt;String, Object> params = new HashMap&lt;String, Object>();
+ *     Map&lt;String, Object&gt; params = new HashMap&lt;String, Object&gt;();
  *     params.put("username", "admin");
  *     params.put("roles", new int[]{1, 2, 3, 4});
  *     dao.query(new MappedCommand(sql, params));

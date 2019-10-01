@@ -1,6 +1,8 @@
 package com.hyd.dao;
 
-import com.hyd.dao.database.*;
+import com.hyd.dao.database.ExecutorFactory;
+import com.hyd.dao.database.RowIterator;
+import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
@@ -8,15 +10,16 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.util.BeanUtil;
 import com.hyd.dao.util.Str;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * Main facade of hydrogen-dao.
- * <p/>
+ *
  * It must be created from {@link DataSources#getDAO(String)}
- * <p/>
+ *
  * It is thread safe.
  */
 @SuppressWarnings("unchecked")
@@ -332,7 +335,7 @@ public class DAO {
      * @param endPosition   获取查询结果的结束位置（不包含）
      * @param params        参数。如果是一个 List，则自动转换为 Array。
      *
-     * @return 查询结果。如果 startPosition < 0 或 endPosition < 0 则表示返回所有的查询结果
+     * @return 查询结果。如果 startPosition &lt; 0 或 endPosition &lt; 0 则表示返回所有的查询结果
      *
      * @throws DAOException 如果发生数据库错误
      */
@@ -437,7 +440,7 @@ public class DAO {
 
     /**
      * 执行查询，返回迭代器
-     * <p/>
+     *
      * <strong>注意：不关闭迭代器的话，可能造成数据库连接泄露！</strong>
      *
      * @param sql    要执行的查询语句
