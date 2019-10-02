@@ -20,7 +20,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前分支的版本为 `3.3.0`。
+当前分支的版本为 `3.4.0`。
 
 ## 添加依赖关系
 
@@ -30,17 +30,62 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 <dependency>
     <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>3.3.0</version>
+    <version>${hydrogen-dao.version}</version>
 </dependency>
 ```
 
 ## 示例
 
+### 初始化
+
+```java
+// 初始化 DataSource 对象
+DataSource dataSource = new com.zaxxer.hikari.HikariDataSource();
+... 
+
+// 初始化 DataSources 对象。DataSources 中可包含多个数据源。
+com.hyd.dao.DataSources dataSources = new DataSources();
+dataSources.setDataSource("default", dataSource);
+
+// 获得针对某个数据源的 DAO 对象
+DAO dao = dataSources.getDAO("default");
+```
+
+### Spring Boot 自动初始化
+
+如果你的项目是基于 Spring Boot，那么可以简化上面的过程。首先添加下面的依赖关系：
+
+```xml
+<dependency>
+	<groupId>com.github.yiding-he</groupId>
+	<artifactId>spring-boot-starter-hydrogen-dao</artifactId>
+	<version>${hydrogen-dao.version}</version>
+</dependency>
+```
+
+然后在 `application.properties` 中配置数据源：
+
+```properties
+spring.datasource.url = [JDBC URL]
+spring.datasource.driver-class-name = [JDBC Driver]
+spring.datasource.username = [USERNAME]
+spring.datasource.password = [PASSWORD]
+```
+
+这样就可以在代码中直接获取 DAO 对象了，例如：
+
+```java
+@Controller
+public class HomeController {
+
+  @Autowired
+  private DAO dao;  // 直接获取 DAO 对象
+}
+```
+
 ### 查询记录
 
 ```Java
-DAO dao = getDAO();
-
 List<User> userList = dao.query(
         User.class,                                         // 包装类（可选）
         "select * from USER where NAME like ? and ROLE=?",  // 语句
@@ -75,7 +120,7 @@ _不用写恶心的 `where 1=1` 了_
 dao.query(SQL
         .Select("ID", "NAME", "DESCRIPTION")
         .From("USERS")
-        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"
+        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"。也可以用 List 作为参数
         .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会加入该查询条件
         .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
 );
@@ -88,11 +133,15 @@ final DAO dao = getDAO();
 
 DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简单明了
     dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
-    throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
+    throw new RuntimeException();    // 之前的 insert 将会回滚，同时抛出该异常
 });
 ```
 
 ## 更新
+
+#### 2019-10-02
+
+* 将 Spring Boot 自动初始化移到单独的模块独立发布
 
 #### 2019-10-01
 
