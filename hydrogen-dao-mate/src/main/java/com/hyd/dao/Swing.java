@@ -6,11 +6,15 @@ import javax.swing.*;
 
 public class Swing {
 
+    public static final int PADDING = 10;
+
+    public static final int SMALL_PADDING = 5;
+
     private static Rectangle desktopBounds;
 
     static {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
             System.err.println(e.toString());
         }
