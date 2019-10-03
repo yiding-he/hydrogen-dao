@@ -1,14 +1,17 @@
 package com.hyd.dao.database.type;
 
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.util.BeanUtil;
-import com.hyd.dao.util.TypeUtil;
+import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.TypeUtil;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.sql.*;
-import java.util.Date;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**

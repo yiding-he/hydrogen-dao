@@ -1,0 +1,34 @@
+package com.hyd.dao.mate.controller;
+
+import com.hyd.dao.mate.MateConfiguration;
+import com.hyd.dao.mate.swing.Swing;
+import com.hyd.dao.mate.ui.ProjectConfigLayout;
+import com.hyd.dao.mate.util.Configuration;
+
+import static com.hyd.dao.mate.util.Configuration.CONFIG_FILE_PATH;
+
+public class ProjectConfigPanel extends ProjectConfigLayout {
+
+    public ProjectConfigPanel() {
+        this.saveButton.addActionListener(event -> saveConfig());
+    }
+
+    public void saveConfig() {
+        MateConfiguration c = new MateConfiguration();
+        c.setSrcPath(srcPath.getValue());
+        c.setPojoPackage(pojoPackage.getValue());
+
+        Configuration.saveConfiguration(c, CONFIG_FILE_PATH);
+        Swing.alertInfo(this, "保存配置", "保存完毕。");
+    }
+
+    public void readConfig() {
+        MateConfiguration mateConfiguration =
+            Configuration.readConfiguration(CONFIG_FILE_PATH, MateConfiguration.class);
+
+        if (mateConfiguration != null) {
+            this.getSrcPath().setValue(mateConfiguration.getSrcPath());
+            this.getPojoPackage().setValue(mateConfiguration.getPojoPackage());
+        }
+    }
+}

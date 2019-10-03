@@ -5,10 +5,14 @@ import com.hyd.dao.Row;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.util.ResultSetUtil;
+import com.hyd.dao.mate.util.ResultSetUtil;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.function.Consumer;
 
 /**

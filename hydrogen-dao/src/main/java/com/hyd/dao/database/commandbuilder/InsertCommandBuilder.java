@@ -1,11 +1,14 @@
 package com.hyd.dao.database.commandbuilder;
 
-import com.hyd.dao.*;
+import com.hyd.dao.BatchCommand;
+import com.hyd.dao.DAO;
+import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
-import com.hyd.dao.util.Str;
+import com.hyd.dao.mate.util.Str;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;

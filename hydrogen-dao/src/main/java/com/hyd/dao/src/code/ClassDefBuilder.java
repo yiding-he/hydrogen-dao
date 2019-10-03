@@ -3,8 +3,11 @@ package com.hyd.dao.src.code;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.util.TypeUtil;
-import java.util.*;
+import com.hyd.dao.mate.util.TypeUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**

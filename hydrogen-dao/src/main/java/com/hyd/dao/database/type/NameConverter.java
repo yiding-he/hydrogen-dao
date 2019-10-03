@@ -1,6 +1,6 @@
 package com.hyd.dao.database.type;
 
-import com.hyd.dao.util.Str;
+import com.hyd.dao.mate.util.Str;
 
 public abstract class NameConverter {
 

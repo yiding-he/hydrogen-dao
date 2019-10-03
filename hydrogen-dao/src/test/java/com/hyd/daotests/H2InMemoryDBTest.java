@@ -1,18 +1,21 @@
 package com.hyd.daotests;
 
-import com.hyd.dao.*;
+import com.hyd.dao.DAO;
+import com.hyd.dao.DataSources;
+import com.hyd.dao.Row;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.util.DBCPDataSource;
-import com.hyd.dao.util.ResultSetUtil;
+import com.hyd.dao.mate.util.DBCPDataSource;
+import com.hyd.dao.mate.util.ResultSetUtil;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.Test;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.Test;
 
 /**
  * @author yiding_he

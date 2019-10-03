@@ -2,7 +2,7 @@ package com.hyd.dao.mysql;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
-import com.hyd.dao.util.DBCPDataSource;
+import com.hyd.dao.mate.util.DBCPDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 public class TestBase {

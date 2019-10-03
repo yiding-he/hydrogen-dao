@@ -2,13 +2,14 @@ package com.hyd.dao;
 
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.util.Locker;
+import com.hyd.dao.mate.util.Locker;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import javax.sql.DataSource;
 
 /**
  * 管理数据源配置

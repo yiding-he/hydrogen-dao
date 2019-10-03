@@ -1,10 +1,10 @@
 package com.hyd.dao.h2;
 
-import static com.hyd.dao.util.DBCPDataSource.newH2FileDataSource;
-
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
-import com.hyd.dao.util.ScriptExecutor;
+import com.hyd.dao.mate.util.ScriptExecutor;
+
+import static com.hyd.dao.mate.util.DBCPDataSource.newH2FileDataSource;
 
 public class H2FileDBTest {
 

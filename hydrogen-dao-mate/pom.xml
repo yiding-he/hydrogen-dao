@@ -22,8 +22,21 @@
     <dependencies>
         <dependency>
             <groupId>com.github.yiding-he</groupId>
-            <artifactId>spring-boot-starter-hydrogen-dao</artifactId>
+            <artifactId>hydrogen-dao</artifactId>
             <version>3.4.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.thoughtworks.xstream/xstream -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.11.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

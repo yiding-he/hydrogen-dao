@@ -3,7 +3,7 @@ package com.hyd.dao.src.code;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.util.Str;
+import com.hyd.dao.mate.util.Str;
 
 /**
  * (description)

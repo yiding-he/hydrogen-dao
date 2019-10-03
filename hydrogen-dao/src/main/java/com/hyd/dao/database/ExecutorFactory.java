@@ -1,14 +1,17 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.database.executor.*;
+import com.hyd.dao.database.executor.DefaultExecutor;
+import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
+import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.spring.SpringConnectionFactory;
-import com.hyd.dao.util.Cls;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
 
 /**
  * 构造 Executor 对象的工厂。
