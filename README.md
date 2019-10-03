@@ -9,6 +9,8 @@
 
 # hydrogen-dao
 
+![如何使用](https://user-images.githubusercontent.com/900606/66099687-6e705e80-e5da-11e9-903c-fd7aee85f042.png)
+
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
 * 执行带参数的查询和更新；
@@ -107,10 +109,6 @@ dao.execute(cmd);
 ```
 
 > `MappedCommand` 并非用字符串替换来生成最终 SQL，而仍然使用 PreparedStatement 并设置每个参数，以保证安全性。
-
-另一个例子：
-
-![dao-demo1.gif](http://git.oschina.net/uploads/images/2015/0322/171100_27e64522_298739.gif)
 
 ### 构造动态查询条件
 
