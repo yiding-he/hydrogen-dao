@@ -4,6 +4,8 @@ import com.hyd.dao.mate.MateConfiguration;
 import com.hyd.dao.mate.swing.Swing;
 import com.hyd.dao.mate.ui.ProjectConfigLayout;
 import com.hyd.dao.mate.util.Configuration;
+import com.hyd.dao.mate.util.Events;
+import com.hyd.dao.mate.util.Listeners;
 
 import static com.hyd.dao.mate.util.Configuration.CONFIG_FILE_PATH;
 
@@ -20,6 +22,8 @@ public class ProjectConfigPanel extends ProjectConfigLayout {
 
         Configuration.saveConfiguration(c, CONFIG_FILE_PATH);
         Swing.alertInfo(this, "保存配置", "保存完毕。");
+
+        Listeners.publish(Events.ConfigUpdated);
     }
 
     public void readConfig() {

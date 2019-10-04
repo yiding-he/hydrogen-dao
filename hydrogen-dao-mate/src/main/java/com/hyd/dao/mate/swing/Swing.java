@@ -52,4 +52,40 @@ public class Swing {
         }
         return result;
     }
+
+    public static void highlight(Component component) {
+        component.setBackground(Color.RED);
+    }
+
+    public static void addTab(JTabbedPane tabbedPane, String tabTitle, int padding, Component content) {
+        JPanel tabContainer = new JPanel();
+        tabContainer.setLayout(new BorderLayout());
+        tabContainer.setBorder(BorderFactory.createEmptyBorder(padding, padding, padding, padding));
+        tabContainer.add(content, BorderLayout.CENTER);
+
+        tabbedPane.addTab(tabTitle, tabContainer);
+    }
+
+    public static JPanel vBox(int gap, Component... components) {
+        SpringLayout layout = new SpringLayout();
+
+        JPanel panel = new JPanel();
+        panel.setLayout(layout);
+
+        for (int i = 0; i < components.length; i++) {
+            Component component = components[i];
+            panel.add(component);
+
+            layout.putConstraint(SpringLayout.EAST, component, 0, SpringLayout.EAST, panel);
+            layout.putConstraint(SpringLayout.WEST, component, 0, SpringLayout.WEST, panel);
+
+            if (i == 0) {
+                layout.putConstraint(SpringLayout.NORTH, component, 0, SpringLayout.NORTH, panel);
+            } else {
+                layout.putConstraint(SpringLayout.NORTH, component, gap, SpringLayout.SOUTH, components[i - 1]);
+            }
+        }
+
+        return panel;
+    }
 }

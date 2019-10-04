@@ -24,7 +24,7 @@ public abstract class FormPanel extends JPanel {
         buttons.add(Box.createHorizontalGlue());
         layout.putConstraint(WEST, buttons, PADDING, WEST, this);
         layout.putConstraint(EAST, buttons, -PADDING, EAST, this);
-        layout.putConstraint(SOUTH, buttons, -PADDING, SOUTH, this);
+        layout.putConstraint(SOUTH, this, PADDING, SOUTH, buttons);
     }
 
     public void addFormField(FormField<?> formField) {
@@ -32,7 +32,6 @@ public abstract class FormPanel extends JPanel {
 
         layout.putConstraint(WEST, formField, PADDING, WEST, this);
         layout.putConstraint(EAST, formField, -PADDING, EAST, this);
-        // layout.putConstraint(SOUTH, formField, -PADDING, NORTH, buttons);
 
         if (lastField == null) {
             layout.putConstraint(NORTH, formField, PADDING, NORTH, this);
@@ -40,10 +39,12 @@ public abstract class FormPanel extends JPanel {
             layout.putConstraint(NORTH, formField, PADDING, SOUTH, lastField);
         }
 
+        layout.putConstraint(NORTH, buttons, PADDING * 2, SOUTH, formField);
         lastField = formField;
     }
 
     public void addButton(JButton button) {
+        buttons.add(Box.createHorizontalStrut(PADDING));
         buttons.add(button);
     }
 }

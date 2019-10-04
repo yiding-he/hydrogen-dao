@@ -10,12 +10,17 @@ public class ProjectConfigLayout extends FormPanel {
 
     protected final DirectoryField srcPath;
 
+    protected final TextField applicationPropertiesPath;
+
     protected final TextField pojoPackage;
 
     protected final JButton saveButton;
 
     public ProjectConfigLayout() {
+        setBorder(BorderFactory.createTitledBorder("路径配置"));
+
         addFormField(srcPath = new DirectoryField("源码目录"));
+        addFormField(applicationPropertiesPath = new TextField("application.properties 路径"));
         addFormField(pojoPackage = new TextField("pojo 包名"));
 
         addButton(saveButton = new JButton("保存"));
