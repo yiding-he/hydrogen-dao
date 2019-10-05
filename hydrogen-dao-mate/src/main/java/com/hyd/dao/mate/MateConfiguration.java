@@ -6,6 +6,16 @@ public class MateConfiguration {
 
     private String pojoPackage;
 
+    private String configFilePath;
+
+    public String getConfigFilePath() {
+        return configFilePath;
+    }
+
+    public void setConfigFilePath(String configFilePath) {
+        this.configFilePath = configFilePath;
+    }
+
     public String getSrcPath() {
         return srcPath;
     }

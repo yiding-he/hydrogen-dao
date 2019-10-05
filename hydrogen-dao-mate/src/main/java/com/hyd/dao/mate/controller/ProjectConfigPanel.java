@@ -19,9 +19,10 @@ public class ProjectConfigPanel extends ProjectConfigLayout {
         MateConfiguration c = new MateConfiguration();
         c.setSrcPath(srcPath.getValue());
         c.setPojoPackage(pojoPackage.getValue());
+        c.setConfigFilePath(configFilePath.getValue());
 
         Configuration.saveConfiguration(c, CONFIG_FILE_PATH);
-        Swing.alertInfo(this, "保存配置", "保存完毕。");
+        Swing.alertInfo("保存配置", "保存完毕。");
 
         Listeners.publish(Events.ConfigUpdated);
     }
@@ -31,8 +32,9 @@ public class ProjectConfigPanel extends ProjectConfigLayout {
             Configuration.readConfiguration(CONFIG_FILE_PATH, MateConfiguration.class);
 
         if (mateConfiguration != null) {
-            this.getSrcPath().setValue(mateConfiguration.getSrcPath());
-            this.getPojoPackage().setValue(mateConfiguration.getPojoPackage());
+            this.srcPath.setValue(mateConfiguration.getSrcPath());
+            this.pojoPackage.setValue(mateConfiguration.getPojoPackage());
+            this.configFilePath.setValue(mateConfiguration.getConfigFilePath());
         }
     }
 }

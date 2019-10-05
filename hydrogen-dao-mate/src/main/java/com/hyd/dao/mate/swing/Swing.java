@@ -1,5 +1,7 @@
 package com.hyd.dao.mate.swing;
 
+import com.hyd.dao.mate.CodeMateMain;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -34,8 +36,12 @@ public class Swing {
         frame.setVisible(true);
     }
 
-    public static void alertInfo(Component c, String title, String message) {
-        JOptionPane.showMessageDialog(c, message, title, JOptionPane.PLAIN_MESSAGE);
+    public static void alertInfo(String title, String message) {
+        JOptionPane.showMessageDialog(CodeMateMain.getMainFrame(), message, title, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static void alertError(String title, String message) {
+        JOptionPane.showMessageDialog(CodeMateMain.getMainFrame(), message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     public static String chooseDirectory(File startDir) {
@@ -45,6 +51,20 @@ public class Swing {
         chooser.setCurrentDirectory(startDir);
         chooser.setDialogTitle("选择目录");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            result = chooser.getSelectedFile().getAbsolutePath();
+        }
+        return result;
+    }
+
+    public static String chooseFile(File startDir) {
+        String result = null;
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(startDir);
+        chooser.setDialogTitle("选择文件");
         chooser.setAcceptAllFileFilterUsed(false);
 
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {

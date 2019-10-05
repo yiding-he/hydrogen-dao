@@ -1,6 +1,7 @@
 package com.hyd.dao.mate.ui;
 
 import com.hyd.dao.mate.swing.DirectoryField;
+import com.hyd.dao.mate.swing.FileField;
 import com.hyd.dao.mate.swing.FormPanel;
 import com.hyd.dao.mate.swing.TextField;
 
@@ -8,22 +9,22 @@ import javax.swing.*;
 
 public class ProjectConfigLayout extends FormPanel {
 
-    protected final DirectoryField srcPath;
+    protected final DirectoryField srcPath = new DirectoryField("源码目录");
 
-    protected final TextField applicationPropertiesPath;
+    protected final FileField configFilePath = new FileField("application.properties 路径");
 
-    protected final TextField pojoPackage;
+    protected final TextField pojoPackage = new TextField("pojo 包名");
 
-    protected final JButton saveButton;
+    protected final JButton saveButton = new JButton("保存");
 
     public ProjectConfigLayout() {
         setBorder(BorderFactory.createTitledBorder("路径配置"));
 
-        addFormField(srcPath = new DirectoryField("源码目录"));
-        addFormField(applicationPropertiesPath = new TextField("application.properties 路径"));
-        addFormField(pojoPackage = new TextField("pojo 包名"));
+        addFormField(srcPath);
+        addFormField(configFilePath);
+        addFormField(pojoPackage);
 
-        addButton(saveButton = new JButton("保存"));
+        addButton(saveButton);
     }
 
     public DirectoryField getSrcPath() {
@@ -34,4 +35,7 @@ public class ProjectConfigLayout extends FormPanel {
         return pojoPackage;
     }
 
+    public FileField getConfigFilePath() {
+        return configFilePath;
+    }
 }
