@@ -17,7 +17,7 @@ public class DatabaseConfigLayout extends FormPanel {
 
     protected final JButton readFromAppButton = new JButton("从 application.properties 读取");
 
-    protected final JButton testButton = new JButton("测试连接数据库...");
+    protected final JButton testButton = new JButton("连接数据库");
 
     public DatabaseConfigLayout() {
         addFormField(jdbcUrl);

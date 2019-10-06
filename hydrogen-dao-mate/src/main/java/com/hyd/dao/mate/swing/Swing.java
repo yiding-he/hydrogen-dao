@@ -5,6 +5,8 @@ import com.hyd.dao.mate.CodeMateMain;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Swing {
 
@@ -12,7 +14,20 @@ public class Swing {
 
     public static final int SMALL_PADDING = 5;
 
+    public static final String TOP = SpringLayout.NORTH;
+
+    public static final String LEFT = SpringLayout.WEST;
+
+    public static final String BOTTOM = SpringLayout.SOUTH;
+
+    public static final String RIGHT = SpringLayout.EAST;
+
     private static Rectangle desktopBounds;
+
+    private static void forEachDirection(Consumer<String> consumer) {
+        Stream.of(TOP, RIGHT, BOTTOM, LEFT).forEach(consumer);
+
+    }
 
     public static void init() {
         try {
@@ -107,5 +122,13 @@ public class Swing {
         }
 
         return panel;
+    }
+
+    public static void fillWith(Container container, Component content) {
+        SpringLayout layout = new SpringLayout();
+        container.setLayout(layout);
+        container.add(content);
+
+        forEachDirection(d -> layout.putConstraint(d, content, 0, d, container));
     }
 }
