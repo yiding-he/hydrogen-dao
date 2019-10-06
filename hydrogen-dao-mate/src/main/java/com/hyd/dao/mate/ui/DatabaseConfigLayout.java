@@ -17,7 +17,7 @@ public class DatabaseConfigLayout extends FormPanel {
 
     protected final JButton readFromAppButton = new JButton("从 application.properties 读取");
 
-    protected final JButton testButton = new JButton("连接数据库");
+    protected final JButton openDatabaseButton = new JButton("连接数据库");
 
     public DatabaseConfigLayout() {
         addFormField(jdbcUrl);
@@ -26,6 +26,25 @@ public class DatabaseConfigLayout extends FormPanel {
         addFormField(databasePass);
 
         addButton(readFromAppButton);
-        addButton(testButton);
+        addButton(openDatabaseButton);
+
+        openDatabaseButton.setEnabled(false);
+
+        jdbcUrl.setOnValueChanged(text -> textChanged());
+        driverClassName.setOnValueChanged(text -> textChanged());
+        databaseUser.setOnValueChanged(text -> textChanged());
+        databasePass.setOnValueChanged(text -> textChanged());
+    }
+
+    private void textChanged() {
+        if (!jdbcUrl.getValue().isEmpty() &&
+            !driverClassName.getValue().isEmpty() &&
+            !databaseUser.getValue().isEmpty() &&
+            !databasePass.getValue().isEmpty()) {
+
+            openDatabaseButton.setEnabled(true);
+        } else {
+            openDatabaseButton.setEnabled(false);
+        }
     }
 }

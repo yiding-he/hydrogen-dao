@@ -2,6 +2,8 @@ package com.hyd.dao.mate.swing;
 
 import javax.swing.*;
 
+import java.util.stream.Stream;
+
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static javax.swing.SpringLayout.*;
 
@@ -24,6 +26,11 @@ public abstract class FormPanel extends JPanel {
         buttons.add(Box.createHorizontalGlue());
         layout.putConstraint(WEST, buttons, PADDING, WEST, this);
         layout.putConstraint(EAST, buttons, -PADDING, EAST, this);
+    }
+
+    public void addButton(JButton button) {
+        buttons.add(Box.createHorizontalStrut(PADDING));
+        buttons.add(button);
         layout.putConstraint(SOUTH, this, PADDING, SOUTH, buttons);
     }
 
@@ -40,11 +47,24 @@ public abstract class FormPanel extends JPanel {
         }
 
         layout.putConstraint(NORTH, buttons, PADDING * 2, SOUTH, formField);
+
+        if (Stream.of(this.buttons.getComponents()).noneMatch(c -> c instanceof JButton)) {
+            layout.putConstraint(SOUTH, this, PADDING, SOUTH, formField);
+        }
+
         lastField = formField;
     }
 
-    public void addButton(JButton button) {
-        buttons.add(Box.createHorizontalStrut(PADDING));
-        buttons.add(button);
+    public void setAutoStretch(FormField<?> formField) {
+        Stream.of(this.getComponents())
+            .filter(c -> c instanceof FormField)
+            .map(c -> (FormField) c)
+            .forEach(field -> {
+                if (field == formField) {
+                    field.setAutoStretch(true);
+                } else {
+                    field.setAutoStretch(false);
+                }
+            });
     }
 }

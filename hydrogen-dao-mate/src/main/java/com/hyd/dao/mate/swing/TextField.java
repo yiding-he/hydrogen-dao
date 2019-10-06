@@ -9,6 +9,12 @@ public class TextField extends FormField<String> {
     public TextField(String label) {
         super(label);
         add(textField);
+
+        Swing.addChangeListener(this.textField, text -> {
+            if (this.onValueChanged != null) {
+                this.onValueChanged.accept(text);
+            }
+        });
     }
 
     @Override

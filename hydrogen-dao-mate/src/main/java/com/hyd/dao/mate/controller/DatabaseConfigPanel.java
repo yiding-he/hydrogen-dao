@@ -18,6 +18,11 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
     public DatabaseConfigPanel() {
         setBorder(BorderFactory.createTitledBorder("数据库配置"));
         this.readFromAppButton.addActionListener(event -> readDatabaseConfig());
+        this.openDatabaseButton.addActionListener(event -> openDatabase());
+    }
+
+    private void openDatabase() {
+
     }
 
     private void readDatabaseConfig() {

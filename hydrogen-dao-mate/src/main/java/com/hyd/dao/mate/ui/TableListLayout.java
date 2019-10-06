@@ -13,6 +13,7 @@ public class TableListLayout extends FormPanel {
     public TableListLayout() {
         addFormField(schemas);
         addFormField(tables);
+        setAutoStretch(tables);
     }
 
     public ComboBoxField getSchemas() {

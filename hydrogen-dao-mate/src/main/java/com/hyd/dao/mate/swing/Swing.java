@@ -3,6 +3,10 @@ package com.hyd.dao.mate.swing;
 import com.hyd.dao.mate.CodeMateMain;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.io.File;
 import java.util.function.Consumer;
@@ -130,5 +134,36 @@ public class Swing {
         container.add(content);
 
         forEachDirection(d -> layout.putConstraint(d, content, 0, d, container));
+    }
+
+    public static void addChangeListener(JTextField textField, Consumer<String> listener) {
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                changed(e);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                changed(e);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                changed(e);
+            }
+
+            private void changed(DocumentEvent e) {
+                if (listener != null) {
+                    try {
+                        Document document = e.getDocument();
+                        String fullText = document.getText(0, document.getLength());
+                        listener.accept(fullText);
+                    } catch (BadLocationException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
