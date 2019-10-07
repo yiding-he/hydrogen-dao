@@ -1,6 +1,7 @@
 package com.hyd.dao.mate.swing;
 
 import javax.swing.*;
+import java.util.List;
 
 public class ListField extends FormField<String> {
 
@@ -19,5 +20,11 @@ public class ListField extends FormField<String> {
     @Override
     public void setValue(String value) {
         this.list.setSelectedValue(value, true);
+    }
+
+    public void setItems(List<String> items) {
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+        items.forEach(listModel::addElement);
+        this.list.setModel(listModel);
     }
 }

@@ -39,8 +39,7 @@ public class DatabaseConfigLayout extends FormPanel {
     private void textChanged() {
         if (!jdbcUrl.getValue().isEmpty() &&
             !driverClassName.getValue().isEmpty() &&
-            !databaseUser.getValue().isEmpty() &&
-            !databasePass.getValue().isEmpty()) {
+            !databaseUser.getValue().isEmpty()) {
 
             openDatabaseButton.setEnabled(true);
         } else {

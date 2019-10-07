@@ -35,6 +35,19 @@ public class MainFrameLayout extends InitializableJFrame {
         createTabs();
     }
 
+    public void openTab(int index) {
+        index = Math.max(0, Math.min(tpMain.getTabCount() - 1, index));
+        tpMain.setSelectedIndex(index);
+    }
+
+    public ProjectConfigPanel getProjectConfigPanel() {
+        return this.projectConfigPanel;
+    }
+
+    public CreatePojoPanel getCreatePojoPanel() {
+        return createPojoPanel;
+    }
+
     private void layoutComponents(SpringLayout layout) {
         Container parent = getContentPane();
 

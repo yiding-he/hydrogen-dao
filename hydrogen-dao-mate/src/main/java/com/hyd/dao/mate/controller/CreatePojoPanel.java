@@ -4,4 +4,7 @@ import com.hyd.dao.mate.ui.CreatePojoLayout;
 
 public class CreatePojoPanel extends CreatePojoLayout {
 
+    public void reset() {
+        this.tableListPanel.reset();
+    }
 }
