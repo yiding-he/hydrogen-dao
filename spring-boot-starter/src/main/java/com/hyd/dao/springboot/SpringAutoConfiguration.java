@@ -1,10 +1,12 @@
 package com.hyd.dao.springboot;
 
+import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
+
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.log.Logger;
 import javax.sql.DataSource;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -18,30 +20,28 @@ import org.springframework.core.annotation.Order;
  * @author yidin
  */
 @Configuration
-@ImportAutoConfiguration(DataSourceAutoConfiguration.class)
-@Order
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class SpringAutoConfiguration {
 
     private static final Logger LOG = Logger.getLogger(SpringAutoConfiguration.class);
 
-    public static final String DEFAULT_DATA_SOURCES_BEAN_NAME = "dataSources";
-
-    public static final String DEFAULT_DAO_BEAN_NAME = "dao";
-
-    @Bean(DEFAULT_DATA_SOURCES_BEAN_NAME)
+    @Bean
+    @Order(0)
     public DataSources dataSources() {
-        LOG.debug("DataSources initialized.");
+        LOG.info("DataSources initialized.");
         return new DataSources();
     }
 
-    @Bean(DEFAULT_DAO_BEAN_NAME)
+    @Bean
     @ConditionalOnBean(DataSource.class)
     public DAO dao(
         DataSource dataSource,
         DataSources dataSources
     ) {
-        dataSources.setDataSource(DataSources.DEFAULT_DATA_SOURCE_NAME, dataSource);
-        return dataSources.getDAO(DataSources.DEFAULT_DATA_SOURCE_NAME);
+        dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, dataSource);
+        DAO dao = dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
+        LOG.info("DAO '" + DEFAULT_DATA_SOURCE_NAME + "' initialized as " + dao);
+        return dao;
     }
 
 }
