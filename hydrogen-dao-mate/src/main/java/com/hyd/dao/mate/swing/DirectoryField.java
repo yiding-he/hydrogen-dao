@@ -1,9 +1,12 @@
 package com.hyd.dao.mate.swing;
 
-import javax.swing.*;
-import java.io.File;
-
 import static javax.swing.BoxLayout.X_AXIS;
+
+import java.awt.Component;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.*;
 
 public class DirectoryField extends FormField<String> {
 
@@ -44,5 +47,10 @@ public class DirectoryField extends FormField<String> {
     @Override
     public void setValue(String value) {
         this.textField.setText(value);
+    }
+
+    @Override
+    protected List<Component> getFunctionComponents() {
+        return Arrays.asList(this.textField, this.chooseButton);
     }
 }

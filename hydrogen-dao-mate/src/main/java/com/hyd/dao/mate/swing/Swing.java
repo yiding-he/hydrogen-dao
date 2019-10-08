@@ -1,16 +1,15 @@
 package com.hyd.dao.mate.swing;
 
 import com.hyd.dao.mate.CodeMateMain;
-
+import java.awt.*;
+import java.io.File;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.awt.*;
-import java.io.File;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class Swing {
 
@@ -134,6 +133,14 @@ public class Swing {
         container.add(content);
 
         forEachDirection(d -> layout.putConstraint(d, content, 0, d, container));
+    }
+
+    public static void fillWith(Container container, Component content, String... directions) {
+        SpringLayout layout = new SpringLayout();
+        container.setLayout(layout);
+        container.add(content);
+
+        Stream.of(directions).forEach(d -> layout.putConstraint(d, content, 0, d, container));
     }
 
     public static void addChangeListener(JTextField textField, Consumer<String> listener) {

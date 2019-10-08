@@ -1,7 +1,9 @@
 package com.hyd.dao.mate.swing;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.util.Collections;
 import java.util.List;
+import javax.swing.JComboBox;
 
 public class ComboBoxField extends FormField<String> {
 
@@ -42,5 +44,10 @@ public class ComboBoxField extends FormField<String> {
 
     public void select(int index) {
         this.comboBox.setSelectedIndex(index);
+    }
+
+    @Override
+    protected List<Component> getFunctionComponents() {
+        return Collections.singletonList(this.comboBox);
     }
 }

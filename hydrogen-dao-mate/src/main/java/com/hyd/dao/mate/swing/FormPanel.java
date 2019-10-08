@@ -1,13 +1,12 @@
 package com.hyd.dao.mate.swing;
 
-import javax.swing.*;
-
-import java.util.stream.Stream;
-
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static javax.swing.SpringLayout.*;
 
-public abstract class FormPanel extends JPanel {
+import java.util.stream.Stream;
+import javax.swing.*;
+
+public class FormPanel extends JPanel {
 
     private final SpringLayout layout = new SpringLayout();
 

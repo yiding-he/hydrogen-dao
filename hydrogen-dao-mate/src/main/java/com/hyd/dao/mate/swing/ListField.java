@@ -1,7 +1,9 @@
 package com.hyd.dao.mate.swing;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.util.Collections;
 import java.util.List;
+import javax.swing.*;
 
 public class ListField extends FormField<String> {
 
@@ -26,5 +28,10 @@ public class ListField extends FormField<String> {
         DefaultListModel<String> listModel = new DefaultListModel<>();
         items.forEach(listModel::addElement);
         this.list.setModel(listModel);
+    }
+
+    @Override
+    protected List<Component> getFunctionComponents() {
+        return Collections.singletonList(this.list);
     }
 }

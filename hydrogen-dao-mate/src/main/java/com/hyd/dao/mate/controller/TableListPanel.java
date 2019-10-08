@@ -3,8 +3,7 @@ package com.hyd.dao.mate.controller;
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.CodeMateMain;
 import com.hyd.dao.mate.ui.TableListLayout;
-import com.hyd.dao.mate.util.ResultSetUtil;
-
+import com.hyd.dao.mate.util.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
@@ -13,6 +12,14 @@ import java.util.stream.Collectors;
 public class TableListPanel extends TableListLayout {
 
     public TableListPanel() {
+        this.tables.setEnabled(false);
+        this.schemas.setEnabled(false);
+
+        Listeners.addListener(Events.DatabaseConnected, () -> {
+            this.tables.setEnabled(true);
+            this.schemas.setEnabled(true);
+        });
+
         this.schemas.setOnSelectionChanged(() -> {
             String schema = this.schemas.getValue();
             loadTables(schema);

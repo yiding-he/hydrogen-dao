@@ -4,16 +4,13 @@ import com.hyd.dao.database.NonPooledDataSource;
 import com.hyd.dao.mate.CodeMateMain;
 import com.hyd.dao.mate.swing.Swing;
 import com.hyd.dao.mate.ui.DatabaseConfigLayout;
-
-import javax.swing.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.hyd.dao.mate.util.Events;
+import com.hyd.dao.mate.util.Listeners;
+import java.io.*;
+import java.nio.file.*;
 import java.sql.SQLException;
 import java.util.Properties;
+import javax.swing.BorderFactory;
 
 public class DatabaseConfigPanel extends DatabaseConfigLayout {
 
@@ -21,23 +18,6 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
         setBorder(BorderFactory.createTitledBorder("数据库配置"));
         this.readFromAppButton.addActionListener(event -> readDatabaseConfig());
         this.openDatabaseButton.addActionListener(event -> openDatabase());
-    }
-
-    private void openDatabase() {
-        NonPooledDataSource ds = new NonPooledDataSource(
-            driverClassName.getValue(), jdbcUrl.getValue(), databaseUser.getValue(), databasePass.getValue()
-        );
-
-        try {
-            CodeMateMain.getMainFrame().setConnection(ds.getConnection());
-            Swing.alertInfo("数据库已连接", "数据库已成功连接。");
-            openDatabaseButton.setEnabled(false);
-
-            CodeMateMain.getMainFrame().openTab(1);
-            CodeMateMain.getMainFrame().getCreatePojoPanel().reset();
-        } catch (SQLException e) {
-            Swing.alertError("失败", "无法连接到数据库：" + e);
-        }
     }
 
     private void readDatabaseConfig() {
@@ -64,6 +44,26 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
             this.databasePass.setValue(properties.getProperty("spring.datasource.password"));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void openDatabase() {
+        NonPooledDataSource ds = new NonPooledDataSource(
+            driverClassName.getValue(), jdbcUrl.getValue(), databaseUser.getValue(), databasePass.getValue()
+        );
+
+        try {
+            CodeMateMain.getMainFrame().setConnection(ds.getConnection());
+            Swing.alertInfo("数据库已连接", "数据库已成功连接。");
+            openDatabaseButton.setEnabled(false);
+
+            Listeners.publish(Events.DatabaseConnected);
+
+            CodeMateMain.getMainFrame().openTab(1);
+            CodeMateMain.getMainFrame().getCreatePojoPanel().reset();
+
+        } catch (SQLException e) {
+            Swing.alertError("失败", "无法连接到数据库：" + e);
         }
     }
 }
