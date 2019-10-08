@@ -1,4 +1,4 @@
-package com.hyd.dao.mate.ui;
+package com.hyd.dao.mate.ui.pojo;
 
 import com.hyd.dao.mate.swing.ComboBoxField;
 import com.hyd.dao.mate.swing.FormPanel;

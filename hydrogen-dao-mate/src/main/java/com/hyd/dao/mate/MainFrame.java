@@ -1,6 +1,4 @@
-package com.hyd.dao.mate.controller;
-
-import com.hyd.dao.mate.ui.MainFrameLayout;
+package com.hyd.dao.mate;
 
 import java.sql.Connection;
 

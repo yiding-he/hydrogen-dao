@@ -1,10 +1,10 @@
 package com.hyd.dao.mate.ui;
 
-import com.hyd.dao.mate.controller.PojoConfigPanel;
-import com.hyd.dao.mate.controller.TableListPanel;
+import com.hyd.dao.mate.controller.pojo.PojoConfigPanel;
+import com.hyd.dao.mate.controller.pojo.TableListPanel;
 import com.hyd.dao.mate.swing.Swing;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+
+import javax.swing.*;
 
 public class CreatePojoLayout extends JPanel {
 
@@ -17,5 +17,13 @@ public class CreatePojoLayout extends JPanel {
         jSplitPane.setBorder(null);
         jSplitPane.setResizeWeight(0.5);
         Swing.fillWith(this, jSplitPane);
+    }
+
+    public TableListPanel getTableListPanel() {
+        return tableListPanel;
+    }
+
+    public PojoConfigPanel getPojoConfigPanel() {
+        return pojoConfigPanel;
     }
 }

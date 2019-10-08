@@ -1,17 +1,26 @@
 package com.hyd.dao.mate.swing;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JComboBox;
 
 public class ComboBoxField extends FormField<String> {
 
     private final JComboBox<String> comboBox = new JComboBox<>();
 
+    @SuppressWarnings("unchecked")
     public ComboBoxField(String labelText) {
         super(labelText);
         add(comboBox);
+
+        comboBox.addActionListener(event -> {
+            if (this.onValueChanged != null) {
+                JComboBox<String> c = (JComboBox<String>) event.getSource();
+                Object[] selectedObjects = c.getSelectedObjects();
+                this.onValueChanged.accept(selectedObjects.length == 0? null: String.valueOf(selectedObjects[0]));
+            }
+        });
     }
 
     public JComboBox<String> getComboBox() {
@@ -25,10 +34,6 @@ public class ComboBoxField extends FormField<String> {
     public void setOptions(List<String> options) {
         this.comboBox.removeAllItems();
         options.forEach(this.comboBox::addItem);
-    }
-
-    public void setOnSelectionChanged(Runnable action) {
-        this.comboBox.addActionListener(event -> action.run());
     }
 
     @Override

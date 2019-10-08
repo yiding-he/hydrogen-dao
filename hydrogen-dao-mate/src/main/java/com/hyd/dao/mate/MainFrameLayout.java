@@ -1,15 +1,17 @@
-package com.hyd.dao.mate.ui;
+package com.hyd.dao.mate;
+
+import com.hyd.dao.mate.controller.CreatePojoPanel;
+import com.hyd.dao.mate.controller.DatabaseConfigPanel;
+import com.hyd.dao.mate.controller.ProjectConfigPanel;
+import com.hyd.dao.mate.swing.InitializableJFrame;
+import com.hyd.dao.mate.swing.Swing;
+
+import javax.swing.*;
+import java.awt.*;
 
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static com.hyd.dao.mate.swing.Swing.vBox;
 import static javax.swing.SpringLayout.*;
-
-import com.hyd.dao.mate.controller.*;
-import com.hyd.dao.mate.swing.InitializableJFrame;
-import com.hyd.dao.mate.swing.Swing;
-import java.awt.Container;
-import java.awt.HeadlessException;
-import javax.swing.*;
 
 public class MainFrameLayout extends InitializableJFrame {
 

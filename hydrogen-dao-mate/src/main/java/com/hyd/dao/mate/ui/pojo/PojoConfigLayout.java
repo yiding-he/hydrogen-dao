@@ -1,8 +1,10 @@
-package com.hyd.dao.mate.ui;
+package com.hyd.dao.mate.ui.pojo;
 
-import com.hyd.dao.mate.swing.*;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import com.hyd.dao.mate.swing.FormPanel;
+import com.hyd.dao.mate.swing.Swing;
+import com.hyd.dao.mate.swing.TextField;
+
+import javax.swing.*;
 
 public class PojoConfigLayout extends JPanel {
 

@@ -1,9 +1,12 @@
-package com.hyd.dao.mate.controller;
+package com.hyd.dao.mate.controller.pojo;
 
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.CodeMateMain;
-import com.hyd.dao.mate.ui.TableListLayout;
-import com.hyd.dao.mate.util.*;
+import com.hyd.dao.mate.ui.pojo.TableListLayout;
+import com.hyd.dao.mate.util.Events;
+import com.hyd.dao.mate.util.Listeners;
+import com.hyd.dao.mate.util.ResultSetUtil;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
@@ -20,10 +23,9 @@ public class TableListPanel extends TableListLayout {
             this.schemas.setEnabled(true);
         });
 
-        this.schemas.setOnSelectionChanged(() -> {
-            String schema = this.schemas.getValue();
-            loadTables(schema);
-        });
+        this.tables.setOnValueChanged(tableName -> Listeners.publish(Events.SelectedTableChanged));
+
+        this.schemas.setOnValueChanged(this::loadTables);
     }
 
     private void loadTables(String schema) {
