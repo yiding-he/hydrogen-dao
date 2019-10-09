@@ -24,5 +24,7 @@ public class App {
     private void init() {
         ScriptExecutor.execute("classpath:/init.sql", dao);
         log.info("Initialization completed.");
+
+        dao.query("select * from book").forEach(row -> log.info(row.toString()));
     }
 }

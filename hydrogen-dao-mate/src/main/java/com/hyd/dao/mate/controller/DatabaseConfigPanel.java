@@ -27,11 +27,8 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
     }
 
     private void readDatabaseConfig() {
-        String configFilePath =
-            CodeMateMain.getMainFrame().getProjectConfigPanel().getConfigFilePath().getValue();
-
-        if (configFilePath == null || configFilePath.isEmpty()) {
-            Swing.alertError("错误", "请配置 application.properties 路径");
+        String configFilePath = Swing.chooseFile(new File("."));
+        if (configFilePath == null) {
             return;
         }
 

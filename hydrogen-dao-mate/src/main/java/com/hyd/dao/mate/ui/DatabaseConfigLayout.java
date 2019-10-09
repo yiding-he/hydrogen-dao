@@ -15,7 +15,7 @@ public class DatabaseConfigLayout extends FormPanel {
 
     protected final TextField databasePass = new TextField("数据库密码");
 
-    protected final JButton readFromAppButton = new JButton("从 application.properties 读取");
+    protected final JButton readFromAppButton = new JButton("打开 application.properties 文件...");
 
     protected final JButton openDatabaseButton = new JButton("连接数据库");
 

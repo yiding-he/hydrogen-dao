@@ -16,6 +16,6 @@ public class MainFrame extends MainFrameLayout {
 
     @Override
     public void initialize() {
-        this.projectConfigPanel.readConfig();
+
     }
 }

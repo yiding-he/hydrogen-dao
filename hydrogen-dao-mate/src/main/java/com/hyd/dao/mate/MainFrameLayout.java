@@ -2,7 +2,6 @@ package com.hyd.dao.mate;
 
 import com.hyd.dao.mate.controller.CreatePojoPanel;
 import com.hyd.dao.mate.controller.DatabaseConfigPanel;
-import com.hyd.dao.mate.controller.ProjectConfigPanel;
 import com.hyd.dao.mate.swing.InitializableJFrame;
 import com.hyd.dao.mate.swing.Swing;
 
@@ -14,8 +13,6 @@ import static com.hyd.dao.mate.swing.Swing.vBox;
 import static javax.swing.SpringLayout.*;
 
 public class MainFrameLayout extends InitializableJFrame {
-
-    protected final ProjectConfigPanel projectConfigPanel = new ProjectConfigPanel();
 
     protected final DatabaseConfigPanel databaseConfigPanel = new DatabaseConfigPanel();
 
@@ -40,10 +37,6 @@ public class MainFrameLayout extends InitializableJFrame {
         tpMain.setSelectedIndex(index);
     }
 
-    public ProjectConfigPanel getProjectConfigPanel() {
-        return this.projectConfigPanel;
-    }
-
     public CreatePojoPanel getCreatePojoPanel() {
         return createPojoPanel;
     }
@@ -58,8 +51,7 @@ public class MainFrameLayout extends InitializableJFrame {
     }
 
     private void createTabs() {
-        JPanel vBox = vBox(PADDING, projectConfigPanel, databaseConfigPanel);
-        Swing.addTab(tpMain, "项目配置", PADDING, vBox);
+        Swing.addTab(tpMain, "项目配置", PADDING, vBox(PADDING, databaseConfigPanel));
         Swing.addTab(tpMain, "生成 Pojo 类", PADDING, createPojoPanel);
     }
 }

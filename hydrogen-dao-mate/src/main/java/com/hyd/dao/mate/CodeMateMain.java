@@ -14,6 +14,6 @@ public class CodeMateMain {
         Swing.init();
 
         mainFrame = new MainFrame();
-        Swing.openWindow(mainFrame, 900, 700);
+        Swing.openWindow(mainFrame, 700, 500);
     }
 }
