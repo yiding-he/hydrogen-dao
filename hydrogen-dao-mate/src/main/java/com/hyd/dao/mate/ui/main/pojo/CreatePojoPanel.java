@@ -1,6 +1,4 @@
-package com.hyd.dao.mate.controller;
-
-import com.hyd.dao.mate.ui.CreatePojoLayout;
+package com.hyd.dao.mate.ui.main.pojo;
 
 public class CreatePojoPanel extends CreatePojoLayout {
 

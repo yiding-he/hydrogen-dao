@@ -1,6 +1,7 @@
 package com.hyd.dao.mate;
 
 import com.hyd.dao.mate.swing.Swing;
+import com.hyd.dao.mate.ui.main.MainFrame;
 
 public class CodeMateMain {
 

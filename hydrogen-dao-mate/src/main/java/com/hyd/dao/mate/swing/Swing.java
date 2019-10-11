@@ -43,6 +43,14 @@ public class Swing {
     }
 
     public static void openWindow(InitializableJFrame frame, int width, int height) {
+        openWindow(frame, width, height, true);
+    }
+
+    public static void openSubWindow(InitializableJFrame frame, int width, int height) {
+        openWindow(frame, width, height, false);
+    }
+
+    public static void openWindow(InitializableJFrame frame, int width, int height, boolean exitOnClose) {
 
         frame.initialize();
 
@@ -50,7 +58,9 @@ public class Swing {
         int y = desktopBounds.y + (desktopBounds.height - height) / 2;
         frame.setSize(width, height);
         frame.setLocation(x, y);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        if (exitOnClose) {
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        }
         frame.setVisible(true);
     }
 

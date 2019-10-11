@@ -1,4 +1,4 @@
-package com.hyd.dao.mate;
+package com.hyd.dao.mate.ui.main;
 
 import java.sql.Connection;
 

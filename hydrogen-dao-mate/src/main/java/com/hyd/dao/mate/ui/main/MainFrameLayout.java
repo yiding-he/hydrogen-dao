@@ -1,16 +1,16 @@
-package com.hyd.dao.mate;
-
-import com.hyd.dao.mate.controller.CreatePojoPanel;
-import com.hyd.dao.mate.controller.DatabaseConfigPanel;
-import com.hyd.dao.mate.swing.InitializableJFrame;
-import com.hyd.dao.mate.swing.Swing;
-
-import javax.swing.*;
-import java.awt.*;
+package com.hyd.dao.mate.ui.main;
 
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static com.hyd.dao.mate.swing.Swing.vBox;
 import static javax.swing.SpringLayout.*;
+
+import com.hyd.dao.mate.swing.InitializableJFrame;
+import com.hyd.dao.mate.swing.Swing;
+import com.hyd.dao.mate.ui.main.db.DatabaseConfigPanel;
+import com.hyd.dao.mate.ui.main.pojo.CreatePojoPanel;
+import java.awt.Container;
+import java.awt.HeadlessException;
+import javax.swing.*;
 
 public class MainFrameLayout extends InitializableJFrame {
 
@@ -21,7 +21,7 @@ public class MainFrameLayout extends InitializableJFrame {
     protected JTabbedPane tpMain = new JTabbedPane(SwingConstants.TOP);
 
     public MainFrameLayout() throws HeadlessException {
-        setTitle("代码生成工具");
+        setTitle("POJO 代码生成工具");
         SpringLayout layout = new SpringLayout();
 
         Container contentPane = getContentPane();

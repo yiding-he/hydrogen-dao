@@ -1,12 +1,8 @@
-package com.hyd.dao.mate.controller.pojo;
+package com.hyd.dao.mate.ui.main.pojo.table;
 
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.CodeMateMain;
-import com.hyd.dao.mate.ui.pojo.TableListLayout;
-import com.hyd.dao.mate.util.Events;
-import com.hyd.dao.mate.util.Listeners;
-import com.hyd.dao.mate.util.ResultSetUtil;
-
+import com.hyd.dao.mate.util.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
@@ -16,16 +12,16 @@ public class TableListPanel extends TableListLayout {
 
     public TableListPanel() {
         this.tables.setEnabled(false);
-        this.schemas.setEnabled(false);
+        this.catalogs.setEnabled(false);
 
         Listeners.addListener(Events.DatabaseConnected, () -> {
             this.tables.setEnabled(true);
-            this.schemas.setEnabled(true);
+            this.catalogs.setEnabled(true);
         });
 
         this.tables.setOnValueChanged(tableName -> Listeners.publish(Events.SelectedTableChanged));
 
-        this.schemas.setOnValueChanged(this::loadTables);
+        this.catalogs.setOnValueChanged(this::loadTables);
     }
 
     private void loadTables(String schema) {
@@ -47,8 +43,8 @@ public class TableListPanel extends TableListLayout {
         try {
             Connection connection = CodeMateMain.getMainFrame().getConnection();
             List<Row> schemas = ResultSetUtil.readResultSet(connection.getMetaData().getCatalogs());
-            schemas.forEach(row -> this.schemas.addOption(row.getString("TABLE_CAT")));
-            this.schemas.select(0);
+            schemas.forEach(row -> this.catalogs.addOption(row.getString("TABLE_CAT")));
+            this.catalogs.select(0);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

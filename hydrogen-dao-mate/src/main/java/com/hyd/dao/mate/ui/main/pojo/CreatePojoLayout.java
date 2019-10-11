@@ -1,10 +1,10 @@
-package com.hyd.dao.mate.ui;
+package com.hyd.dao.mate.ui.main.pojo;
 
-import com.hyd.dao.mate.controller.pojo.PojoConfigPanel;
-import com.hyd.dao.mate.controller.pojo.TableListPanel;
 import com.hyd.dao.mate.swing.Swing;
-
-import javax.swing.*;
+import com.hyd.dao.mate.ui.main.pojo.generate.PojoConfigPanel;
+import com.hyd.dao.mate.ui.main.pojo.table.TableListPanel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 public class CreatePojoLayout extends JPanel {
 

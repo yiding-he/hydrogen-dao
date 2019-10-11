@@ -1,22 +1,16 @@
-package com.hyd.dao.mate.controller;
+package com.hyd.dao.mate.ui.main.db;
 
 import com.hyd.dao.database.NonPooledDataSource;
 import com.hyd.dao.mate.CodeMateMain;
-import com.hyd.dao.mate.MainFrame;
 import com.hyd.dao.mate.swing.Swing;
-import com.hyd.dao.mate.ui.DatabaseConfigLayout;
+import com.hyd.dao.mate.ui.main.MainFrame;
 import com.hyd.dao.mate.util.Events;
 import com.hyd.dao.mate.util.Listeners;
-
-import javax.swing.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.sql.SQLException;
 import java.util.Properties;
+import javax.swing.BorderFactory;
 
 public class DatabaseConfigPanel extends DatabaseConfigLayout {
 
