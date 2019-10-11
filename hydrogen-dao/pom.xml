@@ -6,7 +6,7 @@
 
     <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>3.4.0</version>
+    <version>3.5.0</version>
     <packaging>jar</packaging>
 
     <name>hydrogen-dao</name>

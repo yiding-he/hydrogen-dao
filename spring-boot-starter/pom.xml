@@ -5,7 +5,7 @@
 
 	<groupId>com.github.yiding-he</groupId>
 	<artifactId>spring-boot-starter-hydrogen-dao</artifactId>
-	<version>3.4.0</version>
+	<version>3.5.0</version>
     <packaging>jar</packaging>
 
 	<name>spring-boot-starter-hydrogen-dao</name>
