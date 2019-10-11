@@ -7,6 +7,8 @@ public class PojoConfigLayout extends JPanel {
 
     protected final TextField pojoName = new TextField("POJO 类名");
 
+    protected final ComboBoxField convertType = new ComboBoxField("属性名转换方式");
+
     protected final JButton generateButton = new JButton("生成代码");
 
     public PojoConfigLayout() {
@@ -15,7 +17,7 @@ public class PojoConfigLayout extends JPanel {
         FormPanel formPanel = new FormPanel();
         formPanel.setBorder(BorderFactory.createTitledBorder("POJO 配置"));
         formPanel.addFormField(pojoName);
-
+        formPanel.addFormField(convertType);
         formPanel.addButton(generateButton);
 
         add(formPanel);

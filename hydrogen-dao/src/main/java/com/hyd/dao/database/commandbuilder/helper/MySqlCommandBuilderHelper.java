@@ -1,6 +1,7 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
 import com.hyd.dao.database.executor.ExecutionContext;
+import java.sql.SQLException;
 
 /**
  * (description)
@@ -22,6 +23,12 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
     public String getRangedSql(String sql, int startPos, int endPos) {
         int size = endPos - startPos;
         return "select range_wrapper.* from (" + sql + ") range_wrapper limit " + startPos + ", " + size;
+    }
+
+    @Override
+    protected String getCatalog() throws SQLException {
+        String catalog = super.getCatalog();
+        return catalog == null || catalog.isEmpty() ? null : catalog;
     }
 
     @Override

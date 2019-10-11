@@ -1,6 +1,14 @@
 package com.hyd.dao.mate.generator;
 
+import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.database.type.NameConverter;
+import com.hyd.dao.mate.generator.code.ClassDef;
+import com.hyd.dao.mate.generator.code.ModelClassBuilder;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class PojoGenerator {
 
@@ -11,6 +19,12 @@ public class PojoGenerator {
     private String catalog;
 
     private String tableName;
+
+    private NameConverter nameConverter;
+
+    public void setNameConverter(NameConverter nameConverter) {
+        this.nameConverter = nameConverter;
+    }
 
     public void setCatalog(String catalog) {
         this.catalog = catalog;
@@ -28,9 +42,24 @@ public class PojoGenerator {
         this.tableName = tableName;
     }
 
-    public String generateCode() {
-        return "public class " + pojoName + " {\n"
-            + "\n"
-            + "}";
+    //////////////////////////////////////////////////////////////
+
+    public String generateCode() throws SQLException {
+        ExecutionContext context = new ExecutionContext();
+        context.setDataSourceName("");
+        context.setConnection(this.connection);
+        context.setNameConverter(nameConverter);
+
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        ColumnInfo[] columnInfos = helper.getColumnInfos(this.catalog, this.tableName);
+
+        ModelClassBuilder modelClassBuilder = new ModelClassBuilder(
+            null, tableName, columnInfos, DatabaseType.of(connection), context.getNameConverter()
+        );
+
+        ClassDef classDef = modelClassBuilder.build(tableName);
+        classDef.setClassName(pojoName);
+
+        return classDef.toString();
     }
 }
