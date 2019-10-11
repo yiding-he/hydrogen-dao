@@ -1,23 +1,59 @@
+对于 Spring Boot 项目，hydrogen-dao 提供了开箱即用的 DAO 对象。你可以在
+ `application.properties` 当中配置单个或多个数据源，然后得到可用的 DAO 对象。
+ 
+## 添加依赖关系
 
-> 注：这种配置方式会在将来的版本中废除，改为适应多个数据源的配置方式。
+```xml
+<dependency>
+    <groupId>com.github.yiding-he</groupId>
+    <artifactId>spring-boot-starter-hydrogen-dao</artifactId>
+    <version>3.5.0</version>
+</dependency>
+```
+ 
+## 单数据源
 
-对于 Spring Boot 项目，hydrogen-dao 提供了开箱即用的 DAO 对象。方法如下：
+在 Spring Boot 配置中加入配置如下例子所示：
 
-1. 在 pom.xml 中加入 spring-boot-autoconfigure 的依赖关系；
-1. 在 pom.xml 中加入访问数据库必要的依赖关系（JDBC 驱动和连接池）；
-1. 在 Spring Boot 配置中加入 `spring.datasource.url`、`spring.datasource.username` 
-和 `spring.datasource.password` 三个配置。
+```properties
+spring.datasource.url=jdbc:h2:./target/db/default
+spring.datasource.username=sa
+```
 
-然后不需要编写任何额外代码，就可以直接在任何 Spring bean 当中使用了：
+然后就可以直接在任何 Spring bean 当中使用了：
 
 ```java
 @Service
 public class UserService {
     
     @Autowired
-    private com.hyd.dao.DAO dao;
+    private DAO dao;
     
     // ...
 }
 ```
 
+## 多数据源
+
+你需要分别为每个数据源配置不同的 @Bean，然后在 `DataSources` 类中使用，下面是一个例子：
+
+```java
+@Bean
+@ConfigurationProperties("spring.datasource.ds1")
+public DataSource ds1(DataSources dataSources) {
+    DataSource dataSource = 
+        org.springframework.boot.jdbc.DataSourceBuilder.create().build();
+    dataSources.setDataSource("ds1", dataSource);
+    return dataSource;
+}
+```
+
+```java
+@Autowired
+private DataSources dataSources;
+
+public void showTables() {
+    DAO ds1 = this.dataSources.getDAO("ds1");
+    ds1.query("show tables").forEach(System.out::println);
+}
+```

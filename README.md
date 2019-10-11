@@ -1,32 +1,101 @@
+<p>
+  <a href="https://github.com/996icu/996.ICU/blob/master/LICENSE">
+    <img alt="996icu" src="https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg">
+  </a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0">
+    <img alt="code style" src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square">
+  </a>
+</p>
+
 # hydrogen-dao
+
+![如何使用](https://user-images.githubusercontent.com/900606/66099687-6e705e80-e5da-11e9-903c-fd7aee85f042.png)
 
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
-* 连接池管理，状态查看；
-* 跨数据库的事务；
-* 根据参数值来动态组装 select/insert/update/delete 语句，免除大量的 if-else；
-* 简化分页查询和批处理。
+* 执行带参数的查询和更新；
+* 查询结果自动转为 Java Bean；
+* 根据参数值来动态组装 SQL 语句；
+* 简化数据库事务；
+* 简化分页查询和批处理；
+* 连接池管理，状态查看。
 
 使用方法参考源码下的 `docs` 目录。
 
-- latest available version: `3.1.0-SNAPSHOT`(branch [3.1.0](https://github.com/yiding-he/hydrogen-dao/tree/3.1.0))
-- currently developing vesion: `3.2.0-SNAPSHOT`(branch [3.2.0](https://github.com/yiding-he/hydrogen-dao/tree/3.2.0))
+当前分支的版本为 `3.5.0`。
+
+## 添加依赖关系
+
+请在 pom.xml 的 `<dependencies>` 元素当中添加下面的内容：
+
+```xml
+<dependency>
+    <groupId>com.github.yiding-he</groupId>
+    <artifactId>hydrogen-dao</artifactId>
+    <version>${hydrogen-dao.version}</version>
+</dependency>
+```
 
 ## 示例
+
+### 初始化
+
+```java
+// 初始化 DataSource 对象
+DataSource dataSource = new com.zaxxer.hikari.HikariDataSource();
+... 
+
+// 初始化 DataSources 对象。DataSources 中可包含多个数据源。
+com.hyd.dao.DataSources dataSources = new DataSources();
+dataSources.setDataSource("default", dataSource);
+
+// 获得针对某个数据源的 DAO 对象
+DAO dao = dataSources.getDAO("default");
+```
+
+### Spring Boot 自动初始化
+
+如果你的项目是基于 Spring Boot，那么可以简化上面的过程。首先添加下面的依赖关系：
+
+```xml
+<dependency>
+	<groupId>com.github.yiding-he</groupId>
+	<artifactId>spring-boot-starter-hydrogen-dao</artifactId>
+	<version>${hydrogen-dao.version}</version>
+</dependency>
+```
+
+然后在 `application.properties` 中配置数据源：
+
+```properties
+spring.datasource.url = [JDBC URL]
+spring.datasource.driver-class-name = [JDBC Driver]
+spring.datasource.username = [USERNAME]
+spring.datasource.password = [PASSWORD]
+```
+
+这样就可以在代码中直接获取 DAO 对象了，例如：
+
+```java
+@Controller
+public class HomeController {
+
+  @Autowired
+  private DAO dao;  // 直接获取 DAO 对象
+}
+```
 
 ### 查询记录
 
 ```Java
-DAO dao = getDAO();
-
 List<User> userList = dao.query(
         User.class,                                         // 包装类（可选）
         "select * from USER where NAME like ? and ROLE=?",  // 语句
         "admin%", 3);                                       // 参数（可选）
         
-for (User user: userList) {
+userList.forEach(user -> {
     System.out.println("user name: " + user.getName());
-}
+});
 ```
 
 ### 执行带参数名的 SQL
@@ -39,9 +108,7 @@ MappedCommand cmd =
 dao.execute(cmd);
 ```
 
-另一个例子：
-
-![dao-demo1.gif](http://git.oschina.net/uploads/images/2015/0322/171100_27e64522_298739.gif)
+> `MappedCommand` 并非用字符串替换来生成最终 SQL，而仍然使用 PreparedStatement 并设置每个参数，以保证安全性。
 
 ### 构造动态查询条件
 
@@ -51,7 +118,7 @@ _不用写恶心的 `where 1=1` 了_
 dao.query(SQL
         .Select("ID", "NAME", "DESCRIPTION")
         .From("USERS")
-        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"
+        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"。也可以用 List 作为参数
         .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会加入该查询条件
         .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
 );
@@ -64,11 +131,38 @@ final DAO dao = getDAO();
 
 DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简单明了
     dao.execute("insert into USER(id,name) values(?,?)", 1, "user1");
-    throw new RuntimeException();    // 之前的 insert 将会回滚，同时异常抛出
+    throw new RuntimeException();    // 之前的 insert 将会回滚，同时抛出该异常
 });
 ```
 
 ## 更新
+
+#### 2019-10-11
+
+* 版本号更新到 3.5.0；
+* 用 Swing 重写代码生成工具；
+* 删除之前的基于 JavaFX 的代码生成工具；
+
+#### 2019-10-02
+
+* 将 Spring Boot 自动初始化移到单独的模块独立发布
+
+#### 2019-10-01
+
+* hydrogen-dao 版本 3.3.0 发布到了 Maven 中心库。
+
+#### 2019-08-12
+
+* Spring Boot 自动配置现在只支持单数据源，因为 Spring JDBC 本身只支持这么做。
+
+#### 2019-03-11
+
+* 版本号升级到 3.3.0-SNAPSHOT
+* 允许自定义数据库字段名和类属性名之间的映射规则，参见 `DataSources.setColumnNameConverter()`
+
+#### 2019-01-17
+
+* 修改 Spring Boot 自动配置部分的[相关文档](docs/09-spring-boot-autoconfig.md)
 
 #### 2018-07-09
 
@@ -135,4 +229,3 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ## 文档
 
 具体的文档都在源代码 docs 目录下。
-
