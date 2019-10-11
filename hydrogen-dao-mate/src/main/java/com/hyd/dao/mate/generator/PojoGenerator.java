@@ -5,8 +5,7 @@ import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.mate.generator.code.ClassDef;
-import com.hyd.dao.mate.generator.code.ModelClassBuilder;
+import com.hyd.dao.mate.generator.code.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -21,6 +20,18 @@ public class PojoGenerator {
     private String tableName;
 
     private NameConverter nameConverter;
+
+    private boolean useLombok;
+
+    private boolean useMybatisPlus;
+
+    public void setUseMybatisPlus(boolean useMybatisPlus) {
+        this.useMybatisPlus = useMybatisPlus;
+    }
+
+    public void setUseLombok(boolean useLombok) {
+        this.useLombok = useLombok;
+    }
 
     public void setNameConverter(NameConverter nameConverter) {
         this.nameConverter = nameConverter;
@@ -53,13 +64,47 @@ public class PojoGenerator {
         CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] columnInfos = helper.getColumnInfos(this.catalog, this.tableName);
 
-        ModelClassBuilder modelClassBuilder = new ModelClassBuilder(
+        ModelClassBuilder builder = new ModelClassBuilder(
             null, tableName, columnInfos, DatabaseType.of(connection), context.getNameConverter()
         );
 
-        ClassDef classDef = modelClassBuilder.build(tableName);
+        if (useLombok) {
+            useLombok(builder);
+        }
+
+        if (useMybatisPlus) {
+            useMybatisPlus(builder);
+        }
+
+        ClassDef classDef = builder.build(tableName);
         classDef.setClassName(pojoName);
 
         return classDef.toString();
+    }
+
+    private void useMybatisPlus(ModelClassBuilder builder) {
+        builder.addImports("com.baomidou.mybatisplus.annotations.*");
+
+        builder.addAnnotation(
+            new AnnotationDef("TableName").setProperty("\"" + builder.getTableName() + "\""));
+
+        builder.addAfterFieldListener(
+            (columnInfo, fieldDef) -> {
+                if (columnInfo.isPrimary()) {
+                    fieldDef.addAnnotation("TableId")
+                        .setProperty("\"" + columnInfo.getColumnName() + "\"");
+                } else {
+                    fieldDef.addAnnotation("TableField")
+                        .setProperty("\"" + columnInfo.getColumnName() + "\"");
+                }
+            }
+        );
+    }
+
+    private void useLombok(ModelClassBuilder builder) {
+        builder.addAnnotation("Data");
+        builder.addImports("lombok.Data");
+        builder.setGettersEnabled(false);
+        builder.setSettersEnabled(false);
     }
 }

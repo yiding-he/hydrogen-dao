@@ -1,6 +1,8 @@
 package com.hyd.dao.mate.ui.main.pojo.table;
 
-import com.hyd.dao.mate.swing.*;
+import com.hyd.dao.mate.swing.FormPanel;
+import com.hyd.dao.mate.swing.form.ComboBoxField;
+import com.hyd.dao.mate.swing.form.ListField;
 
 public class TableListLayout extends FormPanel {
 

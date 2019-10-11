@@ -1,9 +1,9 @@
-package com.hyd.dao.mate.swing;
+package com.hyd.dao.mate.swing.form;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.JComboBox;
 
 public class ComboBoxField extends FormField<String> {
 

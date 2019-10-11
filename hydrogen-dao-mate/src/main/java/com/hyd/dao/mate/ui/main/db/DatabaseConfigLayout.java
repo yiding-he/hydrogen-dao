@@ -1,7 +1,7 @@
 package com.hyd.dao.mate.ui.main.db;
 
 import com.hyd.dao.mate.swing.FormPanel;
-import com.hyd.dao.mate.swing.TextField;
+import com.hyd.dao.mate.swing.form.TextField;
 import javax.swing.JButton;
 
 public class DatabaseConfigLayout extends FormPanel {

@@ -1,5 +1,8 @@
 package com.hyd.dao.mate.ui.main.pojo.generate;
 
+import static com.hyd.dao.mate.swing.Swing.disableComponents;
+import static com.hyd.dao.mate.swing.Swing.enableComponents;
+
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.CodeMateMain;
 import com.hyd.dao.mate.generator.PojoGenerator;
@@ -25,9 +28,7 @@ public class PojoConfigPanel extends PojoConfigLayout {
                 reset();
             } else {
                 pojoName.setValue(toClassName(tableName));
-                pojoName.setEnabled(true);
-                generateButton.setEnabled(true);
-                convertType.setEnabled(true);
+                enableComponents(pojoName, generateButton, convertType, lombok, mybatisPlus);
             }
         });
 
@@ -56,11 +57,9 @@ public class PojoConfigPanel extends PojoConfigLayout {
         return Str.capitalize(s);
     }
 
-    public void reset() {
+    private void reset() {
         pojoName.setValue("");
-        pojoName.setEnabled(false);
-        generateButton.setEnabled(false);
-        convertType.setEnabled(false);
+        disableComponents(pojoName, generateButton, convertType, lombok, mybatisPlus);
     }
 
     private void generateCode() {
@@ -74,6 +73,8 @@ public class PojoConfigPanel extends PojoConfigLayout {
             generator.setTableName(this.getTableName());
             generator.setPojoName(this.pojoName.getValue());
             generator.setNameConverter(nameConverter);
+            generator.setUseLombok(this.lombok.getValue());
+            generator.setUseMybatisPlus(this.mybatisPlus.getValue());
 
             String pojoCode = generator.generateCode();
             PojoResultFrame frame = new PojoResultFrame(

@@ -14,6 +14,8 @@ import javax.swing.BorderFactory;
 
 public class DatabaseConfigPanel extends DatabaseConfigLayout {
 
+    private String recentPath = ".";
+
     public DatabaseConfigPanel() {
         setBorder(BorderFactory.createTitledBorder("数据库配置"));
         this.readFromAppButton.addActionListener(event -> readDatabaseConfig());
@@ -21,11 +23,12 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
     }
 
     private void readDatabaseConfig() {
-        String configFilePath = Swing.chooseFile(new File("."));
+        String configFilePath = Swing.chooseFile(new File(recentPath));
         if (configFilePath == null) {
             return;
         }
 
+        this.recentPath = configFilePath;
         Path path = Paths.get(configFilePath);
         if (!Files.exists(path)) {
             Swing.alertError("错误", "找不到文件 '" + configFilePath + "'");

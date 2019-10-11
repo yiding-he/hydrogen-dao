@@ -1,8 +1,9 @@
-package com.hyd.dao.mate.swing;
+package com.hyd.dao.mate.swing.form;
 
 import static javax.swing.BoxLayout.X_AXIS;
 import static javax.swing.BoxLayout.Y_AXIS;
 
+import com.hyd.dao.mate.swing.Swing;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.function.Consumer;
@@ -24,17 +25,20 @@ public abstract class FormField<V> extends Box {
 
     public FormField(String labelText) {
         super(Y_AXIS);
-        label.setText(labelText);
 
-        Box labelBox = new Box(X_AXIS);
-        labelBox.add(label);
-        labelBox.add(createHorizontalGlue());
+        if (labelText != null) {
+            label.setText(labelText);
 
-        add(labelBox);
-        add(createVerticalStrut(Swing.SMALL_PADDING));
+            Box labelBox = new Box(X_AXIS);
+            labelBox.add(label);
+            labelBox.add(createHorizontalGlue());
+
+            add(labelBox);
+            add(createVerticalStrut(Swing.SMALL_PADDING));
+        }
     }
 
-    protected void setAutoStretch(boolean autoStretch) {
+    public void setAutoStretch(boolean autoStretch) {
         if (autoStretch) {
             this.setMaximumSize(new Dimension(
                 (int) this.getMaximumSize().getWidth(),

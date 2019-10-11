@@ -78,6 +78,10 @@ public class ClassDef implements Code {
         this.fields.forEach(fieldDefConsumer);
     }
 
+    public ImportDef getImports() {
+        return imports;
+    }
+
     public void setImports(ImportDef imports) {
         this.imports = imports;
     }

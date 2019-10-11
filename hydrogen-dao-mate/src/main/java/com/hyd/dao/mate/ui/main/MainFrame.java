@@ -16,6 +16,6 @@ public class MainFrame extends MainFrameLayout {
 
     @Override
     public void initialize() {
-
+        // 之前有过读取配置的步骤，现已删掉
     }
 }

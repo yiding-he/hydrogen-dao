@@ -1,7 +1,8 @@
-package com.hyd.dao.mate.swing;
+package com.hyd.dao.mate.swing.form;
 
 import static javax.swing.BoxLayout.X_AXIS;
 
+import com.hyd.dao.mate.swing.Swing;
 import java.awt.Component;
 import java.io.File;
 import java.util.Arrays;

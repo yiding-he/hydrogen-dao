@@ -68,6 +68,10 @@ public class Swing {
         JOptionPane.showMessageDialog(CodeMateMain.getMainFrame(), message, title, JOptionPane.PLAIN_MESSAGE);
     }
 
+    public static void alertInfo(Component parent, String title, String message) {
+        JOptionPane.showMessageDialog(parent, message, title, JOptionPane.PLAIN_MESSAGE);
+    }
+
     public static void alertError(String title, String message) {
         JOptionPane.showMessageDialog(CodeMateMain.getMainFrame(), message, title, JOptionPane.ERROR_MESSAGE);
     }
@@ -103,6 +107,26 @@ public class Swing {
 
     public static void highlight(Component component) {
         component.setBackground(Color.RED);
+    }
+
+    public static JPanel flowPanel(Component... components) {
+        JPanel jPanel = new JPanel(new FlowLayout());
+        for (Component component : components) {
+            jPanel.add(component);
+        }
+        return jPanel;
+    }
+
+    public static void disableComponents(Component... components) {
+        for (Component component : components) {
+            component.setEnabled(false);
+        }
+    }
+
+    public static void enableComponents(Component... components) {
+        for (Component component : components) {
+            component.setEnabled(true);
+        }
     }
 
     public static void addTab(JTabbedPane tabbedPane, String tabTitle, int padding, Component content) {

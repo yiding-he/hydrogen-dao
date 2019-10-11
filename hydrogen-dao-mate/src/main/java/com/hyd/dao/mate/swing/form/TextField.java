@@ -1,5 +1,6 @@
-package com.hyd.dao.mate.swing;
+package com.hyd.dao.mate.swing.form;
 
+import com.hyd.dao.mate.swing.Swing;
 import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
