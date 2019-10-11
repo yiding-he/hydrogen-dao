@@ -1,5 +1,15 @@
 对于 Spring Boot 项目，hydrogen-dao 提供了开箱即用的 DAO 对象。你可以在
- application.properties 当中配置单个或多个数据源，然后得到可用的 DAO 对象。
+ `application.properties` 当中配置单个或多个数据源，然后得到可用的 DAO 对象。
+ 
+## 添加依赖关系
+
+```xml
+<dependency>
+    <groupId>com.github.yiding-he</groupId>
+    <artifactId>spring-boot-starter-hydrogen-dao</artifactId>
+    <version>3.5.0</version>
+</dependency>
+```
  
 ## 单数据源
 
@@ -25,7 +35,7 @@ public class UserService {
 
 ## 多数据源
 
-Spring Boot 的自动配置暂不支持多数据源，你可以分别为每个数据源配置不同的 @Bean，然后在 `DataSources` 类中使用，下面是一个例子：
+你需要分别为每个数据源配置不同的 @Bean，然后在 `DataSources` 类中使用，下面是一个例子：
 
 ```java
 @Bean
