@@ -1,6 +1,7 @@
 package com.hyd.dao.mate.ui.result;
 
 import com.hyd.dao.mate.swing.Swing;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -10,6 +11,7 @@ public class PojoResultFrame extends PojoResultLayout {
     public PojoResultFrame(String pojoName, String pojoCode) {
         this.setTitle(pojoName + ".java");
         this.textArea.setText(pojoCode);
+        this.textArea.setFont(new Font("DialogInput", Font.PLAIN, 12));
         this.copyButton.addActionListener(event -> copyCode());
     }
 
