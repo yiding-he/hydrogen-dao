@@ -37,6 +37,7 @@ public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
     @Override
     public String getRangedSql(String sql, int startPos, int endPos) {
         int size = endPos - startPos;
-        return "select range_wrapper.* from (" + sql + ") range_wrapper offset " + startPos + " limit " + size;
+        return "select range_wrapper.* from (" + sql + ") range_wrapper " +
+            " limit " + startPos + "," + size;
     }
 }
