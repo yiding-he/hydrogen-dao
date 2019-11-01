@@ -1,5 +1,6 @@
 package com.hyd.dao.mate.swing;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
 import com.hyd.dao.mate.CodeMateMain;
 import java.awt.*;
 import java.io.File;
@@ -34,7 +35,7 @@ public class Swing {
 
     public static void init() {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(new FlatDarculaLaf());
         } catch (Exception e) {
             System.err.println(e.toString());
         }
