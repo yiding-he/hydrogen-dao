@@ -7,6 +7,8 @@
   </a>
 </p>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f5781dbc75b34d219fbb3b34cf293a81)](https://www.codacy.com/manual/yiding.he/hydrogen-dao?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=yiding-he/hydrogen-dao&amp;utm_campaign=Badge_Grade)
+
 # hydrogen-dao
 
 ![如何使用](https://user-images.githubusercontent.com/900606/66099687-6e705e80-e5da-11e9-903c-fd7aee85f042.png)
