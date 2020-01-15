@@ -84,7 +84,7 @@ public class Logger {
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new LogException(e);
         }
     }
 
@@ -97,7 +97,7 @@ public class Logger {
         } catch (Exception e) {
             System.err.println(obj + ", " + className + ", " + methodName + ", "
                 + Arrays.toString(args) + ", " + Arrays.toString(types));
-            throw new RuntimeException(e);
+            throw new LogException(e);
         }
     }
 
@@ -116,7 +116,7 @@ public class Logger {
             Class<?> type = Class.forName(className);
             return type.getConstructor(types).newInstance(args);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new LogException(e);
         }
     }
 
@@ -224,7 +224,7 @@ public class Logger {
         }
 
         if (loggerFactory == null) {
-            throw new RuntimeException("没有找到支持的日志框架(logback/log4j/log4j2)");
+            throw new LogException("没有找到支持的日志框架(logback/log4j/log4j2)");
         }
 
         Logger l = new Logger();

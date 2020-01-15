@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 从 csv 文件中读取内容到 Row 列表
@@ -58,9 +59,7 @@ public class CSVReader {
 
     public static List<Row> read(InputStream inputStream, Charset charset) throws DAOException {
 
-        if (inputStream == null) {
-            throw new NullPointerException("input stream is null");
-        }
+        Objects.requireNonNull(inputStream, "input stream is null");
 
         List<String> lines = new ArrayList<>();
         String line;
@@ -84,7 +83,7 @@ public class CSVReader {
 
     private static List<Row> convertLines(List<String> lines) {
         String[] columns = lines.get(0).split(",");
-        List<Row> rows = new ArrayList<Row>();
+        List<Row> rows = new ArrayList<>();
 
         for (int i = 1; i < lines.size(); i++) {
             String line = lines.get(i);
