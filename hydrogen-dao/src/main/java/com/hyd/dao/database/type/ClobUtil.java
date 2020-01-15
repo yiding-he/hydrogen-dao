@@ -1,6 +1,8 @@
 package com.hyd.dao.database.type;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 

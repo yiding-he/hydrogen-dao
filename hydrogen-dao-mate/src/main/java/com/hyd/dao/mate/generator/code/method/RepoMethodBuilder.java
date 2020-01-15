@@ -2,7 +2,10 @@ package com.hyd.dao.mate.generator.code.method;
 
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.mate.generator.code.*;
+import com.hyd.dao.mate.generator.code.Comparator;
+import com.hyd.dao.mate.generator.code.MethodArg;
+import com.hyd.dao.mate.generator.code.ParamInfo;
+import com.hyd.dao.mate.generator.code.RepoMethodDef;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.mate.util.TypeUtil;
 import java.util.List;

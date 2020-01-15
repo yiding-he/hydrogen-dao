@@ -2,7 +2,9 @@ package com.hyd.dao;
 
 
 import com.hyd.dao.database.ColumnInfo;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * <p>批处理命令。一个批处理命令包含 SQL 语句和参数列表。</p>

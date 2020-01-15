@@ -2,7 +2,6 @@ package com.hyd.dao;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.CaseInsensitiveHashMap;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,16 +1,28 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import com.hyd.dao.*;
+import com.hyd.dao.DAO;
+import com.hyd.dao.DAOException;
+import com.hyd.dao.DataConversionException;
+import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.mate.util.*;
+import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.Locker;
+import com.hyd.dao.mate.util.Str;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

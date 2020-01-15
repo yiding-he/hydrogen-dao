@@ -23,19 +23,21 @@ public class TransactionManager {
 
     /////////////////////////////////////////////////////////
 
-    private TransactionManager() {
-        // hide public constructor
-    }
-
     /**
      * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
      */
     private static final ThreadLocal<Map<Integer, Map<String, Executor>>>
-            executorCache = new ThreadLocal<>();
+        executorCache = new ThreadLocal<>();
 
     private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
     private static final ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
+
+    /////////////////////////////////////////////////////////
+
+    private TransactionManager() {
+        // hide public constructor
+    }
 
     /**
      * 判断当前线程是否处于事务当中

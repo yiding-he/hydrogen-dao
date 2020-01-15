@@ -2,7 +2,11 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import java.io.PrintWriter;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 

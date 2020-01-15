@@ -7,7 +7,9 @@ import com.hyd.dao.mate.swing.Swing;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.function.Consumer;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 public abstract class FormField<V> extends Box {
 

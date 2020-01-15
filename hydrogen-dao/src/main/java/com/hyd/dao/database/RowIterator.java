@@ -8,7 +8,10 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.ResultSetUtil;
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.function.Consumer;
 
 /**

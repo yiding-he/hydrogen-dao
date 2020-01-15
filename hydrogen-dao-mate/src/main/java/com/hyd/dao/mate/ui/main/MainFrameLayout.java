@@ -10,7 +10,9 @@ import com.hyd.dao.mate.ui.main.db.DatabaseConfigPanel;
 import com.hyd.dao.mate.ui.main.pojo.CreatePojoPanel;
 import java.awt.Container;
 import java.awt.HeadlessException;
-import javax.swing.*;
+import javax.swing.JTabbedPane;
+import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 
 public class MainFrameLayout extends InitializableJFrame {
 

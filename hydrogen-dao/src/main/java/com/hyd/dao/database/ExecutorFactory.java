@@ -1,7 +1,9 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.database.executor.*;
+import com.hyd.dao.database.executor.DefaultExecutor;
+import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;

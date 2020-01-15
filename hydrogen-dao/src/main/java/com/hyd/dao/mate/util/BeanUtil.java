@@ -3,11 +3,20 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Table;
 import com.hyd.dao.database.type.TypeConverter;
-import java.beans.*;
-import java.lang.reflect.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * 处理 bean 对象的帮助类
