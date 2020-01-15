@@ -3,13 +3,12 @@ package com.hyd.dao;
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.Locker;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.sql.DataSource;
 
 /**
  * 管理数据源配置
@@ -28,12 +27,12 @@ public class DataSources {
     /**
      * dsName -> ExecutorFactory
      */
-    private Map<String, ExecutorFactory> executorFactories = new HashMap<>();
+    private final Map<String, ExecutorFactory> executorFactories = new HashMap<>();
 
     /**
      * dsName -> NameConverter
      */
-    private Map<String, NameConverter> columnNameConverters = new HashMap<>();
+    private final Map<String, NameConverter> columnNameConverters = new HashMap<>();
 
     /**
      * 删除指定的数据源

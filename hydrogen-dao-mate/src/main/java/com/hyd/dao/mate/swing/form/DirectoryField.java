@@ -7,13 +7,12 @@ import java.awt.Component;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JButton;
 
-public class DirectoryField extends FormField<String> {
+public class DirectoryField extends TextFormField {
 
-    private JTextField textField = textField();
-
-    private JButton chooseButton = new JButton("...");
+    private final JButton chooseButton = new JButton("...");
 
     public DirectoryField(String labelText) {
         super(labelText);
@@ -38,16 +37,6 @@ public class DirectoryField extends FormField<String> {
         if (result != null) {
             textField.setText(result);
         }
-    }
-
-    @Override
-    public String getValue() {
-        return textField.getText();
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.textField.setText(value);
     }
 
     @Override

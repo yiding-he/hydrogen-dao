@@ -6,7 +6,7 @@ import javax.swing.SpringLayout;
 
 public class SpringLayoutHelper {
 
-    private SpringLayout layout;
+    private final SpringLayout layout;
 
     private Component c1, c2;
 
@@ -41,7 +41,7 @@ public class SpringLayoutHelper {
         BOTTOM(SpringLayout.SOUTH),
         LEFT(SpringLayout.WEST);
 
-        private String value;
+        private final String value;
 
         Edge(String value) {
             this.value = value;

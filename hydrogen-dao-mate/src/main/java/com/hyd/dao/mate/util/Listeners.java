@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Listeners {
 
-    private static Map<Events, List<Runnable>> listeners = new HashMap<>();
+    private static final Map<Events, List<Runnable>> listeners = new HashMap<>();
 
     public static void addListener(Events event, Runnable listener) {
         listeners

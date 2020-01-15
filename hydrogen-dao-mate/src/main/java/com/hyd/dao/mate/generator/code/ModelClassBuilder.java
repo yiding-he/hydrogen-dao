@@ -29,7 +29,7 @@ public class ModelClassBuilder extends ClassDefBuilder {
     /**
      * 每个 field 创建后的额外处理
      */
-    private List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
+    private final List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
 
     public void setSettersEnabled(boolean settersEnabled) {
         this.settersEnabled = settersEnabled;

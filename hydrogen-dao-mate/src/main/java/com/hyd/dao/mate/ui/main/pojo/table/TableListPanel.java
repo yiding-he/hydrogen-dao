@@ -5,6 +5,7 @@ import com.hyd.dao.mate.CodeMateMain;
 import com.hyd.dao.mate.util.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ public class TableListPanel extends TableListLayout {
 
     public void reset() {
         try {
+            this.catalogs.setOptions(Collections.emptyList());
             Connection connection = CodeMateMain.getMainFrame().getConnection();
             List<Row> schemas = ResultSetUtil.readResultSet(connection.getMetaData().getCatalogs());
             schemas.forEach(row -> this.catalogs.addOption(row.getString("TABLE_CAT")));

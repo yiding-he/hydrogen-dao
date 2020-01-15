@@ -14,7 +14,7 @@ public class FormPanel extends JPanel {
 
     private FormField<?> lastField = null;
 
-    private Box buttons = new Box(BoxLayout.X_AXIS);
+    private final Box buttons = new Box(BoxLayout.X_AXIS);
 
     private final SpringLayoutHelper helper;
 

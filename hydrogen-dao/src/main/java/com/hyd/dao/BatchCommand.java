@@ -22,7 +22,7 @@ public class BatchCommand {
 
     /////////////////////////////////////////////////////////////////
 
-    private String command;
+    private final String command;
 
     private List<List<Object>> params = new ArrayList<List<Object>>();
 

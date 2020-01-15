@@ -18,7 +18,7 @@ public enum DatabaseType {
 
     ;
 
-    private String pattern;
+    private final String pattern;
 
     DatabaseType(String pattern) {
         this.pattern = pattern;

@@ -30,12 +30,12 @@ public class TransactionManager {
     /**
      * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
      */
-    private static ThreadLocal<Map<Integer, Map<String, Executor>>>
+    private static final ThreadLocal<Map<Integer, Map<String, Executor>>>
             executorCache = new ThreadLocal<>();
 
-    private static ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
+    private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
-    private static ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
+    private static final ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
 
     /**
      * 判断当前线程是否处于事务当中

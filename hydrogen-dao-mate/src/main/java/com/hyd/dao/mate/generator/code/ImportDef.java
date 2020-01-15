@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  */
 public class ImportDef implements Code {
 
-    private Collection<String> imports;
+    private final Collection<String> imports;
 
     public ImportDef(String... imports) {
         this.imports = new ArrayList<>(Arrays.asList(imports));

@@ -59,7 +59,7 @@ public class SQL {
 
         private Joint joint = null;  // AND/OR
 
-        private String statement;
+        private final String statement;
 
         private Object[] args;
 
@@ -350,7 +350,7 @@ public class SQL {
 
     public static class Insert extends Generatable<Insert> {
 
-        private List<Pair> pairs = new ArrayList<>();
+        private final List<Pair> pairs = new ArrayList<>();
 
         public Insert(String table) {
             this.table = table;
@@ -390,7 +390,7 @@ public class SQL {
      */
     public static class Update extends Generatable<Update> {
 
-        private List<Pair> updates = new ArrayList<>();
+        private final List<Pair> updates = new ArrayList<>();
 
         public Update(String table) {
             this.table = table;
@@ -472,7 +472,7 @@ public class SQL {
      */
     public static class Select extends Generatable<Select> {
 
-        private String columns;
+        private final String columns;
 
         private String from;
 

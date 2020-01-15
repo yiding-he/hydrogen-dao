@@ -13,7 +13,7 @@ public class CodeBlock {
 
     private int indent;
 
-    private List<String> lines = new ArrayList<>();
+    private final List<String> lines = new ArrayList<>();
 
     public CodeBlock(String... lines) {
         this.lines.addAll(Arrays.asList(lines));

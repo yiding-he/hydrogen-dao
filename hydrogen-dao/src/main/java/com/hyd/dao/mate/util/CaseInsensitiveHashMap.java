@@ -11,7 +11,7 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
     private static final long serialVersionUID = 1L;
 
     // lowercase -> original
-    private Map<String, String> originalKeys = new HashMap<>();
+    private final Map<String, String> originalKeys = new HashMap<>();
 
     private String originalKey(String key) {
         return originalKeys.get(key.toLowerCase());

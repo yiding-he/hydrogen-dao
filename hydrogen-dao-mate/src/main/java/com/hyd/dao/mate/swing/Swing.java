@@ -53,8 +53,6 @@ public class Swing {
 
     public static void openWindow(InitializableJFrame frame, int width, int height, boolean exitOnClose) {
 
-        frame.initialize();
-
         int x = desktopBounds.x + (desktopBounds.width - width) / 2;
         int y = desktopBounds.y + (desktopBounds.height - height) / 2;
         frame.setSize(width, height);
