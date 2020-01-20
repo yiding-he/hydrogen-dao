@@ -1,0 +1,5 @@
+<config>
+  <srcPath>E:\Projects\my-open-source\hydrogen-dao\spring-boot-demo\src\main\java</srcPath>
+  <pojoPackage>com.demo.pojo</pojoPackage>
+  <configFilePath>E:\Projects\my-open-source\hydrogen-dao\spring-boot-starter\src\test\resources\application.properties</configFilePath>
+</config>
