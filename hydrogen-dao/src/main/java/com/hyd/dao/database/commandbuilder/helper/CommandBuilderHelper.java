@@ -1,6 +1,9 @@
 package com.hyd.dao.database.commandbuilder.helper;
 
-import com.hyd.dao.*;
+import com.hyd.dao.DAO;
+import com.hyd.dao.DAOException;
+import com.hyd.dao.DataConversionException;
+import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.executor.ExecutionContext;
@@ -8,17 +11,19 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.Locker;
-import com.hyd.dao.mate.util.ResultSetUtil;
 import com.hyd.dao.mate.util.Str;
-
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 用于构造 SQL 命令的帮助类，隐藏不同数据库之间的区别
@@ -28,7 +33,7 @@ public class CommandBuilderHelper {
     private static final Logger LOG = Logger.getLogger(CommandBuilderHelper.class);
 
     // 缓存已经生成的字段info
-    private static Map<String, ColumnInfo[]> cache = new ConcurrentHashMap<>();
+    private static final Map<String, ColumnInfo[]> cache = new ConcurrentHashMap<>();
 
     protected ExecutionContext context;
 
@@ -72,19 +77,6 @@ public class CommandBuilderHelper {
         cache.clear();
     }
 
-    public List<String> getTableNames() throws SQLException {
-        try {
-            Connection connection = this.context.getConnection();
-            ResultSet tables = connection.getMetaData().getTables(getCatalog(), getSchema("%"), "%", null);
-            List<Row> tableRows = ResultSetUtil.readResultSet(tables);
-            return tableRows.stream().map(m -> (String) m.get("table_name")).collect(Collectors.toList());
-        } catch (SQLException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DAOException(e);
-        }
-    }
-
     /**
      * 获得指定库表的字段信息
      *
@@ -107,10 +99,10 @@ public class CommandBuilderHelper {
     public ColumnInfo[] getColumnInfos(String schema, String tableName) {
         String fullTableName = schema + "." + tableName;
 
-        if (cache.get(fullTableName) != null) {
-            return cache.get(fullTableName);
-        } else {
+        if (cache.get(fullTableName) == null) {
             return Locker.lockAndRun(fullTableName, () -> getColumnInfos(schema, tableName, fullTableName));
+        } else {
+            return cache.get(fullTableName);
         }
     }
 
@@ -132,7 +124,7 @@ public class CommandBuilderHelper {
 
         LOG.debug("Reading columns of table " + fullTableName + "...");
 
-        String fixedSchema = schema.toUpperCase();
+        String fixedSchema = schema.toUpperCase(Locale.ENGLISH);
         String fixedTableName = getTableNameForMeta(tableName);
 
         Connection connection = this.context.getConnection();
@@ -264,7 +256,7 @@ public class CommandBuilderHelper {
             Map map = (Map) object;
             value = map.get(info.getColumnName());
             if (value == null) {
-                value = map.get(info.getColumnName().toUpperCase());
+                value = map.get(info.getColumnName().toUpperCase(Locale.ENGLISH));
             }
             if (value == null) {
                 value = map.get(info.getColumnName().toLowerCase());

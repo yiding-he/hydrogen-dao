@@ -1,9 +1,8 @@
 package com.hyd.dao.mate.util;
 
 
-import org.apache.commons.dbcp2.BasicDataSource;
-
 import javax.sql.DataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
  * 创建基于 DBCP 的 DataSource 对象

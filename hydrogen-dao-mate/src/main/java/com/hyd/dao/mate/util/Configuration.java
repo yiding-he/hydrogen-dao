@@ -1,7 +1,6 @@
 package com.hyd.dao.mate.util;
 
 import com.thoughtworks.xstream.XStream;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

@@ -7,14 +7,17 @@ import com.hyd.dao.mate.swing.layout.SpringLayoutHelper;
 import com.hyd.dao.mate.swing.layout.SpringLayoutHelper.Edge;
 import java.util.List;
 import java.util.stream.Stream;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class FormPanel extends JPanel {
 
 
     private FormField<?> lastField = null;
 
-    private Box buttons = new Box(BoxLayout.X_AXIS);
+    private final Box buttons = new Box(BoxLayout.X_AXIS);
 
     private final SpringLayoutHelper helper;
 

@@ -2,8 +2,12 @@ package com.hyd.dao.mate.ui.main.pojo.generate;
 
 import com.hyd.dao.mate.swing.FormPanel;
 import com.hyd.dao.mate.swing.Swing;
-import com.hyd.dao.mate.swing.form.*;
-import javax.swing.*;
+import com.hyd.dao.mate.swing.form.CheckBoxField;
+import com.hyd.dao.mate.swing.form.ComboBoxField;
+import com.hyd.dao.mate.swing.form.TextField;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class PojoConfigLayout extends JPanel {
 

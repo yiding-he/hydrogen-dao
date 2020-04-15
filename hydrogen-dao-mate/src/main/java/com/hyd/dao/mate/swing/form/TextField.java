@@ -8,7 +8,7 @@ import javax.swing.JTextField;
 
 public class TextField extends FormField<String> {
 
-    private JTextField textField = textField();
+    private final JTextField textField = textField();
 
     public TextField(String label) {
         super(label);

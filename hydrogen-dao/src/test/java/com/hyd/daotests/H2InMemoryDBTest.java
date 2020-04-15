@@ -9,13 +9,12 @@ import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.dao.mate.util.ResultSetUtil;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.Test;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.Test;
 
 /**
  * @author yiding_he

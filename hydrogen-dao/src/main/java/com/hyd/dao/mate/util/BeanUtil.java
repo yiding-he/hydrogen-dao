@@ -3,7 +3,6 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Table;
 import com.hyd.dao.database.type.TypeConverter;
-
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -16,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -24,6 +24,10 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class BeanUtil {
 
+    private BeanUtil() {
+
+    }
+
     /**
      * 设置一个对象的属性
      *
@@ -31,7 +35,7 @@ public class BeanUtil {
      * @param fieldName 属性名（忽略大小写）
      * @param value     值
      */
-    public static void setValueIgnoreCase(Object obj, String fieldName, Object value) {
+    public static void setValueIgnoreCase(final Object obj, final String fieldName, final Object value) {
         if (value == null) {
             return;
         }
@@ -44,14 +48,16 @@ public class BeanUtil {
             }
 
             Class<?> fieldType = propertyDescriptor.getPropertyType();
-            value = convertValue(value, fieldType);
+            Object convertedValue = convertValue(value, fieldType);
+
             Method writeMethod = getPropertyMethod(obj.getClass(), fieldName, false);
-            if (writeMethod != null) {
-                writeMethod.invoke(obj, value);
-            } else {
+            if (writeMethod == null) {
                 throw new DAOException(
                         "Missing write method for " + obj.getClass().getCanonicalName() + "#" + fieldName);
             }
+
+            writeMethod.invoke(obj, convertedValue);
+
         } catch (DAOException e) {
             throw e;
         } catch (Exception e) {
@@ -134,7 +140,8 @@ public class BeanUtil {
 
             } catch (InvocationTargetException e) {
                 if (e.getTargetException() instanceof NumberFormatException) {
-                    throw new DAOException("Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz);
+                    String message = "Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz;
+                    throw new DAOException(message, e);
                 }
             }
         } else if (clazz == Boolean.TYPE || clazz == Boolean.class) {
@@ -202,7 +209,7 @@ public class BeanUtil {
     public static Object getValue(Object obj, String fieldName) {
         try {
             Method getter = getPropertyMethod(obj.getClass(), fieldName, true);
-            return getter != null ? getter.invoke(obj) : null;
+            return getter == null ? null: getter.invoke(obj);
         } catch (Exception e) {
             throw new DAOException("Error getting property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
         }
@@ -218,7 +225,7 @@ public class BeanUtil {
      *
      * @throws Exception 如果属性不存在
      */
-    private static Object getStaticValue(Class clazz, String fieldName) throws Exception {
+    private static Object getStaticValue(Class<?> clazz, String fieldName) throws Exception {
         try {
             Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
             if (field == null) {
@@ -239,7 +246,7 @@ public class BeanUtil {
     }
 
     private static String capitalize(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
+        return str.substring(0, 1).toUpperCase(Locale.ENGLISH) + str.substring(1);
     }
 
     /**

@@ -3,7 +3,6 @@ package com.hyd.dao.database.type;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.TypeUtil;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +11,11 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 将查询结果封装为 pojo 对象的类
@@ -22,13 +25,11 @@ public class TypeConverter {
 
     static final Logger LOG = Logger.getLogger(TypeConverter.class);
 
-    private static Map<String, String> convertBuffer = new HashMap<String, String>();
+    private static final ThreadLocal<List<String>> warnedMsgs = new ThreadLocal<>();
 
-    private static ThreadLocal<List<String>> warnedMsgs = new ThreadLocal<List<String>>();
+    static Map<Class, Class> primitiveToWrapper = new HashMap<>();
 
-    static Map<Class, Class> primitiveToWrapper = new HashMap<Class, Class>();
-
-    static Map<Class, Class> wrapperToPrimitive = new HashMap<Class, Class>();
+    static Map<Class, Class> wrapperToPrimitive = new HashMap<>();
 
     static {
         primitiveToWrapper.put(Boolean.TYPE, Boolean.class);
@@ -75,7 +76,7 @@ public class TypeConverter {
     public static List<Object> convert(
             Class clazz, List<Object> simpleResult, NameConverter nameConverter
     ) throws Exception {
-        ArrayList<Object> result = new ArrayList<Object>();
+        ArrayList<Object> result = new ArrayList<>();
 
         for (Object obj : simpleResult) {
             Map<String, Object> row = (Map<String, Object>) obj;

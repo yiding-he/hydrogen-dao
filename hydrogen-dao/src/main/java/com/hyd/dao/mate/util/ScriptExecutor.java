@@ -3,7 +3,6 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.log.Logger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
