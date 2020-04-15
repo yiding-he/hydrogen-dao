@@ -2,6 +2,7 @@ package com.hyd.dao.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
 
 /**
  * @author yidin
@@ -18,14 +19,14 @@ public enum DatabaseType {
 
     ;
 
-    private final String pattern;
+    private final Pattern pattern;
 
     DatabaseType(String pattern) {
-        this.pattern = pattern;
+        this.pattern = Pattern.compile(pattern);
     }
 
     public boolean matchPattern(String databaseProductionInfo) {
-        return this.pattern != null && databaseProductionInfo.matches(this.pattern);
+        return this.pattern != null && this.pattern.matcher(databaseProductionInfo).matches();
     }
 
     public boolean isSequenceSupported() {
