@@ -14,7 +14,7 @@ public class IteratorBatchCommand {
 
     public static final int DEFAULT_BATCH_SIZE = 100;
 
-    private String command;
+    private final String command;
 
     private Iterator<List<Object>> params;
 

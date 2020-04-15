@@ -5,16 +5,15 @@ import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.util.CSVReader;
 import com.hyd.dao.mate.util.ScriptExecutor;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * 用于单元测试的 Rule
@@ -29,7 +28,7 @@ public class HydrogenDAORule implements TestRule {
 
     private final String scriptFolder;
 
-    private Map<String, List<Row>> prepareData = new HashMap<>();
+    private final Map<String, List<Row>> prepareData = new HashMap<>();
 
     public HydrogenDAORule(Supplier<DAO> daoSupplier) {
         this.daoSupplier = daoSupplier;

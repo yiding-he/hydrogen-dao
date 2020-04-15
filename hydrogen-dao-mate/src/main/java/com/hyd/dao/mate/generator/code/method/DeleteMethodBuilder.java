@@ -1,7 +1,9 @@
 package com.hyd.dao.mate.generator.code.method;
 
 import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.mate.generator.code.*;
+import com.hyd.dao.mate.generator.code.CodeBlock;
+import com.hyd.dao.mate.generator.code.ParamInfo;
+import com.hyd.dao.mate.generator.code.RepoMethodDef;
 import java.util.List;
 
 /**

@@ -13,7 +13,7 @@ import com.hyd.dao.mate.util.Str;
  */
 public class RepoClassDefBuilder extends ClassDefBuilder {
 
-    private String modelPackage;
+    private final String modelPackage;
 
     public RepoClassDefBuilder(
         String repoPackage, String modelPackage, String tableName, ColumnInfo[] columnInfos,

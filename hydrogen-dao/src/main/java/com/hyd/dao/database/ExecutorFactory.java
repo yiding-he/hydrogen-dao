@@ -8,10 +8,9 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.spring.SpringConnectionFactory;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
 /**
  * 构造 Executor 对象的工厂。
@@ -24,7 +23,7 @@ public class ExecutorFactory {
 
     private final DataSource dataSource;
 
-    private String dataSourceName;
+    private final String dataSourceName;
 
     /**
      * 构造方法

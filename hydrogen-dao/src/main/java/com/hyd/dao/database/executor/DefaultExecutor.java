@@ -1,6 +1,10 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.*;
+import com.hyd.dao.BatchCommand;
+import com.hyd.dao.DAOException;
+import com.hyd.dao.IteratorBatchCommand;
+import com.hyd.dao.Page;
+import com.hyd.dao.Row;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.commandbuilder.Command;
@@ -18,9 +22,17 @@ import com.hyd.dao.mate.util.TypeUtil;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProcedureHelper;
-
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**

@@ -13,7 +13,7 @@ public enum RepoMethodReturnType {
     ///////////////////////////////////////////////
     ;
 
-    private String name;
+    private final String name;
 
     RepoMethodReturnType(String name) {
         this.name = name;

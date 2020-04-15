@@ -1,17 +1,16 @@
 package com.hyd.dao.springboot;
 
+import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
+
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.log.Logger;
+import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
-
-import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 
 /**
  * Spring Boot 的自动化配置，目前只支持单个 DataSource。

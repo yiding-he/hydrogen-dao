@@ -1,6 +1,9 @@
 package com.hyd.dao.mate.generator.code;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -13,7 +16,7 @@ public class CodeBlock {
 
     private int indent;
 
-    private List<String> lines = new ArrayList<>();
+    private final List<String> lines = new ArrayList<>();
 
     public CodeBlock(String... lines) {
         this.lines.addAll(Arrays.asList(lines));

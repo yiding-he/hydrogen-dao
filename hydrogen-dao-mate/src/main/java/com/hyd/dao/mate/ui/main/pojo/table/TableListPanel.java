@@ -2,9 +2,13 @@ package com.hyd.dao.mate.ui.main.pojo.table;
 
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.CodeMateMain;
-import com.hyd.dao.mate.util.*;
+import com.hyd.dao.mate.DbException;
+import com.hyd.dao.mate.util.Events;
+import com.hyd.dao.mate.util.Listeners;
+import com.hyd.dao.mate.util.ResultSetUtil;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,18 +39,19 @@ public class TableListPanel extends TableListLayout {
 
             this.tables.setItems(tableNames);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DbException(e);
         }
     }
 
     public void reset() {
         try {
+            this.catalogs.setOptions(Collections.emptyList());
             Connection connection = CodeMateMain.getMainFrame().getConnection();
             List<Row> schemas = ResultSetUtil.readResultSet(connection.getMetaData().getCatalogs());
             schemas.forEach(row -> this.catalogs.addOption(row.getString("TABLE_CAT")));
             this.catalogs.select(0);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DbException(e);
         }
     }
 }

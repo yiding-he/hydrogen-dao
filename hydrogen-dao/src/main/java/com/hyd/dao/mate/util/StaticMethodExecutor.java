@@ -1,7 +1,6 @@
 package com.hyd.dao.mate.util;
 
 import com.hyd.dao.DAOException;
-
 import java.lang.reflect.Method;
 
 /**

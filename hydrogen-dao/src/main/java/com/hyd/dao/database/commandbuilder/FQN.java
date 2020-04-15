@@ -1,7 +1,6 @@
 package com.hyd.dao.database.commandbuilder;
 
 import com.hyd.dao.mate.util.Str;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 

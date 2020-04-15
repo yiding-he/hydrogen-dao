@@ -6,7 +6,6 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.ResultSetUtil;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
@@ -41,7 +40,7 @@ public class RowIterator implements Closeable {
 
     private static final Logger LOG = Logger.getLogger(RowIterator.class);
 
-    private ResultSet rs;
+    private final ResultSet rs;
 
     private NameConverter nameConverter;
 

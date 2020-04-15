@@ -6,7 +6,12 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 import com.hyd.dao.mate.swing.InitializableJFrame;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class PojoResultLayout extends InitializableJFrame {
 

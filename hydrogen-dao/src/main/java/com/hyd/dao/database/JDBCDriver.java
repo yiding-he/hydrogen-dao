@@ -18,9 +18,9 @@ public enum JDBCDriver {
     ///////////////////////////////////////////////
     ;
 
-    private String schemaPrefix;
+    private final String schemaPrefix;
 
-    private String driverClass;
+    private final String driverClass;
 
     JDBCDriver(String schemaPrefix, String driverClass) {
         this.schemaPrefix = schemaPrefix;

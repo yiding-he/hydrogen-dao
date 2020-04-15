@@ -1,6 +1,8 @@
 package com.hyd.dao.mate.generator.code;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
@@ -11,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class ImportDef implements Code {
 
-    private Collection<String> imports;
+    private final Collection<String> imports;
 
     public ImportDef(String... imports) {
         this.imports = new ArrayList<>(Arrays.asList(imports));

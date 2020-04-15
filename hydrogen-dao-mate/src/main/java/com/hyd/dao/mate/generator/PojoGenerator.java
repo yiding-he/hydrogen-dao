@@ -5,7 +5,9 @@ import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.mate.generator.code.*;
+import com.hyd.dao.mate.generator.code.AnnotationDef;
+import com.hyd.dao.mate.generator.code.ClassDef;
+import com.hyd.dao.mate.generator.code.ModelClassBuilder;
 import java.sql.Connection;
 import java.sql.SQLException;
 

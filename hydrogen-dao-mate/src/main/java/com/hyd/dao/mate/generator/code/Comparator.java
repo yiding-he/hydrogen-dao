@@ -21,7 +21,7 @@ public enum Comparator {
 
     ;
 
-    private String symbol;
+    private final String symbol;
 
     Comparator(String symbol) {
         this.symbol = symbol;

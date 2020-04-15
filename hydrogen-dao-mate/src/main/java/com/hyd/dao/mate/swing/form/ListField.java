@@ -3,7 +3,9 @@ package com.hyd.dao.mate.swing.form;
 import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 
 public class ListField extends FormField<String> {
 

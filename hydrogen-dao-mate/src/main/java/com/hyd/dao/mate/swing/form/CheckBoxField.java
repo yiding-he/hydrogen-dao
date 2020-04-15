@@ -3,7 +3,9 @@ package com.hyd.dao.mate.swing.form;
 import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 
 public class CheckBoxField extends FormField<Boolean> {
 

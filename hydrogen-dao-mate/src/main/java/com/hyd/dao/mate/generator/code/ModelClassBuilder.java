@@ -16,12 +16,6 @@ import java.util.function.BiConsumer;
  */
 public class ModelClassBuilder extends ClassDefBuilder {
 
-    public ModelClassBuilder(
-            String packageName, String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType, NameConverter nameConverter) {
-        super(packageName, tableName, columnInfos, databaseType, nameConverter);
-    }
-
     private boolean settersEnabled = true;
 
     private boolean gettersEnabled = true;
@@ -29,7 +23,13 @@ public class ModelClassBuilder extends ClassDefBuilder {
     /**
      * 每个 field 创建后的额外处理
      */
-    private List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
+    private final List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
+
+    public ModelClassBuilder(
+            String packageName, String tableName, ColumnInfo[] columnInfos,
+            DatabaseType databaseType, NameConverter nameConverter) {
+        super(packageName, tableName, columnInfos, databaseType, nameConverter);
+    }
 
     public void setSettersEnabled(boolean settersEnabled) {
         this.settersEnabled = settersEnabled;
