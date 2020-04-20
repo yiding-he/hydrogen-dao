@@ -6,6 +6,8 @@ import com.hyd.dao.mate.swing.Swing;
 import com.hyd.dao.mate.ui.main.MainFrame;
 import com.hyd.dao.mate.util.Events;
 import com.hyd.dao.mate.util.Listeners;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Properties;
-import javax.swing.BorderFactory;
 
 public class DatabaseConfigPanel extends DatabaseConfigLayout {
 
@@ -24,6 +25,10 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
         setBorder(BorderFactory.createTitledBorder("数据库配置"));
         this.readFromAppButton.addActionListener(event -> readDatabaseConfig());
         this.openDatabaseButton.addActionListener(event -> openDatabase());
+
+        this.jdbcUrl.setValue("jdbc:mysql://127.0.0.1:3306/");
+        this.driverClassName.setValue("com.mysql.jdbc.Driver");
+        this.databaseUser.setValue("root");
     }
 
     private void readDatabaseConfig() {
