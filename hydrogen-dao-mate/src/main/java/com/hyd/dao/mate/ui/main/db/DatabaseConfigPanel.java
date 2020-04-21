@@ -2,12 +2,12 @@ package com.hyd.dao.mate.ui.main.db;
 
 import com.hyd.dao.database.NonPooledDataSource;
 import com.hyd.dao.mate.CodeMateMain;
+import com.hyd.dao.mate.profile.DatabaseProfile;
+import com.hyd.dao.mate.profile.ProfileManager;
 import com.hyd.dao.mate.swing.Swing;
 import com.hyd.dao.mate.ui.main.MainFrame;
 import com.hyd.dao.mate.util.Events;
 import com.hyd.dao.mate.util.Listeners;
-
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
+import javax.swing.BorderFactory;
 
 public class DatabaseConfigPanel extends DatabaseConfigLayout {
 
@@ -25,10 +27,34 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
         setBorder(BorderFactory.createTitledBorder("数据库配置"));
         this.readFromAppButton.addActionListener(event -> readDatabaseConfig());
         this.openDatabaseButton.addActionListener(event -> openDatabase());
+        this.recentProfiles.getComboBox().addActionListener(event -> profileChanged());
 
         this.jdbcUrl.setValue("jdbc:mysql://127.0.0.1:3306/");
         this.driverClassName.setValue("com.mysql.jdbc.Driver");
         this.databaseUser.setValue("root");
+
+        readRecentDatabaseConfig();
+    }
+
+    private void profileChanged() {
+        DatabaseProfile profile = ProfileManager.getInstance()
+            .getProfileList().get(this.recentProfiles.getSelectedIndex());
+
+        this.jdbcUrl.setValue(profile.getJdbcUrl());
+        this.driverClassName.setValue(profile.getDriverClassName());
+        this.databaseUser.setValue(profile.getUsername());
+        this.databasePass.setValue(profile.getPassword());
+    }
+
+    private void readRecentDatabaseConfig() {
+        List<DatabaseProfile> profileList = ProfileManager.getInstance().getProfileList();
+        for (DatabaseProfile databaseProfile : profileList) {
+            this.recentProfiles.addOption(databaseProfile.toString());
+        }
+
+        if (!profileList.isEmpty()) {
+            this.recentProfiles.select(0);
+        }
     }
 
     private void readDatabaseConfig() {
@@ -60,6 +86,14 @@ public class DatabaseConfigPanel extends DatabaseConfigLayout {
         NonPooledDataSource ds = new NonPooledDataSource(
             driverClassName.getValue(), jdbcUrl.getValue(), databaseUser.getValue(), databasePass.getValue()
         );
+
+        DatabaseProfile databaseProfile = new DatabaseProfile();
+        databaseProfile.setDriverClassName(driverClassName.getValue());
+        databaseProfile.setJdbcUrl(jdbcUrl.getValue());
+        databaseProfile.setUsername(databaseUser.getValue());
+        databaseProfile.setPassword(databasePass.getValue());
+
+        ProfileManager.getInstance().saveProfile(databaseProfile);
 
         try {
             MainFrame mainFrame = CodeMateMain.getMainFrame();
