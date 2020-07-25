@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-public class ProfileManager {
+public final class ProfileManager {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -14,11 +14,11 @@ public class ProfileManager {
 
     private static final ProfileManager instance = new ProfileManager();
 
+    private final List<DatabaseProfile> profileList;  // should be mutable list
+
     public static ProfileManager getInstance() {
         return instance;
     }
-
-    private final List<DatabaseProfile> profileList;  // should be mutable list
 
     //////////////////////////////////////////////////////////////
 

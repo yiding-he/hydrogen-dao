@@ -23,7 +23,7 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class TypeConverter {
 
-    static final Logger LOG = Logger.getLogger(TypeConverter.class);
+    private static final Logger LOG = Logger.getLogger(TypeConverter.class);
 
     private static final ThreadLocal<List<String>> warnedMsgs = new ThreadLocal<>();
 
@@ -132,16 +132,6 @@ public class TypeConverter {
             }
         }
         return result;
-    }
-
-    private static Class getFieldType(Class clazz, String fieldName) throws IllegalAccessException {
-        Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
-        if (field != null) {
-            return field.getType();
-        } else {
-            throw new IllegalAccessException(
-                    "Field '" + fieldName + "' not found in class " + clazz.getCanonicalName());
-        }
     }
 
     /**

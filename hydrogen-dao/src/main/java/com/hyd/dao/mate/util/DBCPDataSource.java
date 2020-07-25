@@ -10,7 +10,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
  *
  * @author Yiding
  */
-public class DBCPDataSource {
+public final class DBCPDataSource {
 
     private DBCPDataSource() {
 

@@ -18,7 +18,7 @@ public class DeleteMethodBuilder extends QueryOneMethodBuilder {
 
 
     @Override
-    CodeBlock buildBody() {
+    protected CodeBlock buildBody() {
         CodeBlock codeBlock = new CodeBlock();
         codeBlock.addLine("dao.execute(SQL.Delete(\"" + tableName + "\")");
         addQueryParameters(codeBlock);
@@ -27,18 +27,18 @@ public class DeleteMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    void afterBodyCreated(RepoMethodDef repoMethodDef) {
+    protected void afterBodyCreated(RepoMethodDef repoMethodDef) {
 
         repoMethodDef.type = null;
     }
 
     @Override
-    String getNonArgMethodName() {
+    protected String getNonArgMethodName() {
         return "deleteAll";
     }
 
     @Override
-    String getMethodNamePrefix() {
+    protected String getMethodNamePrefix() {
         return "deleteBy";
     }
 }

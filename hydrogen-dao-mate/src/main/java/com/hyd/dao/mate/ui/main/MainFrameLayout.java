@@ -1,17 +1,19 @@
 package com.hyd.dao.mate.ui.main;
 
-import com.hyd.dao.mate.swing.InitializableJFrame;
-import com.hyd.dao.mate.swing.Swing;
-import com.hyd.dao.mate.ui.main.db.DatabaseConfigPanel;
-import com.hyd.dao.mate.ui.main.pojo.CreatePojoPanel;
-
-import javax.swing.*;
-import java.awt.*;
-
 import static com.hyd.dao.mate.CodeMateMain.I18N;
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static com.hyd.dao.mate.swing.Swing.vBox;
 import static javax.swing.SpringLayout.*;
+
+import com.hyd.dao.mate.swing.InitializableJFrame;
+import com.hyd.dao.mate.swing.Swing;
+import com.hyd.dao.mate.ui.main.db.DatabaseConfigPanel;
+import com.hyd.dao.mate.ui.main.pojo.CreatePojoPanel;
+import java.awt.Container;
+import java.awt.HeadlessException;
+import javax.swing.JTabbedPane;
+import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 
 public class MainFrameLayout extends InitializableJFrame {
 
@@ -33,9 +35,9 @@ public class MainFrameLayout extends InitializableJFrame {
         createTabs();
     }
 
-    public void openTab(int index) {
-        index = Math.max(0, Math.min(tpMain.getTabCount() - 1, index));
-        tpMain.setSelectedIndex(index);
+    public void openTab(final int index) {
+        int finalIndex = Math.max(0, Math.min(tpMain.getTabCount() - 1, index));
+        tpMain.setSelectedIndex(finalIndex);
     }
 
     public CreatePojoPanel getCreatePojoPanel() {

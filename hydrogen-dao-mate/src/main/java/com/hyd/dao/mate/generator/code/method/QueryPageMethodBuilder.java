@@ -21,27 +21,27 @@ public class QueryPageMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    String getMethodType() {
+    protected String getMethodType() {
         return "Page<" + Str.underscore2Class(tableName) + ">";
     }
 
     @Override
-    String getDaoMethod() {
+    protected String getDaoMethod() {
         return "queryPage";
     }
 
     @Override
-    String getNonArgMethodName() {
+    protected String getNonArgMethodName() {
         return "queryAllPage";
     }
 
     @Override
-    RepoMethodReturnType getRepoReturnType() {
+    protected RepoMethodReturnType getRepoReturnType() {
         return RepoMethodReturnType.Page;
     }
 
     @Override
-    List<MethodArg> getExtraArgs() {
+    protected List<MethodArg> getExtraArgs() {
         return Arrays.asList(
                 new MethodArg("int", "pageSize"),
                 new MethodArg("int", "pageIndex")
@@ -49,7 +49,7 @@ public class QueryPageMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    void afterBodyCreated(RepoMethodDef methodDef) {
+    protected void afterBodyCreated(RepoMethodDef methodDef) {
         methodDef.body.addLine(-1, ", pageSize, pageIndex", true);
     }
 }

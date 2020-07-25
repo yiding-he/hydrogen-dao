@@ -13,10 +13,6 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
     // lowercase -> original
     private final Map<String, String> originalKeys = new HashMap<>();
 
-    private String originalKey(String key) {
-        return originalKeys.get(key.toLowerCase());
-    }
-
     /**
      * 根据 key 获取值
      *

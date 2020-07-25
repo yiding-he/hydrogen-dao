@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 生成 update 语句
  */
-public class DeleteCommandBuilder {
+public final class DeleteCommandBuilder {
 
     private DeleteCommandBuilder() {
 

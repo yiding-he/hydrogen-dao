@@ -10,6 +10,10 @@ public class CodeMateMain {
 
     private static MainFrame mainFrame;
 
+    private CodeMateMain() {
+
+    }
+
     public static MainFrame getMainFrame() {
         return mainFrame;
     }

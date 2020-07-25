@@ -55,11 +55,9 @@ public class FunctionHelper {
         String schema = name.contains(".") ?
                 name.split("\\.")[0].toUpperCase() : metaData.getUserName().toUpperCase();
 
-        if (name.contains(".")) {
-            name = name.substring(name.lastIndexOf(".") + 1);
-        }
+        String lastPartOfName = name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : name;
 
-        ResultSet rs = metaData.getProcedureColumns(null, schema, name.toUpperCase(), "%");
+        ResultSet rs = metaData.getProcedureColumns(null, schema, lastPartOfName.toUpperCase(), "%");
         List<Row> functionColumns = ResultSetUtil.readResultSet(rs);
 
         if (functionColumns.isEmpty()) {
@@ -83,7 +81,7 @@ public class FunctionHelper {
     }
 
     private static SpParam createSpParam(HashMap row, Object param_value) {
-        SpParamType param_type = StorageProcedureHelper.sp_param_types.get(((Double) row.get("column_type")).intValue());
+        SpParamType param_type = StorageProcedureHelper.SP_PARAM_TYPES.get(((Double) row.get("column_type")).intValue());
         int data_type = ((Double) row.get("data_type")).intValue();
         return new SpParam(param_type, data_type, param_value);
     }

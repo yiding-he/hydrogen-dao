@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class MapCacheUtils {
+public final class MapCacheUtils {
 
-    public MapCacheUtils() {
+    private MapCacheUtils() {
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <K, V> Map<K, V> newLRUCache(final int size, boolean threadSafe) {
         LinkedHashMap cache = new LinkedHashMap(size + 1, 0.75F, true) {
 

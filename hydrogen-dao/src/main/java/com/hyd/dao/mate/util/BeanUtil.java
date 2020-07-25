@@ -167,7 +167,7 @@ public class BeanUtil {
 
             } else if (clazz == Double.TYPE) {
 
-                if (bdValue.compareTo(new BigDecimal(Double.MAX_VALUE)) > 0) {
+                if (bdValue.compareTo(BigDecimal.valueOf(Double.MAX_VALUE)) > 0) {
                     throw new DAOException("Value " + bdValue + " is too large for double");
                 }
                 return bdValue.doubleValue();
@@ -188,7 +188,7 @@ public class BeanUtil {
 
             } else if (clazz == Float.TYPE) {
 
-                if (bdValue.compareTo(new BigDecimal(Float.MAX_VALUE)) > 0) {
+                if (bdValue.compareTo(BigDecimal.valueOf(Float.MAX_VALUE)) > 0) {
                     throw new DAOException("Value " + bdValue + " is too large for float");
                 }
                 return bdValue.floatValue();

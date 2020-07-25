@@ -16,22 +16,22 @@ public class QueryListMethodBuilder extends QueryOneMethodBuilder {
     }
 
     @Override
-    String getMethodType() {
+    protected String getMethodType() {
         return "List<" + Str.underscore2Class(tableName) + ">";
     }
 
     @Override
-    String getDaoMethod() {
+    protected String getDaoMethod() {
         return "query";
     }
 
     @Override
-    String getNonArgMethodName() {
+    protected String getNonArgMethodName() {
         return "queryAll";
     }
 
     @Override
-    RepoMethodReturnType getRepoReturnType() {
+    protected RepoMethodReturnType getRepoReturnType() {
         return RepoMethodReturnType.Collection;
     }
 }
