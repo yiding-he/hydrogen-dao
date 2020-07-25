@@ -45,7 +45,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 ```java
 // 初始化 DataSource 对象
 DataSource dataSource = new com.zaxxer.hikari.HikariDataSource();
-... 
+...
 
 // 初始化 DataSources 对象。DataSources 中可包含多个数据源。
 com.hyd.dao.DataSources dataSources = new DataSources();
@@ -94,7 +94,7 @@ List<User> userList = dao.query(
         User.class,                                         // 包装类（可选）
         "select * from USER where NAME like ? and ROLE=?",  // 语句
         "admin%", 3);                                       // 参数（可选）
-        
+
 userList.forEach(user -> {
     System.out.println("user name: " + user.getName());
 });
@@ -103,7 +103,7 @@ userList.forEach(user -> {
 ### 执行带参数名的 SQL
 
 ```Java
-MappedCommand cmd = 
+MappedCommand cmd =
         new MappedCommand("update USERS set ROLE=#role# where ID in(#userid#)")
         .setParam("role", "admin")
         .setParam("userid", 1, 2, 3, 4);  // 数组或 List 都可以
@@ -139,6 +139,12 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 
 ## 更新
 
+#### 2020-07-25
+
+* 版本号更新到 3.5.1；
+* 删除对 fastjson 的依赖；
+* 修复若干 BUG。
+
 #### 2019-10-11
 
 * 版本号更新到 3.5.0；
@@ -168,7 +174,7 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 
 #### 2018-07-09
 
-* 实现基于 JavaFX 的代码生成工具，在 Maven 目录结构下生成 Pojo、Repository 
+* 实现基于 JavaFX 的代码生成工具，在 Maven 目录结构下生成 Pojo、Repository
 及对应的单元测试代码。[视频演示](https://www.bilibili.com/video/av22590671/)
 * 修复若干 BUG，详见日志
 
@@ -223,7 +229,7 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 * 将数据库差异集中到 CommandBuilderHelper 的子类中去，去掉 DefaultExecutor 的子类。
 * 添加对 HSQLDB 分页查询的支持
 
-#### 2015-03-20: 
+#### 2015-03-20:
 
 * 以自适应的方式支持 logback/log4j/log4j2 三种日志输出框架。使用 hydrogen-dao 的项目可以自行选择。
 * 版本升级到 2.3.0-SNAPSHOT。
