@@ -22,7 +22,7 @@ public enum DatabaseType {
     private final Pattern pattern;
 
     DatabaseType(String pattern) {
-        this.pattern = Pattern.compile(pattern);
+        this.pattern = pattern != null ? Pattern.compile(pattern) : null;
     }
 
     public boolean matchPattern(String databaseProductionInfo) {

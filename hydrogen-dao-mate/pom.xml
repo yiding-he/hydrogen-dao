@@ -6,7 +6,7 @@
 
     <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao-mate</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>hydrogen-dao-mate</name>
@@ -23,12 +23,13 @@
         <dependency>
             <groupId>com.github.yiding-he</groupId>
             <artifactId>hydrogen-dao</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.1</version>
         </dependency>
+
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.67</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.11.1</version>
         </dependency>
 
         <dependency>
@@ -46,7 +47,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.17</version>
+            <version>5.1.48</version>
         </dependency>
 
         <dependency>

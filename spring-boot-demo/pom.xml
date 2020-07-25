@@ -32,13 +32,13 @@
         <dependency>
             <groupId>com.github.yiding-he</groupId>
             <artifactId>spring-boot-starter-hydrogen-dao</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.yiding-he</groupId>
             <artifactId>hydrogen-dao-mate</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
             <optional>true</optional>
         </dependency>
 

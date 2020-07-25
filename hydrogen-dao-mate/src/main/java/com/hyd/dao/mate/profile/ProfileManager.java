@@ -1,11 +1,14 @@
 package com.hyd.dao.mate.profile;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 public class ProfileManager {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final Preferences PROFILES_ROOT = Preferences.userRoot().node("/com/hyd/dao/mate/profiles");
 
@@ -28,31 +31,39 @@ public class ProfileManager {
     }
 
     public ArrayList<DatabaseProfile> readProfileList() {
-        final int profileCount = PROFILES_ROOT.getInt("count", 0);
-        if (profileCount == 0) {
-            return new ArrayList<>();
-        }
-
-        ArrayList<DatabaseProfile> profileList = new ArrayList<>();
-        for (int i = 0; i < profileCount; i++) {
-            String json = PROFILES_ROOT.get("profile." + i, null);
-            if (json != null) {
-                profileList.add(JSON.parseObject(json, DatabaseProfile.class));
+        try {
+            final int profileCount = PROFILES_ROOT.getInt("count", 0);
+            if (profileCount == 0) {
+                return new ArrayList<>();
             }
-        }
 
-        return profileList;
+            ArrayList<DatabaseProfile> profileList = new ArrayList<>();
+            for (int i = 0; i < profileCount; i++) {
+                String json = PROFILES_ROOT.get("profile." + i, null);
+                if (json != null) {
+                    profileList.add(OBJECT_MAPPER.readValue(json, DatabaseProfile.class));
+                }
+            }
+
+            return profileList;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void saveProfile(DatabaseProfile databaseProfile) {
-        final int index = this.profileList.indexOf(databaseProfile);
+        try {
+            final int index = this.profileList.indexOf(databaseProfile);
 
-        if (index == -1) {
-            PROFILES_ROOT.putInt("count", this.profileList.size() + 1);
-            PROFILES_ROOT.put("profile." + this.profileList.size(), JSON.toJSONString(databaseProfile));
-            this.profileList.add(databaseProfile);
-        } else {
-            PROFILES_ROOT.put("profile." + index, JSON.toJSONString(databaseProfile));
+            if (index == -1) {
+                PROFILES_ROOT.putInt("count", this.profileList.size() + 1);
+                PROFILES_ROOT.put("profile." + this.profileList.size(), OBJECT_MAPPER.writeValueAsString(databaseProfile));
+                this.profileList.add(databaseProfile);
+            } else {
+                PROFILES_ROOT.put("profile." + index, OBJECT_MAPPER.writeValueAsString(databaseProfile));
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

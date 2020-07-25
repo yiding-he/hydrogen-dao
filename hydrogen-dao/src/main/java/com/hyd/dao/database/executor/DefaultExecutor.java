@@ -91,7 +91,7 @@ public class DefaultExecutor extends Executor {
             LOG.debug(findCaller() + "|Query result：" + result.size() + "/" + result.getTotal() + " records.");
             return result;
         } catch (Exception e) {
-            throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
+            throw new DAOException("Query failed:" + e.getMessage(), e, rangedSql == null ? sql : rangedSql, params);
         } finally {
             closeButConnection();
         }
