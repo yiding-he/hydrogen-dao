@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  *
  * It is thread safe.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unused", "unchecked", "rawtypes", "RedundantSuppression"})
 public class DAO {
 
     public static final Date SYSDATE = new Date(0) {
@@ -348,7 +348,7 @@ public class DAO {
 
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
-            return queryRange(clazz, sql, startPosition, endPosition, list.toArray(new Object[list.size()]));
+            return queryRange(clazz, sql, startPosition, endPosition, list.toArray(new Object[0]));
         }
 
         String fixedSql = fixSql(sql);
@@ -408,7 +408,7 @@ public class DAO {
             int pageSize, int pageIndex, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
-            return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[list.size()]));
+            return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[0]));
         }
 
         String fixedSql = fixSql(sql);
@@ -781,10 +781,10 @@ public class DAO {
      *
      * @return 调用结果
      */
-    public List call(String name, Object... params) {
+    public List<Object> call(String name, Object... params) {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
-            call(name, list.toArray(new Object[list.size()]));
+            return call(name, list.toArray(new Object[0]));
         }
 
         Executor executor = getExecutor();
@@ -808,7 +808,7 @@ public class DAO {
     public List callFunction(String name, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
-            callFunction(name, list.toArray(new Object[list.size()]));
+            callFunction(name, list.toArray(new Object[0]));
         }
 
         Executor executor = getExecutor();

@@ -44,4 +44,13 @@ public class Blog {
         this.createTime = createTime;
     }
 
+    @Override
+    public String toString() {
+        return "Blog{" +
+            "id=" + id +
+            ", title='" + title + '\'' +
+            ", content='" + content + '\'' +
+            ", createTime=" + createTime +
+            '}';
+    }
 }

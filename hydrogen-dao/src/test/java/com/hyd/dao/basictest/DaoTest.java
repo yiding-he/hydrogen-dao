@@ -21,6 +21,7 @@ public class DaoTest extends JUnitRuleTestBase {
     public void query() throws Exception {
         List<Row> rows = dao.query("select * from blog");
         assertFalse(rows.isEmpty());
+        rows.forEach(System.out::println);
     }
 
     @Test

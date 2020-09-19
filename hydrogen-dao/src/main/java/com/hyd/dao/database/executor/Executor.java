@@ -24,6 +24,7 @@ import java.util.function.Consumer;
  *
  * @author <a href="mailto:yiding.he@gmail.com">yiding_he</a>
  */
+@SuppressWarnings("rawtypes")
 public abstract class Executor {
 
     protected ExecutorInfo info;            // 当前状态
@@ -120,6 +121,7 @@ public abstract class Executor {
      * @param tableName    表名
      *
      * @return 记录。如果查询不到则返回 null
+     * @deprecated
      */
     public abstract <T> T find(Class<T> wrapperClass, Object key, String tableName);
 
@@ -128,6 +130,7 @@ public abstract class Executor {
      *
      * @param object    要插入的记录
      * @param tableName 表名
+     * @deprecated
      */
     public abstract void insert(Object object, String tableName);
 
@@ -136,6 +139,7 @@ public abstract class Executor {
      *
      * @param row       包含字段名和值的 Map 对象。
      * @param tableName 表名
+     * @deprecated
      */
     public abstract void insertMap(Map row, String tableName);
 
@@ -162,6 +166,7 @@ public abstract class Executor {
      * @param tableName 表名
      *
      * @return 受影响的行数
+     * @deprecated
      */
     public abstract int delete(Object obj, String tableName);
 
@@ -181,6 +186,7 @@ public abstract class Executor {
      *
      * @param list      List 对象
      * @param tableName 表名
+     * @deprecated
      */
     public abstract void insertList(List list, String tableName);
 
@@ -191,6 +197,7 @@ public abstract class Executor {
      * @param tableName 表名
      *
      * @return 受影响行数
+     * @deprecated
      */
     public abstract int deleteByKey(Object key, String tableName);
 
@@ -201,6 +208,7 @@ public abstract class Executor {
      * @param tableName 表名
      *
      * @return 记录是否存在
+     * @deprecated
      */
     public abstract boolean exists(Object obj, String tableName);
 
