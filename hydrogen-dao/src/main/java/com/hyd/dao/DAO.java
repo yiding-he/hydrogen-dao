@@ -2,31 +2,32 @@ package com.hyd.dao;
 
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.database.TransactionManager;
 import com.hyd.dao.database.commandbuilder.Command;
+import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
+import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
+import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
+import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.snapshot.Snapshot;
+import com.hyd.dao.transaction.TransactionManager;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Main facade of hydrogen-dao.
- *
+ * <p>
  * It must be created from {@link DataSources#getDAO(String)}
- *
+ * <p>
  * It is thread safe.
  */
-@SuppressWarnings({"unused", "unchecked", "rawtypes", "RedundantSuppression"})
+@SuppressWarnings({"unused", "unchecked", "rawtypes", "RedundantSuppression", "UnusedReturnValue"})
 public class DAO {
 
     public static final Date SYSDATE = new Date(0) {
@@ -154,12 +155,55 @@ public class DAO {
     }
 
     /**
+     * 判断本 DAO 对象是否是独立于当前事务之外
+     *
+     * @return 如果本 DAO 对象独立于事务之外，则返回 true
+     */
+    public boolean isStandAlone() {
+        return this.standAlone;
+    }
+
+    void setStandAlone(boolean standAlone) {
+        this.standAlone = standAlone;
+    }
+
+    /**
      * 获得 dao 实例所属的数据源名称
      *
      * @return dao 实例所属的数据源名称
      */
     public String getDataSourceName() {
         return dsName;
+    }
+
+    ////////////////////////////////////////////////////////////////
+
+    private void runWithExecutor(Consumer<Executor> consumer) {
+        try {
+            Executor executor = ExecutionContext.init(
+                executorFactory, standAlone, nameConverter);
+            try {
+                consumer.accept(executor);
+            } finally {
+                executor.finish();
+            }
+        } finally {
+            ExecutionContext.clear();
+        }
+    }
+
+    private <T> T returnWithExecutor(Function<Executor, T> f) {
+        try {
+            Executor executor = ExecutionContext.init(
+                executorFactory, standAlone, nameConverter);
+            try {
+                return f.apply(executor);
+            } finally {
+                executor.finish();
+            }
+        } finally {
+            ExecutionContext.clear();
+        }
     }
 
     ////////////////////////////////////////////////////////////////
@@ -344,7 +388,7 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public <T> List<T> queryRange(
-            Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
+        Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
 
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
@@ -352,12 +396,10 @@ public class DAO {
         }
 
         String fixedSql = fixSql(sql);
-        Executor executor = getExecutor();
-        try {
-            return executor.query(clazz, fixedSql, Arrays.asList(params), startPosition, endPosition);
-        } finally {
-            executor.finish();
-        }
+
+        return returnWithExecutor(executor -> executor.query(
+            clazz, fixedSql, Arrays.asList(params), startPosition, endPosition)
+        );
     }
 
     ////////////////////////////////////////////////////////////////
@@ -384,9 +426,7 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public Page<Row> queryPage(
-            String sql,
-            int pageSize, int pageIndex, Object... params) throws DAOException {
+    public Page<Row> queryPage(String sql, int pageSize, int pageIndex, Object... params) throws DAOException {
         return queryPage(null, sql, pageSize, pageIndex, params);
     }
 
@@ -404,20 +444,18 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public <T> Page<T> queryPage(
-            Class<T> wrappingClass, String sql,
-            int pageSize, int pageIndex, Object... params) throws DAOException {
+        Class<T> wrappingClass, String sql,
+        int pageSize, int pageIndex, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
             List list = (List) params[0];
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[0]));
         }
 
         String fixedSql = fixSql(sql);
-        Executor executor = getExecutor();
-        try {
-            return executor.queryPage(wrappingClass, fixedSql, Arrays.asList(params), pageSize, pageIndex);
-        } finally {
-            executor.finish();
-        }
+
+        return returnWithExecutor(executor -> executor.queryPage(
+            wrappingClass, fixedSql, Arrays.asList(params), pageSize, pageIndex)
+        );
     }
 
     ////////////////////////////////////////////////////////////////
@@ -467,23 +505,10 @@ public class DAO {
         }
 
         String fixedSql = fixSql(sql);
-        Executor executor = getExecutor(true);
-        return executor.queryIterator(fixedSql, Arrays.asList(params), preProcessor);
-        // 数据库连接此时必须保持开启，所以不能调用 closeExecutor() 方法。
-    }
+        List<Object> paramList = Arrays.asList(params);
 
-    /**
-     * 获取指定 sequence 的下一个值。注意，本方法仅用于 Oracle 数据库。
-     *
-     * @param sequenceName sequence 的名称
-     *
-     * @return 值
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    public Long next(final String sequenceName) throws DAOException {
-        Row row = queryFirst("select " + sequenceName + ".nextval val from dual");
-        return row.getLongObject("val");
+        return returnWithExecutor(executor ->
+            executor.queryIterator(fixedSql, paramList, preProcessor));
     }
 
     /**
@@ -498,12 +523,11 @@ public class DAO {
      * @throws DAOException 如果查询失败
      */
     public <T> T find(Class<T> clazz, String tableName, Object key) throws DAOException {
-        Executor executor = getExecutor();
-        try {
-            return executor.find(clazz, key, tableName);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> {
+            Command command = QueryCommandBuilder.buildByKey(tableName, key);
+            List<T> list = executor.query(clazz, command.getStatement(), command.getParams(), 0, 1);
+            return list.isEmpty() ? null : list.get(0);
+        });
     }
 
     /**
@@ -527,10 +551,10 @@ public class DAO {
      *
      * @return 结果中的数字
      */
-    public int count(Command command) {
+    public long count(Command command) {
         Row row = queryFirst(command);
         Iterator<Object> iterator = row.values().iterator();
-        return ((BigDecimal) iterator.next()).intValue();
+        return ((BigDecimal) iterator.next()).longValue();
     }
 
     /**
@@ -541,10 +565,10 @@ public class DAO {
      *
      * @return 结果中的数字
      */
-    public int count(String sql, Object... params) {
+    public long count(String sql, Object... params) {
         Row row = queryFirst(sql, params);
         Iterator<Object> iterator = row.values().iterator();
-        return ((BigDecimal) iterator.next()).intValue();
+        return ((BigDecimal) iterator.next()).longValue();
     }
 
     /**
@@ -554,10 +578,10 @@ public class DAO {
      *
      * @return 结果中的数字
      */
-    public int count(SQL.Generatable generatable) {
+    public long count(SQL.Generatable generatable) {
         Row row = queryFirst(generatable);
         Iterator<Object> iterator = row.values().iterator();
-        return ((BigDecimal) iterator.next()).intValue();
+        return ((BigDecimal) iterator.next()).longValue();
     }
 
     /////////////////// UPDATE //////////////////////
@@ -573,21 +597,17 @@ public class DAO {
      * @throws DAOException 如果执行数据库操作失败
      */
     public int delete(Object obj, String tableName) throws DAOException {
-        Executor executor = getExecutor();
-        try {
-            return executor.delete(obj, tableName);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> {
+            Command command = DeleteCommandBuilder.build(tableName, obj);
+            return executor.execute(command);
+        });
     }
 
     public int deleteByKey(Object key, String tableName) {
-        Executor executor = getExecutor();
-        try {
-            return executor.deleteByKey(key, tableName);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> {
+            Command command = DeleteCommandBuilder.buildByKey(tableName, key);
+            return executor.execute(command);
+        });
     }
 
     /**
@@ -606,17 +626,15 @@ public class DAO {
         }
         String fixedSql = fixSql(sql);
 
-        Executor executor = getExecutor();
-        try {
-            if (params.length == 1 && params[0] instanceof List) {
-                List list = (List) params[0];
-                return executor.execute(fixedSql, list);
-            } else {
-                return executor.execute(fixedSql, Arrays.asList(params));
-            }
-        } finally {
-            executor.finish();
+        List<Object> paramsList;
+        if (params.length == 1 && params[0] instanceof List) {
+            paramsList = (List<Object>) params[0];
+        } else {
+            paramsList = Arrays.asList(params);
         }
+
+        Command command = new Command(fixedSql, paramsList);
+        return returnWithExecutor(executor -> executor.execute(command));
     }
 
     /**
@@ -629,21 +647,20 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(BatchCommand command) throws DAOException {
-        Executor executor = getExecutor();
-        try {
-            return executor.execute(command);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> executor.execute(command));
     }
 
+    /**
+     * 执行流式批处理命令
+     *
+     * @param command 流式批处理命令
+     *
+     * @return 受影响的行数
+     *
+     * @throws DAOException 如果执行失败
+     */
     public int execute(IteratorBatchCommand command) throws DAOException {
-        Executor executor = getExecutor();
-        try {
-            return executor.execute(command);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> executor.execute(command));
     }
 
     public int execute(SQL.Generatable generatable) {
@@ -689,12 +706,10 @@ public class DAO {
             return;
         }
 
-        Executor executor = getExecutor();
-        try {
-            executor.insert(object, tableName);
-        } finally {
-            executor.finish();
-        }
+        runWithExecutor(executor -> {
+            Command command = InsertCommandBuilder.build(tableName, object);
+            executor.execute(command);
+        });
     }
 
     /**
@@ -706,12 +721,10 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     private void insert(Map row, String tableName) throws DAOException {
-        Executor executor = getExecutor();
-        try {
-            executor.insertMap(row, tableName);
-        } finally {
-            executor.finish();
-        }
+        runWithExecutor(executor -> {
+            Command command = InsertCommandBuilder.build(tableName, row);
+            executor.execute(command);
+        });
     }
 
     /**
@@ -738,39 +751,10 @@ public class DAO {
             return;
         }
 
-        Executor executor = getExecutor();
-        try {
-            executor.insertList(objects, tableName);
-        } finally {
-            executor.finish();
-        }
-    }
-
-    /**
-     * 构造一个 Executor 对象。如果当前处于事务当中，则返回缓存于事务当中的 Executor 对象。
-     *
-     * @return Executor 对象
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    private Executor getExecutor() throws DAOException {
-        return getExecutor(this.standAlone);
-    }
-
-    /**
-     * 构造一个 Executor 对象。如果 standalone 为 true，即使当前处于事务当中，这个
-     * Executor 对象也会使用新的数据库连接，从而独立于事务执行数据库操作。
-     *
-     * @param standalone 是否脱离当前事务（如果有的话）
-     *
-     * @return Executor 对象
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    private Executor getExecutor(boolean standalone) throws DAOException {
-        Executor executor = executorFactory.getExecutor(standalone);
-        executor.setNameConverter(nameConverter);
-        return executor;
+        runWithExecutor(executor -> {
+            BatchCommand command = InsertCommandBuilder.buildBatch(tableName, objects);
+            executor.execute(command);
+        });
     }
 
     /**
@@ -787,12 +771,7 @@ public class DAO {
             return call(name, list.toArray(new Object[0]));
         }
 
-        Executor executor = getExecutor();
-        try {
-            return executor.call(name, params);
-        } finally {
-            executor.finish();
-        }
+        return returnWithExecutor(executor -> executor.call(name, params));
     }
 
     /**
@@ -811,41 +790,6 @@ public class DAO {
             callFunction(name, list.toArray(new Object[0]));
         }
 
-        Executor executor = getExecutor();
-        try {
-            return executor.callFunction(name, params);
-        } finally {
-            executor.finish();
-        }
-    }
-
-    /**
-     * 判断指定的记录是否存在
-     *
-     * @param obj       包含主键值的 Pojo 对象或 Map 对象
-     * @param tableName 表名
-     *
-     * @return 如果记录存在则返回 true
-     */
-    public boolean exists(Object obj, String tableName) {
-        Executor executor = getExecutor();
-        try {
-            return executor.exists(obj, tableName);
-        } finally {
-            executor.finish();
-        }
-    }
-
-    /**
-     * 判断本 DAO 对象是否是独立于当前事务之外
-     *
-     * @return 如果本 DAO 对象独立于事务之外，则返回 true
-     */
-    public boolean isStandAlone() {
-        return this.standAlone;
-    }
-
-    void setStandAlone(boolean standAlone) {
-        this.standAlone = standAlone;
+        return returnWithExecutor(executor -> executor.callFunction(name, params));
     }
 }

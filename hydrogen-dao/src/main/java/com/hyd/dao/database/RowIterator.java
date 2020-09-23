@@ -2,10 +2,12 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
+import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.ResultSetUtil;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
@@ -136,11 +138,13 @@ public class RowIterator implements Closeable {
                     LOG.warn(e.getMessage(), e);
                 }
             }
+
             try {
                 st.close();
             } catch (SQLException e) {
                 LOG.warn(e.getMessage(), e);
             }
+
             try {
                 conn.close();
             } catch (SQLException e) {
@@ -148,6 +152,7 @@ public class RowIterator implements Closeable {
             }
 
             closed = true;
+            ExecutionContext.clear();
         }
     }
 

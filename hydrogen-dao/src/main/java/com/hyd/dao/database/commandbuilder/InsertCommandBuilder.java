@@ -8,6 +8,7 @@ import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.mate.util.Str;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,21 +26,20 @@ public class InsertCommandBuilder {
      * 构造一个批处理命令。注意：批处理命令 SQL 语句中有哪些参数，是根据第一个要插入的记录生成的。
      * 这时候不能因为记录的某个属性值为 null 就不将该属性加入 SQL，因为后面的其他记录的属性值可能不是 null。
      *
-     * @param context   数据库操作上下文
      * @param tableName 表名
      * @param objects   要插入的记录对象
      *
      * @return 批处理插入命令
-     * @throws java.sql.SQLException 如果获取数据库信息失败
      */
-    public static BatchCommand buildBatch(ExecutionContext context, String tableName, List objects)
-        throws SQLException {
+    public static BatchCommand buildBatch(String tableName, List objects) {
+
+        ExecutionContext context = ExecutionContext.get();
 
         if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
         }
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, objects.get(0));
 
         StringBuilder statement = new StringBuilder("insert into " + helper.getTableNameForSql(tableName) + "(");
@@ -75,9 +75,9 @@ public class InsertCommandBuilder {
     // 获取要批量插入的表字段信息
     private static ColumnInfo[] getBatchColumnInfo(
         ExecutionContext context, String tableName, CommandBuilderHelper helper, Object sample
-    ) throws SQLException {
+    ) {
 
-        FQN fqn = new FQN(context.getConnection(), tableName);
+        FQN fqn = new FQN(context, tableName);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
         List list = helper.generateParams(infos, sample);
 
@@ -93,16 +93,16 @@ public class InsertCommandBuilder {
     /**
      * 构造一条插入命令
      *
-     * @param context   数据库操作上下文
      * @param tableName 表名
      * @param object    要插入的对象
      *
      * @return 插入命令
      * @throws SQLException 如果获取数据库信息失败
      */
-    public static Command build(ExecutionContext context, String tableName, Object object) throws SQLException {
-        FQN fqn = new FQN(context.getConnection(), tableName);
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+    public static Command build(String tableName, Object object) throws DAOException {
+        ExecutionContext context = ExecutionContext.get();
+        FQN fqn = new FQN(context, tableName);
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema(), fqn.getName());
         List params = helper.generateParams(infos, object);
         return buildCommand(tableName, infos, params, context);
@@ -117,16 +117,15 @@ public class InsertCommandBuilder {
      * @param context   数据库操作上下文
      *
      * @return 插入命令
-     * @throws java.sql.SQLException 如果获取数据库类型失败
      */
     private static Command buildCommand(
         String tableName, ColumnInfo[] infos, List params, ExecutionContext context
-    ) throws SQLException {
+    ) {
 
         DatabaseType databaseType = DatabaseType.of(context.getConnection());
         List<Object> finalParams = new ArrayList<>();
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
 
         StringBuilder command = new StringBuilder("insert into " + tableName + "(");
         StringBuilder questionMarks = new StringBuilder();

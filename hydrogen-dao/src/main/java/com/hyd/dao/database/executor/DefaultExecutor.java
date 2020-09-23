@@ -1,15 +1,9 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.BatchCommand;
-import com.hyd.dao.DAOException;
-import com.hyd.dao.IteratorBatchCommand;
-import com.hyd.dao.Page;
-import com.hyd.dao.Row;
+import com.hyd.dao.*;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.commandbuilder.Command;
-import com.hyd.dao.database.commandbuilder.DeleteCommandBuilder;
-import com.hyd.dao.database.commandbuilder.InsertCommandBuilder;
 import com.hyd.dao.database.commandbuilder.QueryCommandBuilder;
 import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.function.FunctionHelper;
@@ -22,17 +16,12 @@ import com.hyd.dao.mate.util.TypeUtil;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProcedureHelper;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -55,8 +44,8 @@ public class DefaultExecutor extends Executor {
 
     private ResultSet rs;
 
-    public DefaultExecutor(ExecutionContext context) throws SQLException {
-        super(context);
+    public DefaultExecutor(String dataSourceName, Connection connection) {
+        super(dataSourceName, connection);
     }
 
     @Override
@@ -106,8 +95,8 @@ public class DefaultExecutor extends Executor {
      *
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
-    private String getRangedSql(String sql, int startPos, int endPos) throws SQLException {
-        return CommandBuilderHelper.getHelper(context).getRangedSql(sql, startPos, endPos);
+    private String getRangedSql(String sql, int startPos, int endPos) {
+        return CommandBuilderHelper.getHelper().getRangedSql(sql, startPos, endPos);
     }
 
     /**
@@ -135,7 +124,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private String getCountSql(String sql) throws SQLException {
-        return CommandBuilderHelper.getHelper(context).getCountSql(sql);
+        return CommandBuilderHelper.getHelper().getCountSql(sql);
     }
 
     @Override
@@ -190,21 +179,9 @@ public class DefaultExecutor extends Executor {
     }
 
     @Override
-    @SuppressWarnings({"unchecked"})
-    public <T> T find(Class<T> wrapperClass, Object key, String tableName) {
-        try {
-            Command command = QueryCommandBuilder.buildByKey(context, tableName, key);
-            List list = query(wrapperClass, command.getStatement(), command.getParams(), 0, 1);
-            return (T) (list.isEmpty() ? null : list.get(0));
-        } catch (SQLException e) {
-            throw new DAOException("Query failed:", e);
-        }
-    }
-
-    @Override
     public boolean exists(Object obj, String tableName) {
         try {
-            Command command = QueryCommandBuilder.build(context, tableName, obj);
+            Command command = QueryCommandBuilder.build(tableName, obj);
             return !query(null, command.getStatement(), command.getParams(), -1, -1).isEmpty();
         } catch (SQLException e) {
             throw new DAOException("Delete failed: " + e.getMessage(), e);
@@ -385,52 +362,6 @@ public class DefaultExecutor extends Executor {
                     ps.setObject(i + 1, null); // this will cause exception
                 }
             }
-        }
-    }
-
-    @Override
-    public void insert(Object object, String tableName) {
-        Command command = new Command();
-        try {
-            command = InsertCommandBuilder.build(context, tableName, object);
-            execute(command.getStatement(), command.getParams());
-        } catch (SQLException e) {
-            throw new DAOException("Execution failed: " + e.getMessage(), e, command.getStatement(), command.getParams());
-        }
-    }
-
-    @Override
-    public void insertList(List list, String table) {
-        try {
-            execute(InsertCommandBuilder.buildBatch(context, table, list));
-        } catch (SQLException e) {
-            throw new DAOException("Insert Failed: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void insertMap(Map row, String tableName) {
-        insert(row, tableName);
-    }
-
-    @Override
-    public int delete(Object obj, String tableName) {
-        Command command = new Command();
-        try {
-            command = DeleteCommandBuilder.build(context, tableName, obj);
-            return execute(command.getStatement(), command.getParams());
-        } catch (SQLException e) {
-            throw new DAOException("Delete failed: " + e.getMessage(), e, command.getStatement(), command.getParams());
-        }
-    }
-
-    @Override
-    public int deleteByKey(Object key, String tableName) {
-        try {
-            Command command = DeleteCommandBuilder.buildByKey(context, tableName, key);
-            return execute(command.getStatement(), command.getParams());
-        } catch (SQLException e) {
-            throw new DAOException("Delete failed: " + e.getMessage(), e);
         }
     }
 

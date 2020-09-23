@@ -8,6 +8,7 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.generator.code.AnnotationDef;
 import com.hyd.dao.mate.generator.code.ClassDef;
 import com.hyd.dao.mate.generator.code.ModelClassBuilder;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -63,7 +64,7 @@ public class PojoGenerator {
         context.setConnection(this.connection);
         context.setNameConverter(nameConverter);
 
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] columnInfos = helper.getColumnInfos(this.catalog, this.tableName);
 
         ModelClassBuilder builder = new ModelClassBuilder(

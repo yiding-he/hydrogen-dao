@@ -12,13 +12,10 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.Locker;
 import com.hyd.dao.mate.util.Str;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -49,12 +46,11 @@ public class CommandBuilderHelper {
     /**
      * 获取一个 CommandBuilderHelper 对象
      *
-     * @param context 数据库操作上下文
-     *
      * @return 根据数据库类型产生的 CommandBuilderHelper 对象
-     * @throws SQLException 如果获取数据库连接信息失败
+     * @throws DAOException 如果获取数据库连接信息失败
      */
-    public static CommandBuilderHelper getHelper(ExecutionContext context) throws SQLException {
+    public static CommandBuilderHelper getHelper() throws DAOException {
+        ExecutionContext context = ExecutionContext.get();
         DatabaseType databaseType = DatabaseType.of(context.getConnection());
         switch (databaseType) {
             case Oracle:
@@ -214,7 +210,7 @@ public class CommandBuilderHelper {
      * @return fixed column name
      * @throws SQLException when fails
      */
-    public String getColumnNameForSql(String column) throws SQLException {
+    public String getColumnNameForSql(String column) throws DAOException {
         return column;
     }
 

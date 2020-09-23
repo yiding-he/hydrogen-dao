@@ -1,6 +1,7 @@
 package com.hyd.dao;
 
 import com.hyd.dao.database.ColumnInfo;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,6 +44,10 @@ public class IteratorBatchCommand {
 
     public void setColumnInfos(ColumnInfo[] columnInfos) {
         this.columnInfos = columnInfos;
+    }
+
+    public ColumnInfo[] getColumnInfos() {
+        return columnInfos;
     }
 
     public String getCommand() {

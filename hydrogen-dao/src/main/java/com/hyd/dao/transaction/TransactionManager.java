@@ -1,18 +1,25 @@
-package com.hyd.dao.database;
+package com.hyd.dao.transaction;
 
-import com.hyd.dao.TransactionException;
+import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.executor.Executor;
+import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
+
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 管理事务开始和结束，并缓存事务当中要用到的 Executor 对象
- *
+ * 管理事务开始和结束，并缓存事务当中要用到的 Executor 对象。
+ * 事务可以分多级，每一级用 Map 保存多个数据源的当前连接。
+ * 每一级都需要单独执行 commit/rollback。当执行 commit/rollback
+ * 时，会对该级的所有数据源执行。
+ * <p>
+ * 这个不是分布式事务，无法保证一致性。
+ * <p>
  * 关于多级事务：
- * 多级事务会占用大量连接（每个线程的每一级事务中对每个数据源都会占用一个连接），
+ * 多级事务会占用多个数据库连接（每一级事务对每个用到的数据源都会占用一个连接），
  * 连接池不够用的情况下可能会造成假死，所以请慎重使用
  */
 public class TransactionManager {
@@ -27,7 +34,7 @@ public class TransactionManager {
      * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
      */
     private static final ThreadLocal<Map<Integer, Map<String, Executor>>>
-        executorCache = new ThreadLocal<>();
+        executorCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
     private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
@@ -36,7 +43,6 @@ public class TransactionManager {
     /////////////////////////////////////////////////////////
 
     private TransactionManager() {
-        // hide public constructor
     }
 
     /**
@@ -44,6 +50,7 @@ public class TransactionManager {
      *
      * @return 如果线程处于事务当中，则返回 true
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isInTransaction() {
         return getLevel() > 0;
     }
@@ -59,41 +66,38 @@ public class TransactionManager {
     }
 
     /**
-     * 获得处于当前事务中的 Executor 对象
-     *
-     * @param dsName 数据源名称
-     *
-     * @return 处于当前事务中的 Executor 对象。如果当前不处于事务中，则返回 null；即使处于事务中，也有可能返回 null。
+     * 根据当前事务上下文和参数，返回一个合适的 Executor 对象
      */
-    public static Executor getExecutor(String dsName) {
-        if (!isInTransaction()) {
-            return null;
+    public static Executor getExecutor(
+        ExecutorFactory executorFactory, boolean standAlone, NameConverter nameConverter
+    ) {
+
+        Executor executor;
+
+        // 不打算以事务方式执行，或当前没有进行中的事务
+        if (standAlone || !isInTransaction()) {
+            executor = executorFactory.getExecutor(true);
+        } else {
+
+            // 获取当前事务中缓存的 Executor，如果没有则自动新建一个
+            int level = getLevel();
+            String dataSourceName = executorFactory.getDataSourceName();
+
+            executor = getExecutors(level).computeIfAbsent(
+                dataSourceName, __ -> {
+                    Executor e = executorFactory.getExecutor(false);
+                    e.setTransactionIsolation(getIsolation(level));
+                    return e;
+                }
+            );
         }
 
-        int level = getLevel();
-        Map<String, Executor> executors = executorCache.get().get(level);
-        return executors.get(dsName + ":" + level);
+        executor.setNameConverter(nameConverter);
+        return executor;
     }
 
-    /**
-     * 缓存当前事务的 Executor 对象
-     *
-     * @param dsName   数据源名称
-     * @param executor Executor 对象
-     */
-    public static void setExecutor(String dsName, Executor executor) {
-        if (!isInTransaction()) {
-            return;
-        }
-
-        try {
-            int level = getLevel();
-            executor.setTransactionIsolation(getIsolation(level));
-            Map<String, Executor> executors = executorCache.get().get(level);
-            executors.put(dsName + ":" + level, executor);
-        } catch (SQLException e) {
-            throw new TransactionException(e);
-        }
+    private static Map<String, Executor> getExecutors(int level) {
+        return executorCache.get().computeIfAbsent(level, __ -> new ConcurrentHashMap<>());
     }
 
     private static int getIsolation(int level) {
@@ -107,7 +111,6 @@ public class TransactionManager {
         int _level;
 
         if (!isInTransaction()) {
-            executorCache.set(new HashMap<>()); // start level1 transaction
             _level = 1;
         } else {
             _level = level.get() + 1;

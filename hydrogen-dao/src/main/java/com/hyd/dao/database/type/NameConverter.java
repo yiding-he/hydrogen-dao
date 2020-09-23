@@ -2,8 +2,14 @@ package com.hyd.dao.database.type;
 
 import com.hyd.dao.mate.util.Str;
 
+/**
+ * 名称转换规则。
+ */
 public abstract class NameConverter {
 
+    /**
+     * 不做任何转换
+     */
     public static final NameConverter NONE = new NameConverter() {
 
         @Override
@@ -19,6 +25,9 @@ public abstract class NameConverter {
 
     //////////////////////////////////////////////////////////////
 
+    /**
+     * 属性名为驼峰风格（如"userName"），字段名为下划线隔开（如"user_name"）
+     */
     public static final NameConverter CAMEL_UNDERSCORE = new NameConverter() {
 
         @Override

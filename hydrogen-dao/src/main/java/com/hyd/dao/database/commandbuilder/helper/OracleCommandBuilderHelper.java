@@ -2,7 +2,6 @@ package com.hyd.dao.database.commandbuilder.helper;
 
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.mate.util.ResultSetUtil;
-import java.sql.SQLException;
 
 /**
  * @author hyd
@@ -19,7 +18,7 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    public String getColumnNameForSql(String column) throws SQLException {
+    public String getColumnNameForSql(String column) {
         return "\"" + column.toUpperCase() + "\"";
     }
 

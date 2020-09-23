@@ -186,6 +186,20 @@ public class Str {
         return index == -1 ? s : s.substring(0, index);
     }
 
+    public static String subStringBeforeLast(String s, String search) {
+        if (s == null || search == null) {
+            return s;
+        }
+        int index = s.lastIndexOf(search);
+        if (index == -1) {
+            return s;
+        } else if (index + search.length() >= s.length()) {
+            return "";
+        } else {
+            return s.substring(0, index);
+        }
+    }
+
     public static String subStringAfterLast(String s, String search) {
         if (s == null || search == null) {
             return s;

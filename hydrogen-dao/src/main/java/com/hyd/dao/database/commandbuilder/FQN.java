@@ -1,8 +1,12 @@
 package com.hyd.dao.database.commandbuilder;
 
+import com.hyd.dao.DAOException;
+import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.mate.util.Str;
-import java.sql.Connection;
+
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * FQN of a table.
@@ -11,23 +15,31 @@ import java.sql.SQLException;
  */
 public class FQN {
 
+    private static final Map<String, String> SCHEMA_CACHE = new ConcurrentHashMap<>();
+
     private String schema;
 
     private String name;
 
-    public FQN(Connection conn, String fqn) throws SQLException {
+    public FQN(ExecutionContext context, String fqn) {
         if (Str.isEmpty(fqn)) {
             throw new IllegalArgumentException("FQN parameter cannot be empty");
         }
 
-        if (!fqn.contains(".")) {
-            schema = conn.getMetaData().getUserName();
-            name = fqn;
-        } else {
-            String[] splitted = fqn.split("[.]");
-            schema = splitted[splitted.length - 2];
-            name = splitted[splitted.length - 1];
-        }
+        String dataSourceName = context.getDataSourceName();
+        this.schema = SCHEMA_CACHE.computeIfAbsent(dataSourceName, _ds -> {
+            try {
+                if (fqn.contains(".")) {
+                    return Str.subStringBeforeLast(fqn, ".");
+                } else {
+                    return context.getConnection().getSchema();
+                }
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        });
+
+        this.name = fqn.contains(".") ? Str.subStringAfterLast(fqn, ".") : fqn;
     }
 
     public String getSchema(String defaultValue) {

@@ -1,14 +1,15 @@
 package com.hyd.dao.basictest;
 
-import static org.junit.Assert.*;
-
 import com.hyd.dao.DAO;
 import com.hyd.dao.Row;
 import com.hyd.dao.src.models.Blog;
 import com.hyd.daotests.JUnitRuleTestBase;
+import org.junit.Test;
+
 import java.util.List;
 import java.util.function.Supplier;
-import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class DaoTest extends JUnitRuleTestBase {
 
@@ -33,6 +34,13 @@ public class DaoTest extends JUnitRuleTestBase {
         assertNotNull(blogs.get(0).getContent());
         assertNotNull(blogs.get(0).getCreateTime());
         assertNotNull(blogs.get(0).getTitle());
+    }
+
+    @Test
+    public void queryMap() throws Exception {
+        List<Row> rows = dao.query("select * from blog");
+        assertFalse(rows.isEmpty());
+        assertNotNull(rows.get(0).get("id"));
     }
 
     @Test

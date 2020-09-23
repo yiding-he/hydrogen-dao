@@ -6,6 +6,7 @@ import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.BeanUtil;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +22,10 @@ public class QueryCommandBuilder {
     /**
      * 根据主键值构建查询语句
      */
-    public static Command buildByKey(ExecutionContext context, String tableName, Object key) throws SQLException {
-        FQN fqn = new FQN(context.getConnection(), tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+    public static Command buildByKey(String tableName, Object key) throws DAOException {
+        ExecutionContext context = ExecutionContext.get();
+        FQN fqn = new FQN(context, tableName);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         String statement = "select * from " + tableName + " where ";
@@ -49,13 +51,11 @@ public class QueryCommandBuilder {
     /**
      * 根据 obj 对象构建查询语句
      */
-    public static Command build(
-        ExecutionContext context, String tableName, Object obj
-    ) throws SQLException {
-
-        FQN fqn = new FQN(context.getConnection(), tableName);
+    public static Command build(String tableName, Object obj) throws SQLException {
+        ExecutionContext context = ExecutionContext.get();
+        FQN fqn = new FQN(context, tableName);
         NameConverter nameConverter = context.getNameConverter();
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         List values = new ArrayList();
