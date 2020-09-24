@@ -8,3 +8,6 @@ indent_style = space
 charset = utf-8
 trim_trailing_whitespace = true
 
+[*.java]
+ij_any_blank_lines_around_field = 1
+ij_java_doc_add_blank_line_after_param_comments = true
