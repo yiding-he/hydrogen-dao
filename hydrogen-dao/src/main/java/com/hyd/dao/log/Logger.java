@@ -1,5 +1,7 @@
 package com.hyd.dao.log;
 
+import com.hyd.dao.exception.LogException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;

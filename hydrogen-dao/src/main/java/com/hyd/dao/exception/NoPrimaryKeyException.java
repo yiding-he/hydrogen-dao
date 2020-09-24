@@ -1,4 +1,4 @@
-package com.hyd.dao.database.commandbuilder;
+package com.hyd.dao.exception;
 
 import com.hyd.dao.DAOException;
 

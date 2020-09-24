@@ -1,6 +1,7 @@
-package com.hyd.dao.database.commandbuilder.helper;
+package com.hyd.dao.command.builder.helper;
 
 import com.hyd.dao.database.executor.ExecutionContext;
+
 import java.sql.SQLException;
 
 /**

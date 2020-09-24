@@ -1,4 +1,6 @@
-package com.hyd.dao;
+package com.hyd.dao.exception;
+
+import com.hyd.dao.DAOException;
 
 /**
  * @author yiding.he

@@ -1,12 +1,9 @@
 package com.hyd.dao;
 
 
-import com.hyd.dao.database.commandbuilder.Command;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.hyd.dao.command.Command;
+
+import java.util.*;
 
 /**
  * 生成 Command 的帮助类

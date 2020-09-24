@@ -2,11 +2,12 @@ package com.hyd.dao.mysql;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.hyd.dao.BatchCommand;
 import com.hyd.dao.DAO;
+import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.database.executor.DefaultExecutor;
-import java.util.Random;
 import org.slf4j.LoggerFactory;
+
+import java.util.Random;
 
 public class TestUpdateMillionBlogs {
 

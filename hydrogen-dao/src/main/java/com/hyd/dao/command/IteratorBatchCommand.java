@@ -1,4 +1,4 @@
-package com.hyd.dao;
+package com.hyd.dao.command;
 
 import com.hyd.dao.database.ColumnInfo;
 

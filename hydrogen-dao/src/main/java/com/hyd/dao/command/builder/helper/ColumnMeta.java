@@ -1,4 +1,4 @@
-package com.hyd.dao.database.commandbuilder.helper;
+package com.hyd.dao.command.builder.helper;
 
 /**
  * 定义不同数据库对字段定义的 meta

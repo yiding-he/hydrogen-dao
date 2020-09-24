@@ -37,6 +37,11 @@ public class DaoTest extends JUnitRuleTestBase {
     }
 
     @Test
+    public void testInsertNullContent() throws Exception {
+        dao.execute("insert into blog(id,title,content)values(?,?,?)", 666, "no-content", null);
+    }
+
+    @Test
     public void queryMap() throws Exception {
         List<Row> rows = dao.query("select * from blog");
         assertFalse(rows.isEmpty());

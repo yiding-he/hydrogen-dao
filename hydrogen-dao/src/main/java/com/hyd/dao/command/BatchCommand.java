@@ -1,7 +1,9 @@
-package com.hyd.dao;
+package com.hyd.dao.command;
 
 
+import com.hyd.dao.DAO;
 import com.hyd.dao.database.ColumnInfo;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

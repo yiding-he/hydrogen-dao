@@ -1,16 +1,25 @@
-package com.hyd.dao.database.commandbuilder;
+package com.hyd.dao.command;
 
 import java.util.List;
 
 /**
- * 表示 SQL 命令的类。其中包含 SQL 语句和参数两个部分。参数的值要和 SQL 语句中的问号一一对应。
+ * 对 PreparedStatement 语句和参数的封装
  */
 public class Command {
 
+    /**
+     * 包含 "?" 参数占位符的 SQL 语句
+     */
     private String statement;
 
+    /**
+     * 与参数占位符对应的参数值列表
+     */
     private List<Object> params;
 
+    /**
+     * （可选）参数的 JDBC 类型，当参数值为 null 时，需要指定类型才能填充
+     */
     private List<Integer> paramTypes;
 
     /**

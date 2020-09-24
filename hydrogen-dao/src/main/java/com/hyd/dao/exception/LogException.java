@@ -1,4 +1,4 @@
-package com.hyd.dao.log;
+package com.hyd.dao.exception;
 
 public class LogException extends RuntimeException {
 

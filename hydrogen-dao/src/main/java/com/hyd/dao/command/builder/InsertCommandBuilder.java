@@ -1,11 +1,13 @@
-package com.hyd.dao.database.commandbuilder;
+package com.hyd.dao.command.builder;
 
-import com.hyd.dao.BatchCommand;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
+import com.hyd.dao.command.BatchCommand;
+import com.hyd.dao.command.Command;
+import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.database.commandbuilder.helper.CommandBuilderHelper;
+import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.mate.util.Str;
 

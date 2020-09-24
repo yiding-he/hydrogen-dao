@@ -1,4 +1,4 @@
-package com.hyd.dao.database.commandbuilder;
+package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.database.executor.ExecutionContext;
@@ -17,9 +17,9 @@ public class FQN {
 
     private static final Map<String, String> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
-    private String schema;
+    private final String schema;
 
-    private String name;
+    private final String name;
 
     public FQN(ExecutionContext context, String fqn) {
         if (Str.isEmpty(fqn)) {
@@ -46,16 +46,8 @@ public class FQN {
         return Str.defaultIfEmpty(schema, defaultValue);
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
-
     public String getName(String defaultValue) {
         return Str.defaultIfEmpty(name, defaultValue);
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getSchema() {

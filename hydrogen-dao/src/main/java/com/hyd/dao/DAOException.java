@@ -1,6 +1,7 @@
 package com.hyd.dao;
 
-import com.hyd.dao.database.commandbuilder.Command;
+import com.hyd.dao.command.Command;
+
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
