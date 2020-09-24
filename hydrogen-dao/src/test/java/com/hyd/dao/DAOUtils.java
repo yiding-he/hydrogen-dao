@@ -2,6 +2,7 @@ package com.hyd.dao;
 
 import com.hyd.dao.database.JDBCDriver;
 import com.hyd.dao.database.NonPooledDataSource;
+
 import javax.sql.DataSource;
 
 /**
@@ -28,7 +29,7 @@ public class DAOUtils {
         }
 
         return new NonPooledDataSource(
-                driver.getDriverClass(),
+                driver.getAvailableDriver().getCanonicalName(),
                 url,
                 System.getProperty("jdbc.username"),
                 System.getProperty("jdbc.password")

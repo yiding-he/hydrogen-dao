@@ -3,11 +3,14 @@ package com.hyd.dao.mate.util;
 public class Cls {
 
     public static boolean exists(String typeName) {
+        return getType(typeName) != null;
+    }
+
+    public static Class<?> getType(String typeName) {
         try {
-            Class.forName(typeName);
-            return true;
+            return Class.forName(typeName);
         } catch (ClassNotFoundException e) {
-            return false;
+            return null;
         }
     }
 }

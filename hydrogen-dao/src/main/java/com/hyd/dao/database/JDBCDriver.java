@@ -1,11 +1,17 @@
 package com.hyd.dao.database;
 
+import com.hyd.dao.mate.util.Cls;
+
+import java.sql.Driver;
+
 /**
- * @author yidin
+ * 根据 JDBC URL 来猜测对应的 Driver 类
+ *
+ * @author yiding.he@gmail.com
  */
 public enum JDBCDriver {
 
-    MySQL("jdbc:mysql:", "com.mysql.jdbc.Driver"),
+    MySQL("jdbc:mysql:", "com.mysql.cj.jdbc.Driver", "com.mysql.jdbc.Driver"),
     Oracle("jdbc:oracle:", "oracle.jdbc.OracleDriver"),
     H2("jdbc:h2:", "org.h2.Driver"),
     HSQLDB("jdbc:hsqldb:", "org.hsqldb.jdbc.JDBCDriver"),
@@ -20,29 +26,38 @@ public enum JDBCDriver {
 
     private final String schemaPrefix;
 
-    private final String driverClass;
+    private final String[] driverClasses;
 
-    JDBCDriver(String schemaPrefix, String driverClass) {
+    private Class<? extends Driver> availableDriver;
+
+    JDBCDriver(String schemaPrefix, String... driverClasses) {
         this.schemaPrefix = schemaPrefix;
-        this.driverClass = driverClass;
+        this.driverClasses = driverClasses;
     }
 
     public String getSchemaPrefix() {
         return schemaPrefix;
     }
 
-    public String getDriverClass() {
-        return driverClass;
+    public String[] getDriverClasses() {
+        return driverClasses;
+    }
+
+    public Class<? extends Driver> getAvailableDriver() {
+        return this.availableDriver;
     }
 
     // 检查 JDBC Class 是否存在
+    @SuppressWarnings("unchecked")
     public boolean isAvailable() {
-        try {
-            Class.forName(this.driverClass);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+        for (String driverClass : driverClasses) {
+            Class<?> type = Cls.getType(driverClass);
+            if (type != null && Driver.class.isAssignableFrom(type)) {
+                availableDriver = (Class<? extends Driver>) type;
+                return true;
+            }
         }
+        return false;
     }
 
     public static JDBCDriver getDriverByUrl(String jdbcUrl) {
