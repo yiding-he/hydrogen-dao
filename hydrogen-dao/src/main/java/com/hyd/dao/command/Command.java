@@ -18,11 +18,6 @@ public class Command {
     private List<Object> params;
 
     /**
-     * （可选）参数的 JDBC 类型，当参数值为 null 时，需要指定类型才能填充
-     */
-    private List<Integer> paramTypes;
-
-    /**
      * 缺省构造函数
      */
     public Command() {
@@ -37,20 +32,6 @@ public class Command {
     public Command(String statement, List<Object> params) {
         this.statement = statement;
         this.params = params;
-    }
-
-    public Command(String statement, List<Object> params, List<Integer> paramTypes) {
-        this.statement = statement;
-        this.params = params;
-        this.paramTypes = paramTypes;
-    }
-
-    public List getParamTypes() {
-        return paramTypes;
-    }
-
-    public void setParamTypes(List<Integer> paramTypes) {
-        this.paramTypes = paramTypes;
     }
 
     /**

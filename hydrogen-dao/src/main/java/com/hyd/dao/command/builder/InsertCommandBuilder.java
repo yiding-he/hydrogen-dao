@@ -176,7 +176,7 @@ public class InsertCommandBuilder {
         for (ColumnInfo info : infos) {
             paramTypes.add(info.getDataType());
         }
-        return new Command(command.toString(), finalParams, paramTypes);
+        return new Command(command.toString(), finalParams);
     }
 
 }

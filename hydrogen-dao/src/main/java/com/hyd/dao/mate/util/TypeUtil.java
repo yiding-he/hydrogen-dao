@@ -4,14 +4,11 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,15 +19,15 @@ import java.util.Date;
 public class TypeUtil {
 
     public static final String[] DATE_PATTERNS = {
-            "yyyy-MM-dd HH:mm:ss",
-            "yyyy-MM-dd HH:mm:ss.SSS",
-            "yyyy-MM-dd",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd HH:mm:ss.SSS",
+        "yyyy-MM-dd",
     };
 
     /**
      * 根据字段数据类型将数据库中的值转化为 Java 类型，用于对简单查询结果的转换
      * 转换结果将放入 Row 对象，以帮助进行进一步转换。
-     *
+     * <p>
      * 数字类型 -&gt; BigDecimal
      * CLOB -&gt; String
      * BLOB -&gt; byte[]
@@ -40,7 +37,6 @@ public class TypeUtil {
      * @param value      值
      *
      * @return 转化后的类型
-     *
      * @throws java.io.IOException   如果读取 LOB 流失败
      * @throws java.sql.SQLException 如果读取 LOB 字段失败
      */
@@ -61,9 +57,9 @@ public class TypeUtil {
 
     private static boolean isNumericType(int columnType) {
         return columnType == Types.NUMERIC || columnType == Types.INTEGER
-                || columnType == Types.BIGINT || columnType == Types.REAL
-                || columnType == Types.DECIMAL || columnType == Types.FLOAT
-                || columnType == Types.DOUBLE;
+            || columnType == Types.BIGINT || columnType == Types.REAL
+            || columnType == Types.DECIMAL || columnType == Types.FLOAT
+            || columnType == Types.DOUBLE;
     }
 
     public static boolean isDateType(int columnType) {
@@ -108,18 +104,15 @@ public class TypeUtil {
     /**
      * 对用户提供的执行参数进行一些修复
      *
-     * @param obj  参数值
-     * @param type 字段数据类型
+     * @param obj 参数值
      *
      * @return 修复后的参数
      */
-    public static Object convertParamValue(Object obj, Integer type) {
+    public static Object convertParamValue(Object obj) {
         if (obj == null) {
             return "";
         } else if (obj.getClass().equals(Date.class)) {
             return new Timestamp(((Date) obj).getTime());     // 将 Date 转化为 TimeStamp，以避免时间丢失
-        } else if (type == Types.BIT) {
-            return (obj instanceof Boolean) ? obj : Boolean.valueOf(String.valueOf(obj));
         } else {
             return obj;
         }

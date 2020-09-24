@@ -230,7 +230,7 @@ public class DefaultExecutor extends Executor {
             st = ps;
 
             for (List<Object> param : params) {
-                insertBatchParams(command, param);
+                insertParams(param);
                 ps.addBatch();
             }
 
@@ -283,33 +283,8 @@ public class DefaultExecutor extends Executor {
         return counter;
     }
 
-    /**
-     * 为批处理命令填入参数值
-     *
-     * @param command 批处理命令
-     * @param params  参数
-     *
-     * @throws SQLException 如果填入参数失败
-     */
-    private void insertBatchParams(BatchCommand command, List<Object> params) throws SQLException {
-        int length = Str.countMatches(command.getCommand(), "?");
-
-        List<Integer> paramTypes = new ArrayList<>();
-        if (command.getColumnInfos() != null) {
-            for (int i = 0; i < length; i++) {
-                paramTypes.add(command.getColumnInfos()[i].getDataType());
-            }
-        }
-
-        insertParams(params, paramTypes);
-    }
-
     @Override
-    public int execute(String sql, List<Object> params) {
-        return execute(sql, params, null);
-    }
-
-    public int execute(String sql, List<Object> params, List<Integer> paramTypes) throws DAOException {
+    public int execute(String sql, List<Object> params) throws DAOException {
         printCommand(sql, params);
         try {
             // 执行语句
@@ -322,7 +297,7 @@ public class DefaultExecutor extends Executor {
             } else {
                 PreparedStatement ps = createPreparedStatement(sql);
                 st = ps;
-                insertParams(params, paramTypes);
+                insertParams(params);
                 if (TIMEOUT != -1) {
                     ps.setQueryTimeout(TIMEOUT);
                 }
@@ -337,34 +312,22 @@ public class DefaultExecutor extends Executor {
         }
     }
 
-    // 为普通 SQL 语句填入参数值
-    private void insertParams(List<Object> params) throws SQLException {
-        insertParams(params, null);
-    }
-
     /**
      * 填入参数值
      *
      * @param params     参数值。元素的个数要和语句中的 ? 数量一致。
-     * @param paramTypes 参数值对应的 SQL 类型，每个元素都是 Integer 对象。如果没有则传 null。
-     *
      * @throws SQLException 如果插入参数失败
      */
-    private void insertParams(List<Object> params, List<Integer> paramTypes) throws SQLException {
+    private void insertParams(List<Object> params) throws SQLException {
         PreparedStatement ps = (PreparedStatement) st;
         for (int i = 0; i < params.size(); i++) {
-            int paramType = paramTypes != null && paramTypes.size() > i ? paramTypes.get(i) : UNKNOWN_TYPE;
             Object value = params.get(i);
 
             if (value != null) {
-                value = TypeUtil.convertParamValue(value, paramType);
+                value = TypeUtil.convertParamValue(value);
                 ps.setObject(i + 1, value);
             } else {
-                if (paramType != UNKNOWN_TYPE) {
-                    ps.setNull(i + 1, paramType);
-                } else {
-                    ps.setObject(i + 1, null); // this will cause exception
-                }
+                ps.setNull(i + 1, Types.NULL);
             }
         }
     }
