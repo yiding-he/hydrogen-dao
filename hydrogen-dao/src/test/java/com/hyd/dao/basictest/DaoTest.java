@@ -1,6 +1,7 @@
 package com.hyd.dao.basictest;
 
 import com.hyd.dao.DAO;
+import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.src.models.Blog;
 import com.hyd.daotests.JUnitRuleTestBase;
@@ -37,6 +38,16 @@ public class DaoTest extends JUnitRuleTestBase {
     }
 
     @Test
+    public void testQueryPage() throws Exception {
+        Page<Blog> page = dao.queryPage(Blog.class, "select * from blog", 2, 0);
+        assertNotNull(page);
+        assertFalse(page.isEmpty());
+        assertNotNull(page.get(0));
+        assertEquals(2, page.getTotalPage());
+        assertEquals(3, page.getTotal());
+    }
+
+    @Test
     public void testInsertNullContent() throws Exception {
         dao.execute("insert into blog(id,title,content)values(?,?,?)", 666, "no-content", null);
     }
@@ -48,9 +59,4 @@ public class DaoTest extends JUnitRuleTestBase {
         assertNotNull(rows.get(0).get("id"));
     }
 
-    @Test
-    public void deleteByPrimaryKey() throws Exception {
-        dao.deleteByKey(1, "blog");
-        assertEquals(0, dao.count("select count(1) from blog where id=?", 1));
-    }
 }

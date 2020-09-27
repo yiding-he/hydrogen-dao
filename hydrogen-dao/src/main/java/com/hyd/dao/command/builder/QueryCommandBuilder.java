@@ -9,7 +9,6 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.ConnectionContext;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +56,7 @@ public final class QueryCommandBuilder {
     /**
      * 根据 obj 对象构建查询语句
      */
-    public Command build(String tableName, Object obj) throws SQLException {
+    public Command build(String tableName, Object obj) {
         FQN fqn = new FQN(context, tableName);
         NameConverter nameConverter = context.getNameConverter();
         CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);

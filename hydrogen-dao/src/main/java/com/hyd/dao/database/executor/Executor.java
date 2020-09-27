@@ -36,7 +36,7 @@ public abstract class Executor {
 
     protected ConnectionContext context;
 
-    public Executor(ConnectionContext context, NameConverter nameConverter) {
+    public Executor(ConnectionContext context) {
         this.info = new ExecutorInfo(context.getDataSourceName());
         this.databaseType = DatabaseType.of(context.getConnection());
         this.context = context;

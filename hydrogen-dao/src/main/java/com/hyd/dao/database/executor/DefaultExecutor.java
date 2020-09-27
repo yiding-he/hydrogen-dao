@@ -41,7 +41,7 @@ public class DefaultExecutor extends Executor {
     private ResultSet rs;
 
     public DefaultExecutor(ConnectionContext context, NameConverter nameConverter) {
-        super(context, nameConverter);
+        super(context);
     }
 
     @Override

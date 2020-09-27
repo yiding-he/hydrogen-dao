@@ -4,14 +4,12 @@ import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
 import com.hyd.dao.command.MappedCommand;
-import com.hyd.dao.command.builder.DeleteCommandBuilder;
 import com.hyd.dao.command.builder.InsertCommandBuilder;
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.snapshot.Snapshot;
@@ -25,7 +23,7 @@ import java.util.function.Function;
 /**
  * Main facade of hydrogen-dao. It is thread safe.
  */
-@SuppressWarnings({"unused", "unchecked", "rawtypes", "RedundantSuppression", "UnusedReturnValue"})
+@SuppressWarnings({"unchecked", "rawtypes", "RedundantSuppression", "UnusedReturnValue"})
 public class DAO {
 
     public static final Date SYSDATE = new Date(0) {
@@ -544,29 +542,6 @@ public class DAO {
     /////////////////// UPDATE //////////////////////
 
     /**
-     * 删除指定的一条记录
-     *
-     * @param obj       用于指定记录的对象，只要主键有值即可。
-     * @param tableName 表名
-     *
-     * @return 受影响的行数
-     * @throws DAOException 如果执行数据库操作失败
-     */
-    public int delete(Object obj, String tableName) throws DAOException {
-        return returnWithExecutor(executor -> {
-            Command command = new DeleteCommandBuilder(getContext()).build(tableName, obj);
-            return executor.execute(command);
-        });
-    }
-
-    public int deleteByKey(Object key, String tableName) {
-        return returnWithExecutor(executor -> {
-            Command command = new DeleteCommandBuilder(getContext()).buildByKey(tableName, key);
-            return executor.execute(command);
-        });
-    }
-
-    /**
      * 执行 SQL 语句
      *
      * @param sql    要执行的语句
@@ -644,29 +619,6 @@ public class DAO {
     /**
      * 插入一条记录
      *
-     * @param object    封装记录的对象
-     * @param tableName 表名
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    public void insert(Object object, String tableName) throws DAOException {
-        if (object instanceof List) {
-            insert((List) object, tableName);
-            return;
-        } else if (object instanceof Map) {
-            insert((Map) object, tableName);
-            return;
-        }
-
-        runWithExecutor(executor -> {
-            Command command = new InsertCommandBuilder(getContext()).build(tableName, object);
-            executor.execute(command);
-        });
-    }
-
-    /**
-     * 插入一条记录
-     *
      * @param row       包含字段和值的记录
      * @param tableName 表名
      *
@@ -680,31 +632,20 @@ public class DAO {
     }
 
     /**
-     * 插入一条记录
+     * 批量插入 Map 对象
      *
-     * @param obj 封装记录的对象
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    public void insert(Object obj) throws DAOException {
-        insert(obj, BeanUtil.getTableName(obj.getClass()));
-    }
-
-    /**
-     * 批量插入记录
-     *
-     * @param objects   封装记录的对象
+     * @param rows      封装记录的对象
      * @param tableName 表名
      *
      * @throws DAOException 如果发生数据库错误
      */
-    public void insert(List objects, String tableName) throws DAOException {
-        if (objects == null || objects.isEmpty()) {
+    public void insert(List<Row> rows, String tableName) throws DAOException {
+        if (rows == null || rows.isEmpty()) {
             return;
         }
 
         runWithExecutor(executor -> {
-            BatchCommand command = new InsertCommandBuilder(getContext()).buildBatch(tableName, objects);
+            BatchCommand command = new InsertCommandBuilder(getContext()).buildBatch(tableName, rows);
             executor.execute(command);
         });
     }
