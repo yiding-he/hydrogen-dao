@@ -8,7 +8,7 @@ import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 
 import java.sql.SQLException;
@@ -20,8 +20,10 @@ import java.util.List;
  */
 public final class InsertCommandBuilder {
 
-    private InsertCommandBuilder() {
+    private final ConnectionContext context;
 
+    public InsertCommandBuilder(ConnectionContext context) {
+        this.context = context;
     }
 
     /**
@@ -33,15 +35,13 @@ public final class InsertCommandBuilder {
      *
      * @return 批处理插入命令
      */
-    public static BatchCommand buildBatch(String tableName, List objects) {
-
-        ExecutionContext context = ExecutionContext.get();
+    public BatchCommand buildBatch(String tableName, List objects) {
 
         if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
         }
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, objects.get(0));
 
         StringBuilder statement = new StringBuilder("insert into " + helper.getTableNameForSql(tableName) + "(");
@@ -76,7 +76,7 @@ public final class InsertCommandBuilder {
 
     // 获取要批量插入的表字段信息
     private static ColumnInfo[] getBatchColumnInfo(
-        ExecutionContext context, String tableName, CommandBuilderHelper helper, Object sample
+        ConnectionContext context, String tableName, CommandBuilderHelper helper, Object sample
     ) {
 
         FQN fqn = new FQN(context, tableName);
@@ -101,10 +101,9 @@ public final class InsertCommandBuilder {
      * @return 插入命令
      * @throws SQLException 如果获取数据库信息失败
      */
-    public static Command build(String tableName, Object object) throws DAOException {
-        ExecutionContext context = ExecutionContext.get();
+    public Command build(String tableName, Object object) throws DAOException {
         FQN fqn = new FQN(context, tableName);
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema(), fqn.getName());
         List params = helper.generateParams(infos, object);
         return buildCommand(tableName, infos, params, context);
@@ -120,14 +119,14 @@ public final class InsertCommandBuilder {
      *
      * @return 插入命令
      */
-    private static Command buildCommand(
-        String tableName, ColumnInfo[] infos, List params, ExecutionContext context
+    private Command buildCommand(
+        String tableName, ColumnInfo[] infos, List params, ConnectionContext context
     ) {
 
         DatabaseType databaseType = DatabaseType.of(context.getConnection());
         List<Object> finalParams = new ArrayList<>();
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
 
         StringBuilder command = new StringBuilder("insert into " + tableName + "(");
         StringBuilder questionMarks = new StringBuilder();

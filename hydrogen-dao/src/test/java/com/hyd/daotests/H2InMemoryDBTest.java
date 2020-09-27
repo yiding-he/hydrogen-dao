@@ -5,8 +5,8 @@ import com.hyd.dao.DataSources;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.dao.mate.util.ResultSetUtil;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -24,10 +24,10 @@ public class H2InMemoryDBTest {
     @Test
     public void testCreateImMemoryDB() throws Exception {
         BasicDataSource dataSource = DBCPDataSource.newH2MemDataSource();
-        DataSources dataSources = new DataSources();
+        DataSources dataSources = DataSources.getInstance();
         dataSources.setDataSource("h2", dataSource);
 
-        DAO dao = dataSources.getDAO("h2");
+        DAO dao = new DAO("h2");
         List<Row> schemas = dao.query("show schemas");
         schemas.forEach(System.out::println);
 
@@ -53,11 +53,8 @@ public class H2InMemoryDBTest {
 
         dataSources.withConnection("h2", connection -> {
             try {
-                ExecutionContext context = new ExecutionContext();
-                context.setConnection(connection);
-                context.setNameConverter(NameConverter.DEFAULT);
-
-                CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+                ConnectionContext context = new ConnectionContext("", connection, NameConverter.DEFAULT);
+                CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
                 ColumnInfo[] columnInfos = helper.getColumnInfos("PUBLIC", "table1");
                 for (ColumnInfo columnInfo : columnInfos) {
                     System.out.println(columnInfo);

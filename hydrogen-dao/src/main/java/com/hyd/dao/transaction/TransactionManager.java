@@ -1,11 +1,17 @@
 package com.hyd.dao.transaction;
 
-import com.hyd.dao.database.ExecutorFactory;
+import com.hyd.dao.DAO;
+import com.hyd.dao.DAOException;
+import com.hyd.dao.DataSources;
 import com.hyd.dao.database.executor.Executor;
-import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
+import com.hyd.dao.mate.util.Cls;
+import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.spring.SpringConnectionFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +42,9 @@ public class TransactionManager {
     private static final ThreadLocal<Map<Integer, Map<String, Executor>>>
         executorCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
+    private static final ThreadLocal<Map<Integer, Map<String, DataSource>>>
+        dataSourceCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
+
     private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
     private static final ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
@@ -63,37 +72,6 @@ public class TransactionManager {
     public static int getLevel() {
         Integer _level = level.get();
         return _level == null ? -1 : _level;
-    }
-
-    /**
-     * 根据当前事务上下文和参数，返回一个合适的 Executor 对象
-     */
-    public static Executor getExecutor(
-        ExecutorFactory executorFactory, boolean standAlone, NameConverter nameConverter
-    ) {
-
-        Executor executor;
-
-        // 不打算以事务方式执行，或当前没有进行中的事务
-        if (standAlone || !isInTransaction()) {
-            executor = executorFactory.getExecutor(true);
-        } else {
-
-            // 获取当前事务中缓存的 Executor，如果没有则自动新建一个
-            int level = getLevel();
-            String dataSourceName = executorFactory.getDataSourceName();
-
-            executor = getExecutors(level).computeIfAbsent(
-                dataSourceName, __ -> {
-                    Executor e = executorFactory.getExecutor(false);
-                    e.setTransactionIsolation(getIsolation(level));
-                    return e;
-                }
-            );
-        }
-
-        executor.setNameConverter(nameConverter);
-        return executor;
     }
 
     private static Map<String, Executor> getExecutors(int level) {
@@ -171,4 +149,62 @@ public class TransactionManager {
         isolations.get().put(_level, isolation);
     }
 
+    /////////////////////////////////////////////////////////////////
+
+    public static ConnectionContext getConnectionContext(DAO dao) {
+        DataSources dataSources = DataSources.getInstance();
+        Connection connection;
+
+        try {
+            if (dao.isStandAlone() || !isInTransaction()) {
+                // 不打算以事务方式执行，或当前没有进行中的事务
+                connection = getStandAloneConnection(dao, dataSources);
+            } else {
+                // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
+                connection = getInTransactionConnection(dao, dataSources);
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+
+        return new ConnectionContext(dao.getDataSourceName(), connection, dao.getNameConverter());
+    }
+
+    @SuppressWarnings("MagicConstant")
+    private static Connection getInTransactionConnection(DAO dao, DataSources dataSources)  {
+        try {
+            int level = getLevel();
+            int isolation = getIsolation(level);
+            String dataSourceName = dao.getDataSourceName();
+
+            DataSource dataSource = dataSourceCache.get()
+                .computeIfAbsent(level, __ -> new ConcurrentHashMap<>())
+                .computeIfAbsent(dataSourceName, dataSources::getDataSource);
+
+            Connection connection;
+
+            if (Cls.exists("org.springframework.jdbc.datasource.DataSourceUtils")) {
+                LOG.debug("Getting connection from Spring DataSourceUtils...");
+                connection = SpringConnectionFactory.getConnection(dataSource);
+                if (!connection.getAutoCommit()) {
+                    TransactionManager.start();
+                }
+            } else {
+                connection = dataSource.getConnection();
+                connection.setTransactionIsolation(isolation);
+            }
+
+            return connection;
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+
+    private static Connection getStandAloneConnection(DAO dao, DataSources dataSources) throws SQLException {
+        String dataSourceName = dao.getDataSourceName();
+        DataSource dataSource = dataSources.getDataSource(dataSourceName);
+        Connection connection = dataSource.getConnection();
+        connection.setAutoCommit(true);
+        return connection;
+    }
 }

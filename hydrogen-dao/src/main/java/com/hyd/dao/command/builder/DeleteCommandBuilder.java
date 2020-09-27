@@ -5,8 +5,8 @@ import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.exception.NoPrimaryKeyException;
+import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,18 @@ import java.util.List;
  */
 public final class DeleteCommandBuilder {
 
-    private DeleteCommandBuilder() {
+    private final ConnectionContext context;
 
+    public DeleteCommandBuilder(ConnectionContext context) {
+        this.context = context;
     }
 
     /**
      * 从 object 中提取主键值作为参数
      */
-    public static Command build(String tableName, Object object) throws DAOException {
-        ExecutionContext context = ExecutionContext.get();
+    public Command build(String tableName, Object object) throws DAOException {
         FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         String command = "delete from " + tableName;
@@ -55,10 +56,9 @@ public final class DeleteCommandBuilder {
     /**
      * 根据主键值构造参数
      */
-    public static Command buildByKey(String tableName, Object key) throws DAOException {
-        ExecutionContext context = ExecutionContext.get();
+    public Command buildByKey(String tableName, Object key) throws DAOException {
         FQN fqn = new FQN(context, tableName);
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         String statement = "delete from " + tableName + " where ";

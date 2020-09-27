@@ -2,7 +2,6 @@ package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
 import com.hyd.dao.log.Logger;
@@ -152,7 +151,6 @@ public class RowIterator implements Closeable {
             }
 
             closed = true;
-            ExecutionContext.clear();
         }
     }
 

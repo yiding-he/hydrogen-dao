@@ -10,14 +10,14 @@ import javax.sql.DataSource;
  */
 public class DAOUtils {
 
-    private static final DataSources dataSources = new DataSources();
+    private static final DataSources dataSources = DataSources.getInstance();
 
     public static DAO getDAO() {
         if (dataSources.isEmpty()) {
             dataSources.setDataSource(DataSources.DEFAULT_DATA_SOURCE_NAME, createDataSource());
         }
 
-        return dataSources.getDAO(DataSources.DEFAULT_DATA_SOURCE_NAME);
+        return new DAO(DataSources.DEFAULT_DATA_SOURCE_NAME);
     }
 
     private static DataSource createDataSource() {

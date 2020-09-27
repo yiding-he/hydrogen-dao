@@ -12,7 +12,7 @@ import org.junit.BeforeClass;
  */
 public abstract class InMemoryTestBase {
 
-    private static DataSources dataSources = new DataSources();
+    private static DataSources dataSources = DataSources.getInstance();
 
     protected static DAO dao;
 
@@ -26,7 +26,7 @@ public abstract class InMemoryTestBase {
 
         dataSources.setColumnNameConverter("h21", NameConverter.NONE);
 
-        dao = dataSources.getDAO("h20");
-        dao2 = dataSources.getDAO("h21");
+        dao = new DAO("h20");
+        dao2 = new DAO("h21");
     }
 }

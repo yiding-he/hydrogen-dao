@@ -1,6 +1,6 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.ResultSetUtil;
 
 /**
@@ -8,7 +8,7 @@ import com.hyd.dao.mate.util.ResultSetUtil;
  */
 public class OracleCommandBuilderHelper extends CommandBuilderHelper {
 
-    public OracleCommandBuilderHelper(ExecutionContext context) {
+    public OracleCommandBuilderHelper(ConnectionContext context) {
         super(context);
     }
 

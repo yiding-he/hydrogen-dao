@@ -8,8 +8,6 @@ import java.util.Date;
  */
 public class ExecutorInfo {
 
-    private String dsName;          // Executor 属于哪个数据源
-
     private String lastCommand;     // 最近执行的 SQL 语句
 
     private Date lastExecuteTime;   // 最近执行 SQL 语句的时间
@@ -19,7 +17,6 @@ public class ExecutorInfo {
     private Snapshot snapshot;      // 关联的快照（用于主动移除自己）
 
     public ExecutorInfo(String dsName) {
-        this.dsName = dsName;
         this.snapshot = Snapshot.getInstance(dsName);
         this.snapshot.addExecutorInfo(this);
     }
@@ -41,14 +38,6 @@ public class ExecutorInfo {
         this.snapshot.removeInfo(this);
     }
 
-    public String getDsName() {
-        return dsName;
-    }
-
-    public void setDsName(String dsName) {
-        this.dsName = dsName;
-    }
-
     public String getLastCommand() {
         return lastCommand;
     }
@@ -65,12 +54,12 @@ public class ExecutorInfo {
         this.lastExecuteTime = lastExecuteTime;
     }
 
+    @Override
     public String toString() {
         return "ExecutorInfo{" +
-                "dsName='" + dsName + '\'' +
-                ", lastCommand='" + lastCommand + '\'' +
-                ", lastExecuteTime=" + lastExecuteTime +
-                '}';
+            "lastCommand='" + lastCommand + '\'' +
+            ", lastExecuteTime=" + lastExecuteTime +
+            ", closed=" + closed +
+            '}';
     }
-
 }

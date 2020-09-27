@@ -4,19 +4,13 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.BatchCommand;
-import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
-import com.hyd.dao.command.builder.QueryCommandBuilder;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.mate.util.Arr;
-import com.hyd.dao.mate.util.ResultSetUtil;
-import com.hyd.dao.mate.util.Str;
-import com.hyd.dao.mate.util.TypeUtil;
+import com.hyd.dao.mate.util.*;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProcedureHelper;
@@ -42,14 +36,12 @@ public class DefaultExecutor extends Executor {
 
     private static final int TIMEOUT = Integer.parseInt(Str.defaultIfEmpty(System.getProperty("jdbc.timeout"), "-1"));
 
-    private static final int UNKNOWN_TYPE = Integer.MIN_VALUE;
-
     private Statement st;
 
     private ResultSet rs;
 
-    public DefaultExecutor(String dataSourceName, Connection connection) {
-        super(dataSourceName, connection);
+    public DefaultExecutor(ConnectionContext context, NameConverter nameConverter) {
+        super(context, nameConverter);
     }
 
     @Override
@@ -100,7 +92,7 @@ public class DefaultExecutor extends Executor {
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
     private String getRangedSql(String sql, int startPos, int endPos) {
-        return CommandBuilderHelper.getHelper().getRangedSql(sql, startPos, endPos);
+        return getHelper().getRangedSql(sql, startPos, endPos);
     }
 
     /**
@@ -128,7 +120,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private String getCountSql(String sql) throws SQLException {
-        return CommandBuilderHelper.getHelper().getCountSql(sql);
+        return getHelper().getCountSql(sql);
     }
 
     @Override
@@ -179,16 +171,6 @@ public class DefaultExecutor extends Executor {
             throw new DAOException("Query failed:", e, rangedSql == null ? sql : rangedSql, params);
         } finally {
             closeButConnection();
-        }
-    }
-
-    @Override
-    public boolean exists(Object obj, String tableName) {
-        try {
-            Command command = QueryCommandBuilder.build(tableName, obj);
-            return !query(null, command.getStatement(), command.getParams(), -1, -1).isEmpty();
-        } catch (SQLException e) {
-            throw new DAOException("Delete failed: " + e.getMessage(), e);
         }
     }
 
@@ -455,7 +437,7 @@ public class DefaultExecutor extends Executor {
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 
-        LOG.debug(findCaller() + "(" + info.getDsName() + "): " +
+        LOG.debug(findCaller() + "(" + context.getDataSourceName() + "): " +
                 sql.replaceAll("\n", " ") + " " + (params == null ? "" : params.toString()));
     }
 
@@ -489,7 +471,7 @@ public class DefaultExecutor extends Executor {
         List<List<Object>> params = command.getParams() == null ? new ArrayList<>() : command.getParams();
 
         if (BATCH_LOG.isEnabled(Logger.Level.Debug)) {
-            BATCH_LOG.debug("Batch(" + info.getDsName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
+            BATCH_LOG.debug("Batch(" + context.getDataSourceName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
             for (List<Object> param : params) {
                 BATCH_LOG.debug(param.toString());
             }

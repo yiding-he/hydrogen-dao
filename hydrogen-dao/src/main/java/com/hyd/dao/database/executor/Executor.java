@@ -1,19 +1,19 @@
 package com.hyd.dao.database.executor;
 
-import com.hyd.dao.DAOException;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
+import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.type.NameConverter;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.snapshot.ExecutorInfo;
 import com.hyd.dao.transaction.TransactionManager;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -34,21 +34,12 @@ public abstract class Executor {
 
     protected DatabaseType databaseType;    // 数据库类型
 
-    protected Connection connection;        // 数据库连接
+    protected ConnectionContext context;
 
-    protected NameConverter nameConverter;  // 名称转换
-
-    /**
-     * 构造方法
-     */
-    public Executor(String dataSourceName, Connection connection) {
-        this.info = new ExecutorInfo(dataSourceName);
-        this.databaseType = DatabaseType.of(connection);
-        this.connection = connection;
-    }
-
-    public void setNameConverter(NameConverter nameConverter) {
-        this.nameConverter = nameConverter;
+    public Executor(ConnectionContext context, NameConverter nameConverter) {
+        this.info = new ExecutorInfo(context.getDataSourceName());
+        this.databaseType = DatabaseType.of(context.getConnection());
+        this.context = context;
     }
 
     /**
@@ -207,7 +198,9 @@ public abstract class Executor {
      *
      * @deprecated
      */
-    public abstract boolean exists(Object obj, String tableName);
+    public boolean exists(Object obj, String tableName) {
+        return false;
+    }
 
     //////////////////////////////////////////////////////////////
 
@@ -216,19 +209,15 @@ public abstract class Executor {
     }
 
     protected NameConverter getNameConverter() {
-        return nameConverter;
+        return this.context.getNameConverter();
     }
 
-    public Connection getConnection() {
-        return connection;
+    protected CommandBuilderHelper getHelper() {
+        return CommandBuilderHelper.getHelper(this.context);
     }
 
-    public void setTransactionIsolation(int level) {
-        try {
-            getConnection().setTransactionIsolation(level);
-        } catch (SQLException e) {
-            throw new DAOException(e);
-        }
+    protected Connection getConnection() {
+        return this.context.getConnection();
     }
 
     /**

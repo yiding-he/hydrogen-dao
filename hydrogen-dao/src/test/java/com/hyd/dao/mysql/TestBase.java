@@ -11,9 +11,9 @@ public class TestBase {
         BasicDataSource ds = DBCPDataSource.newMySqlDataSource(
                 "localhost", 3306, "test", "root", "root123", true, "UTF-8");
 
-        DataSources dataSources = new DataSources();
+        DataSources dataSources = DataSources.getInstance();
         dataSources.setDataSource("ds", ds);
 
-        return dataSources.getDAO("ds");
+        return new DAO("ds");
     }
 }

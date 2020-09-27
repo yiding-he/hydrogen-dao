@@ -1,7 +1,7 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 
 import java.sql.SQLException;
@@ -21,7 +21,7 @@ public class FQN {
 
     private final String name;
 
-    public FQN(ExecutionContext context, String fqn) {
+    public FQN(ConnectionContext context, String fqn) {
         if (Str.isEmpty(fqn)) {
             throw new IllegalArgumentException("FQN parameter cannot be empty");
         }

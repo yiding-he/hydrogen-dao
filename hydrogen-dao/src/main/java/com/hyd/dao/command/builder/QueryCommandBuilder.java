@@ -5,9 +5,9 @@ import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,17 +20,18 @@ import java.util.List;
  */
 public final class QueryCommandBuilder {
 
-    private QueryCommandBuilder() {
+    private final ConnectionContext context;
 
+    public QueryCommandBuilder(ConnectionContext context) {
+        this.context = context;
     }
 
     /**
      * 根据主键值构建查询语句
      */
-    public static Command buildByKey(String tableName, Object key) throws DAOException {
-        ExecutionContext context = ExecutionContext.get();
+    public Command buildByKey(String tableName, Object key) throws DAOException {
         FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         String statement = "select * from " + tableName + " where ";
@@ -56,11 +57,10 @@ public final class QueryCommandBuilder {
     /**
      * 根据 obj 对象构建查询语句
      */
-    public static Command build(String tableName, Object obj) throws SQLException {
-        ExecutionContext context = ExecutionContext.get();
+    public Command build(String tableName, Object obj) throws SQLException {
         FQN fqn = new FQN(context, tableName);
         NameConverter nameConverter = context.getNameConverter();
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         List<Object> values = new ArrayList<>();

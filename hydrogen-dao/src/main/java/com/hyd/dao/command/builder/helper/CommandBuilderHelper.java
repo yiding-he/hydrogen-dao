@@ -5,11 +5,11 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.exception.DataConversionException;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Locker;
 import com.hyd.dao.mate.util.Str;
 
@@ -32,14 +32,9 @@ public class CommandBuilderHelper {
     // 缓存已经生成的字段info
     private static final Map<String, ColumnInfo[]> cache = new ConcurrentHashMap<>();
 
-    protected ExecutionContext context;
+    private final ConnectionContext context;
 
-    /**
-     * 构造函数
-     *
-     * @param context   数据库操作上下文
-     */
-    protected CommandBuilderHelper(ExecutionContext context) {
+    public CommandBuilderHelper(ConnectionContext context) {
         this.context = context;
     }
 
@@ -49,8 +44,7 @@ public class CommandBuilderHelper {
      * @return 根据数据库类型产生的 CommandBuilderHelper 对象
      * @throws DAOException 如果获取数据库连接信息失败
      */
-    public static CommandBuilderHelper getHelper() throws DAOException {
-        ExecutionContext context = ExecutionContext.get();
+    public static CommandBuilderHelper getHelper(ConnectionContext context) throws DAOException {
         DatabaseType databaseType = DatabaseType.of(context.getConnection());
         switch (databaseType) {
             case Oracle:

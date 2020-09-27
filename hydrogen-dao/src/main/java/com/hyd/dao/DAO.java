@@ -6,14 +6,13 @@ import com.hyd.dao.command.IteratorBatchCommand;
 import com.hyd.dao.command.MappedCommand;
 import com.hyd.dao.command.builder.DeleteCommandBuilder;
 import com.hyd.dao.command.builder.InsertCommandBuilder;
-import com.hyd.dao.command.builder.QueryCommandBuilder;
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
-import com.hyd.dao.database.executor.ExecutionContext;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.transaction.TransactionManager;
@@ -24,11 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Main facade of hydrogen-dao.
- * <p>
- * It must be created from {@link DataSources#getDAO(String)}
- * <p>
- * It is thread safe.
+ * Main facade of hydrogen-dao. It is thread safe.
  */
 @SuppressWarnings({"unused", "unchecked", "rawtypes", "RedundantSuppression", "UnusedReturnValue"})
 public class DAO {
@@ -50,27 +45,42 @@ public class DAO {
     /**
      * data source name
      */
-    private String dsName;
+    private final String dataSourceName;
 
-    private ExecutorFactory executorFactory;
-
-    private NameConverter nameConverter;
+    private final NameConverter nameConverter;
 
     /**
      * If it is out of current transaction
      */
     private boolean standAlone;
 
-    protected DAO(String dsName) {
-        this.dsName = dsName;
+    public DAO(String dataSourceName) {
+        this(dataSourceName, false, NameConverter.DEFAULT);
     }
 
-    protected DAO(String dsName, boolean standAlone) {
-        this.dsName = dsName;
+    public DAO(String dataSourceName, NameConverter nameConverter) {
+        this(dataSourceName, false, nameConverter);
+    }
+
+    public DAO(String dataSourceName, boolean standAlone) {
+        this(dataSourceName, standAlone, NameConverter.DEFAULT);
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param dataSourceName 数据源名称，用于从 {@link DataSources} 获取数据库连接
+     * @param standAlone     如果为 true，则表示避开当前数据库事务独立提交
+     * @param nameConverter  名称转换规则
+     */
+    public DAO(String dataSourceName, boolean standAlone, NameConverter nameConverter) {
+        this.dataSourceName = dataSourceName;
         this.standAlone = standAlone;
+        this.nameConverter = nameConverter;
     }
 
-    protected DAO() {
+    public NameConverter getNameConverter() {
+        return nameConverter;
     }
 
     /////////////////////////// TRANSACTION //////////////////////////////
@@ -149,14 +159,6 @@ public class DAO {
         return new ArrayList<>(rowList);
     }
 
-    void setExecutorFactory(ExecutorFactory executorFactory) {
-        this.executorFactory = executorFactory;
-    }
-
-    public void setNameConverter(NameConverter nameConverter) {
-        this.nameConverter = nameConverter;
-    }
-
     /**
      * 判断本 DAO 对象是否是独立于当前事务之外
      *
@@ -176,36 +178,30 @@ public class DAO {
      * @return dao 实例所属的数据源名称
      */
     public String getDataSourceName() {
-        return dsName;
+        return dataSourceName;
+    }
+
+    private ConnectionContext getContext() {
+        return TransactionManager.getConnectionContext(this);
     }
 
     ////////////////////////////////////////////////////////////////
 
     private void runWithExecutor(Consumer<Executor> consumer) {
+        Executor executor = ExecutorFactory.getExecutor(this);
         try {
-            Executor executor = ExecutionContext.init(
-                executorFactory, standAlone, nameConverter);
-            try {
-                consumer.accept(executor);
-            } finally {
-                executor.finish();
-            }
+            consumer.accept(executor);
         } finally {
-            ExecutionContext.clear();
+            executor.finish();
         }
     }
 
     private <T> T returnWithExecutor(Function<Executor, T> f) {
+        Executor executor = ExecutorFactory.getExecutor(this);
         try {
-            Executor executor = ExecutionContext.init(
-                executorFactory, standAlone, nameConverter);
-            try {
-                return f.apply(executor);
-            } finally {
-                executor.finish();
-            }
+            return f.apply(executor);
         } finally {
-            ExecutionContext.clear();
+            executor.finish();
         }
     }
 
@@ -257,7 +253,6 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public List<Row> query(String sql, Object... params) throws DAOException {
@@ -272,7 +267,6 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> List<T> query(Class<T> clazz, String sql, Object... params) throws DAOException {
@@ -304,7 +298,6 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public Row queryFirst(String sql, Object... params) throws DAOException {
@@ -320,7 +313,6 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> T queryFirst(Class<T> clazz, String sql, Object... params) throws DAOException {
@@ -369,7 +361,6 @@ public class DAO {
      * @param params        参数
      *
      * @return 查询结果
-     *
      * @throws DAOException         如果发生数据库错误
      * @throws NullPointerException 如果 sql 为 null
      */
@@ -387,7 +378,6 @@ public class DAO {
      * @param params        参数。如果是一个 List，则自动转换为 Array。
      *
      * @return 查询结果。如果 startPosition &lt; 0 或 endPosition &lt; 0 则表示返回所有的查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> List<T> queryRange(
@@ -426,7 +416,6 @@ public class DAO {
      * @param pageIndex 页号
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public Page<Row> queryPage(String sql, int pageSize, int pageIndex, Object... params) throws DAOException {
@@ -443,7 +432,6 @@ public class DAO {
      * @param pageIndex     页号
      *
      * @return 查询结果
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> Page<T> queryPage(
@@ -492,7 +480,6 @@ public class DAO {
      * @param params 查询参数
      *
      * @return 用于获得查询结果的迭代器。如果查询语句为 null，则返回 null。
-     *
      * @throws IllegalArgumentException 如果 sql 为 null
      * @throws DAOException             如果查询失败
      */
@@ -512,39 +499,6 @@ public class DAO {
 
         return returnWithExecutor(executor ->
             executor.queryIterator(fixedSql, paramList, preProcessor));
-    }
-
-    /**
-     * 根据主键查找记录。前提是表的主键不是多个字段
-     *
-     * @param clazz     包装类
-     * @param tableName 表名
-     * @param key       主键值
-     *
-     * @return 找到的记录
-     *
-     * @throws DAOException 如果查询失败
-     */
-    public <T> T find(Class<T> clazz, String tableName, Object key) throws DAOException {
-        return returnWithExecutor(executor -> {
-            Command command = QueryCommandBuilder.buildByKey(tableName, key);
-            List<T> list = executor.query(clazz, command.getStatement(), command.getParams(), 0, 1);
-            return list.isEmpty() ? null : list.get(0);
-        });
-    }
-
-    /**
-     * 根据主键查找记录。前提是表的主键不是多个字段
-     *
-     * @param clazz 包装类
-     * @param key   主键值
-     *
-     * @return 找到的记录
-     *
-     * @throws DAOException 如果查询失败
-     */
-    public <T> T find(Class<T> clazz, Object key) throws DAOException {
-        return find(clazz, BeanUtil.getTableName(clazz), key);
     }
 
     /**
@@ -596,19 +550,18 @@ public class DAO {
      * @param tableName 表名
      *
      * @return 受影响的行数
-     *
      * @throws DAOException 如果执行数据库操作失败
      */
     public int delete(Object obj, String tableName) throws DAOException {
         return returnWithExecutor(executor -> {
-            Command command = DeleteCommandBuilder.build(tableName, obj);
+            Command command = new DeleteCommandBuilder(getContext()).build(tableName, obj);
             return executor.execute(command);
         });
     }
 
     public int deleteByKey(Object key, String tableName) {
         return returnWithExecutor(executor -> {
-            Command command = DeleteCommandBuilder.buildByKey(tableName, key);
+            Command command = new DeleteCommandBuilder(getContext()).buildByKey(tableName, key);
             return executor.execute(command);
         });
     }
@@ -620,7 +573,6 @@ public class DAO {
      * @param params 参数
      *
      * @return 受影响的行数
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(String sql, Object... params) throws DAOException {
@@ -646,7 +598,6 @@ public class DAO {
      * @param command 批量语句
      *
      * @return 受影响的行数
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(BatchCommand command) throws DAOException {
@@ -659,7 +610,6 @@ public class DAO {
      * @param command 流式批处理命令
      *
      * @return 受影响的行数
-     *
      * @throws DAOException 如果执行失败
      */
     public int execute(IteratorBatchCommand command) throws DAOException {
@@ -685,7 +635,6 @@ public class DAO {
      * @param command 要执行的命令
      *
      * @return 受影响的行数
-     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(Command command) throws DAOException {
@@ -710,7 +659,7 @@ public class DAO {
         }
 
         runWithExecutor(executor -> {
-            Command command = InsertCommandBuilder.build(tableName, object);
+            Command command = new InsertCommandBuilder(getContext()).build(tableName, object);
             executor.execute(command);
         });
     }
@@ -725,7 +674,7 @@ public class DAO {
      */
     private void insert(Map row, String tableName) throws DAOException {
         runWithExecutor(executor -> {
-            Command command = InsertCommandBuilder.build(tableName, row);
+            Command command = new InsertCommandBuilder(getContext()).build(tableName, row);
             executor.execute(command);
         });
     }
@@ -755,7 +704,7 @@ public class DAO {
         }
 
         runWithExecutor(executor -> {
-            BatchCommand command = InsertCommandBuilder.buildBatch(tableName, objects);
+            BatchCommand command = new InsertCommandBuilder(getContext()).buildBatch(tableName, objects);
             executor.execute(command);
         });
     }
@@ -784,7 +733,6 @@ public class DAO {
      * @param params 调用参数
      *
      * @return 调用结果。第一个元素是 function 的返回值，第二个元素是第一个 OUT 或 IN_OUT 类型的参数，以此类推。
-     *
      * @throws DAOException 如果调用失败
      */
     public List callFunction(String name, Object... params) throws DAOException {

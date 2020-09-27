@@ -1,6 +1,6 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.sql.SQLException;
 
@@ -11,7 +11,7 @@ import java.sql.SQLException;
  */
 public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
 
-    public MySqlCommandBuilderHelper(ExecutionContext context) {
+    public MySqlCommandBuilderHelper(ConnectionContext context) {
         super(context);
     }
 

@@ -1,6 +1,6 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.database.executor.ExecutionContext;
+import com.hyd.dao.mate.util.ConnectionContext;
 
 /**
  * (description)
@@ -10,7 +10,7 @@ import com.hyd.dao.database.executor.ExecutionContext;
  */
 public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
 
-    public HSQLDBCommandBuildHelper(ExecutionContext context) {
+    public HSQLDBCommandBuildHelper(ConnectionContext context) {
         super(context);
     }
 
