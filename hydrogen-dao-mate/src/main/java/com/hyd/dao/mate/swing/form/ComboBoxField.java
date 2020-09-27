@@ -42,6 +42,10 @@ public class ComboBoxField extends FormField<String> {
         return selectedItem == null ? null : selectedItem.toString();
     }
 
+    public int getSelectedIndex() {
+        return this.comboBox.getSelectedIndex();
+    }
+
     @Override
     public void setValue(String value) {
         this.comboBox.setSelectedItem(value);

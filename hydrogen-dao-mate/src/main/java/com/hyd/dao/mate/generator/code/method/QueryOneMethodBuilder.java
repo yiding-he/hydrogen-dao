@@ -25,31 +25,31 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
 
     }
 
-    String getMethodType() {
+    protected String getMethodType() {
         return Str.underscore2Class(tableName);
     }
 
-    String getNonArgMethodName() {
+    protected String getNonArgMethodName() {
         return "queryOne";
     }
 
-    RepoMethodReturnType getRepoReturnType() {
+    protected RepoMethodReturnType getRepoReturnType() {
         return RepoMethodReturnType.Single;
     }
 
-    String getDaoMethod() {
+    protected String getDaoMethod() {
         return "queryFirst";
     }
 
-    List<MethodArg> getExtraArgs() {
+    protected List<MethodArg> getExtraArgs() {
         return Collections.emptyList();
     }
 
-    void afterBodyCreated(RepoMethodDef repoMethodDef) {
+    protected void afterBodyCreated(RepoMethodDef repoMethodDef) {
 
     }
 
-    String getMethodNamePrefix() {
+    protected String getMethodNamePrefix() {
         return "queryBy";
     }
 
@@ -82,7 +82,7 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         return repoMethodDef;
     }
 
-    CodeBlock buildBody() {
+    protected CodeBlock buildBody() {
 
         String className = Str.underscore2Class(tableName);
         CodeBlock codeBlock = new CodeBlock();
@@ -96,7 +96,7 @@ public class QueryOneMethodBuilder extends RepoMethodBuilder {
         return codeBlock;
     }
 
-    void addQueryParameters(CodeBlock codeBlock) {
+    protected void addQueryParameters(CodeBlock codeBlock) {
         for (int i = 0; i < paramInfoList.size(); i++) {
 
             ParamInfo paramInfo = paramInfoList.get(i);

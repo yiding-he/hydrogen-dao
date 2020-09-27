@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 创建 insert 语句
  */
-public class InsertCommandBuilder {
+public final class InsertCommandBuilder {
 
     private InsertCommandBuilder() {
 

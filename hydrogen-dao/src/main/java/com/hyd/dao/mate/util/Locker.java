@@ -10,13 +10,17 @@ import java.util.function.Supplier;
  *
  * @author yidin
  */
-public class Locker {
+public final class Locker {
 
     public static final int CACHE_SIZE = 10000;
 
     private static final Map<String, Lock> CACHE = MapCacheUtils.newLRUCache(CACHE_SIZE, false);
 
     private static final Lock CACHE_LOCK = new ReentrantLock();
+
+    private Locker() {
+
+    }
 
     public static void lockAndRun(String key, Runnable runnable) {
 

@@ -20,16 +20,19 @@ import java.util.stream.Stream;
 /**
  * 执行存储过程帮助类
  */
-public class StorageProcedureHelper {
+public final class StorageProcedureHelper {
 
-    public static final Map<Integer, SpParamType> sp_param_types = new HashMap<Integer, SpParamType>() {
+    public static final Map<Integer, SpParamType> SP_PARAM_TYPES = new HashMap<>();
 
-        {
-            put(1, SpParamType.IN);
-            put(2, SpParamType.IN_OUT);
-            put(4, SpParamType.OUT);
-        }
-    };
+    static {
+        SP_PARAM_TYPES.put(1, SpParamType.IN);
+        SP_PARAM_TYPES.put(2, SpParamType.IN_OUT);
+        SP_PARAM_TYPES.put(4, SpParamType.OUT);
+    }
+
+    private StorageProcedureHelper() {
+
+    }
 
     /**
      * 创建一个 CallableStatement
@@ -39,11 +42,10 @@ public class StorageProcedureHelper {
      * @param connection 数据库连接
      *
      * @return CallableStatement 对象
-     *
      * @throws SQLException 如果创建失败
      */
     public static CallableStatement createCallableStatement(
-            String name, SpParam[] params, Connection connection) throws SQLException {
+        String name, SpParam[] params, Connection connection) throws SQLException {
         String call_str = generateCallStatement(name, params);
         CallableStatement cs = connection.prepareCall(call_str);
         setupParams(params, cs);
@@ -62,7 +64,7 @@ public class StorageProcedureHelper {
         for (int i = 0; i < params.length; i++) {
             SpParam param = params[i];
             if ((param.getType() == SpParamType.IN || param.getType() == SpParamType.IN_OUT)
-                    && param.getValue() != null) {
+                && param.getValue() != null) {
                 cs.setObject(i + 1, param.getValue());
             }
             if (param.getType() == SpParamType.OUT || param.getType() == SpParamType.IN_OUT) {
@@ -83,10 +85,10 @@ public class StorageProcedureHelper {
      *
      * @return 调用存储过程的语句
      */
-    private static String generateCallStatement(String name, SpParam[] params) {
+    private static String generateCallStatement(String name, SpParam... params) {
         return "{call " + name + "(" +
-                Stream.of(params).map(p -> "?").collect(Collectors.joining(",")) +
-                ")}";
+            Stream.of(params).map(p -> "?").collect(Collectors.joining(",")) +
+            ")}";
     }
 
     /**
@@ -97,7 +99,6 @@ public class StorageProcedureHelper {
      * @param conn   数据库连接（执行完后不会关闭）
      *
      * @return 存储过程调用参数
-     *
      * @throws SQLException 如果获取存储过程信息失败
      */
     public static SpParam[] createSpParams(String name, Object[] params, Connection conn) throws SQLException {
@@ -112,7 +113,7 @@ public class StorageProcedureHelper {
                 int data_type = getIntegerValue(row, "data_type");
                 int column_type = getIntegerValue(row, "column_type");
 
-                SpParamType type = sp_param_types.get(column_type);
+                SpParamType type = SP_PARAM_TYPES.get(column_type);
                 Object value;
                 if (type != SpParamType.OUT) {
                     value = params[param_counter];
@@ -148,25 +149,25 @@ public class StorageProcedureHelper {
      * @param spName 存储过程名称
      *
      * @return 参数信息
-     *
      * @throws Exception 如果获取存储过程信息失败
      */
     private static List<Row> getSpParamDefinitions(Connection conn, String spName) throws Exception {
         DatabaseMetaData metaData = conn.getMetaData();
 
         String schema;
+        String fixedSpName = spName;
 
         if (!spName.contains(".")) {
             schema = metaData.getUserName().toUpperCase();
         } else {
             schema = spName.split("\\.")[0].toUpperCase();
-            spName = spName.substring(spName.lastIndexOf(".") + 1);
+            fixedSpName = spName.substring(spName.lastIndexOf(".") + 1);
         }
 
-        ResultSet procedures = metaData.getProcedureColumns(null, schema, spName.toUpperCase(), "%");
-
-        List<Row> rows = ResultSetUtil.readResultSet(procedures);
-        rows.sort(Comparator.comparing(m -> m.getIntegerObject("sequence")));
-        return rows;
+        try (ResultSet procedures = metaData.getProcedureColumns(null, schema, fixedSpName.toUpperCase(), "%")) {
+            List<Row> rows = ResultSetUtil.readResultSet(procedures);
+            rows.sort(Comparator.comparing(m -> m.getIntegerObject("sequence")));
+            return rows;
+        }
     }
 }

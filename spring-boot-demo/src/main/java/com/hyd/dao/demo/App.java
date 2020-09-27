@@ -20,7 +20,7 @@ public class App {
     }
 
     @PostConstruct
-    private void init() {
+    public void init() {
         ScriptExecutor.execute("classpath:/init.sql", dao);
         log.info("Initialization completed.");
 

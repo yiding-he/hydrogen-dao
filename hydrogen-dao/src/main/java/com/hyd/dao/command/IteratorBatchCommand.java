@@ -1,7 +1,5 @@
 package com.hyd.dao.command;
 
-import com.hyd.dao.database.ColumnInfo;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,8 +19,6 @@ public class IteratorBatchCommand {
 
     private int batchSize = DEFAULT_BATCH_SIZE;
 
-    private ColumnInfo[] columnInfos;               // 参数对应的字段信息，有助于生成 null 参数，非必须
-
     public IteratorBatchCommand(String command) {
         this.command = command;
     }
@@ -40,14 +36,6 @@ public class IteratorBatchCommand {
 
     public int getBatchSize() {
         return batchSize;
-    }
-
-    public void setColumnInfos(ColumnInfo[] columnInfos) {
-        this.columnInfos = columnInfos;
-    }
-
-    public ColumnInfo[] getColumnInfos() {
-        return columnInfos;
     }
 
     public String getCommand() {

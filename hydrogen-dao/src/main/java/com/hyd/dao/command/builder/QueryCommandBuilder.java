@@ -18,8 +18,11 @@ import java.util.List;
  *
  * @author yiding.he
  */
-@SuppressWarnings({"unchecked"})
-public class QueryCommandBuilder {
+public final class QueryCommandBuilder {
+
+    private QueryCommandBuilder() {
+
+    }
 
     /**
      * 根据主键值构建查询语句
@@ -45,7 +48,7 @@ public class QueryCommandBuilder {
             throw new DAOException("Primary key not found in table \"" + tableName + "\"");
         }
 
-        List values = new ArrayList();
+        List<Object> values = new ArrayList<>();
         values.add(key);
         return new Command(statement, values);
     }
@@ -60,7 +63,7 @@ public class QueryCommandBuilder {
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper();
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
-        List values = new ArrayList();
+        List<Object> values = new ArrayList<>();
         String statement = "select * from " + tableName + " where ";
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {

@@ -29,12 +29,11 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
 
     @Override
     public String getRangedSql(String sql, int startPos, int endPos) {
-        startPos += 1;
-
+        int _startPos = startPos + 1;
         String sql_prefix = "select * from ( select pagnation_wrapper.*, rownum " +
                 ResultSetUtil.PAGINATION_WRAPPER_COLUMN_NAME + " from (";
         String sql_suffix = ") pagnation_wrapper) where " +
-                ResultSetUtil.PAGINATION_WRAPPER_COLUMN_NAME + " between " + startPos + " and " + endPos;
+                ResultSetUtil.PAGINATION_WRAPPER_COLUMN_NAME + " between " + _startPos + " and " + endPos;
         return sql_prefix + sql + sql_suffix;
     }
 }

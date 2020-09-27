@@ -1,5 +1,6 @@
 package com.hyd.dao.mate.ui.main;
 
+import static com.hyd.dao.mate.CodeMateMain.I18N;
 import static com.hyd.dao.mate.swing.Swing.PADDING;
 import static com.hyd.dao.mate.swing.Swing.vBox;
 import static javax.swing.SpringLayout.*;
@@ -23,7 +24,7 @@ public class MainFrameLayout extends InitializableJFrame {
     protected JTabbedPane tpMain = new JTabbedPane(SwingConstants.TOP);
 
     public MainFrameLayout() throws HeadlessException {
-        setTitle("POJO 代码生成工具");
+        setTitle(I18N.getString("main.title"));
         SpringLayout layout = new SpringLayout();
 
         Container contentPane = getContentPane();
@@ -34,9 +35,9 @@ public class MainFrameLayout extends InitializableJFrame {
         createTabs();
     }
 
-    public void openTab(int index) {
-        index = Math.max(0, Math.min(tpMain.getTabCount() - 1, index));
-        tpMain.setSelectedIndex(index);
+    public void openTab(final int index) {
+        int finalIndex = Math.max(0, Math.min(tpMain.getTabCount() - 1, index));
+        tpMain.setSelectedIndex(finalIndex);
     }
 
     public CreatePojoPanel getCreatePojoPanel() {
@@ -53,7 +54,7 @@ public class MainFrameLayout extends InitializableJFrame {
     }
 
     private void createTabs() {
-        Swing.addTab(tpMain, "项目配置", PADDING, vBox(PADDING, databaseConfigPanel));
-        Swing.addTab(tpMain, "生成 Pojo 类", PADDING, createPojoPanel);
+        Swing.addTab(tpMain, I18N.getString("main.tabs.config"), PADDING, vBox(PADDING, databaseConfigPanel));
+        Swing.addTab(tpMain, I18N.getString("main.tabs.generate"), PADDING, createPojoPanel);
     }
 }

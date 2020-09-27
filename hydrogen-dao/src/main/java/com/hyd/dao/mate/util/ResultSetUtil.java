@@ -18,9 +18,13 @@ import java.util.stream.Collectors;
  * 用于处理 ResultSet 的辅助类
  */
 @SuppressWarnings({"unchecked"})
-public class ResultSetUtil {
+public final class ResultSetUtil {
 
     public static final String PAGINATION_WRAPPER_COLUMN_NAME = "pagination_wrapper_column_name";
+
+    private ResultSetUtil() {
+
+    }
 
     /**
      * 查询 ResultSet 中有哪些字段
@@ -33,7 +37,7 @@ public class ResultSetUtil {
      */
     public static List<String> getColumnNames(ResultSet rs) throws SQLException {
         int column_count = rs.getMetaData().getColumnCount();
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (int i = 0; i < column_count; i++) {
             result.add(rs.getMetaData().getColumnName(i + 1));
         }
@@ -79,7 +83,7 @@ public class ResultSetUtil {
             ResultSet rs, Class clazz, NameConverter nameConverter,
             int startPosition, int endPosition) throws Exception {
 
-        ArrayList<Object> result = new ArrayList<Object>();
+        ArrayList<Object> result = new ArrayList<>();
 
         // startPosition 是指向要读取的第一条记录之前的位置
         if (startPosition > 0) {

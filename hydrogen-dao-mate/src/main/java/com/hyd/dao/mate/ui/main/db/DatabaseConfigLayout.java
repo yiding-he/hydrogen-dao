@@ -1,10 +1,13 @@
 package com.hyd.dao.mate.ui.main.db;
 
 import com.hyd.dao.mate.swing.FormPanel;
+import com.hyd.dao.mate.swing.form.ComboBoxField;
 import com.hyd.dao.mate.swing.form.TextField;
 import javax.swing.JButton;
 
 public class DatabaseConfigLayout extends FormPanel {
+
+    protected final ComboBoxField recentProfiles = new ComboBoxField("最近使用的配置");
 
     protected final TextField jdbcUrl = new TextField("JDBC 数据库地址");
 
@@ -19,6 +22,7 @@ public class DatabaseConfigLayout extends FormPanel {
     protected final JButton openDatabaseButton = new JButton("连接数据库");
 
     public DatabaseConfigLayout() {
+        addFormField(recentProfiles);
         addFormField(jdbcUrl);
         addFormField(driverClassName);
         addFormField(databaseUser);

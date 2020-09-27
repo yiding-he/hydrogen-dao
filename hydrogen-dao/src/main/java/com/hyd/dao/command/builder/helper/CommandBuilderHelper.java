@@ -257,12 +257,7 @@ public class CommandBuilderHelper {
             if (value == null) {
                 value = map.get(info.getColumnName().toLowerCase());
             }
-            if (value == null) {
-                return null;
-            }
-            strValue = Str.valueOf(value);
         } else {
-
             Field field = getObjectField(object, fieldName);
             if (field == null) {
                 return null;
@@ -271,19 +266,19 @@ public class CommandBuilderHelper {
             // 判断属性是否被标记了 @Sequence
             if (isAnnotatedWithSequence(field)) {
                 info.setAutoIncrement(true);
-
                 String sequenceName = field.getAnnotation(Sequence.class).sequenceName();
                 info.setSequenceName(sequenceName);
                 return null;
             }
 
             value = BeanUtil.getValue(object, fieldName);
-
-            if (value == null) {
-                return null;
-            }
-            strValue = Str.valueOf(value);
         }
+
+        if (value == null) {
+            return null;
+        }
+
+        strValue = Str.valueOf(value);
 
         // 获取返回值
         switch (info.getDataType()) {
