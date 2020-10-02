@@ -516,39 +516,6 @@ public class DefaultExecutor extends Executor {
     }
 
     @Override
-    public void close() {
-        Connection connection = getConnection();
-        if (connection != null) {
-            try {
-                if (!connection.getAutoCommit()) {
-                    connection.commit();
-                }
-            } catch (SQLException e) {
-                LOG.error("", e);
-            }
-
-            closeConnection();
-        }
-        info.setClosed(true);
-    }
-
-    @Override
-    public void rollbackAndClose() {
-        Connection connection = getConnection();
-        if (connection != null) {
-            try {
-                if (!connection.getAutoCommit()) {
-                    connection.rollback();
-                }
-            } catch (SQLException e) {
-                LOG.error("", e);
-            }
-            closeConnection();
-        }
-        info.setClosed(true);
-    }
-
-    @Override
     public boolean isClosed() {
         try {
             Connection connection = getConnection();

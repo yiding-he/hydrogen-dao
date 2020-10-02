@@ -18,7 +18,7 @@ public class DefaultExecutorTest extends JUnitRuleTestBase {
     @Test
     public void testClose() throws Exception {
         Assert.assertFalse(this.executor.isClosed());
-        this.executor.close();
+        this.executor.finish();
         Assert.assertTrue(this.executor.isClosed());
     }
 }

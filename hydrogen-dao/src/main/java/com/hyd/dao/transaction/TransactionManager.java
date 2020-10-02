@@ -3,16 +3,15 @@ package com.hyd.dao.transaction;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.DataSources;
-import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.spring.SpringConnectionFactory;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,20 +34,15 @@ public class TransactionManager {
 
     private static final Logger LOG = Logger.getLogger(TransactionManager.class);
 
-    /////////////////////////////////////////////////////////
-
-    /**
-     * Executor 缓存，每一层事务都有单独的 datasource-executor mapping
-     */
-    private static final ThreadLocal<Map<Integer, Map<String, Executor>>>
-        executorCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
+    private static final ThreadLocal<Map<Integer, Map<String, ConnectionContext>>>
+        connectionContextCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
     private static final ThreadLocal<Map<Integer, Map<String, DataSource>>>
         dataSourceCache = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
-    private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
-
     private static final ThreadLocal<Map<Integer, Integer>> isolations = ThreadLocal.withInitial(HashMap::new);
+
+    private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
     /////////////////////////////////////////////////////////
 
@@ -68,11 +62,11 @@ public class TransactionManager {
     /**
      * 获取当前所处的事务级别（最外层事务为 1 级，里层递增）
      *
-     * @return 当前所处事务级别。如果当前不处于事务中，则返回 -1
+     * @return 当前所处事务级别。如果当前不处于事务中，则返回 0
      */
     public static int getLevel() {
         Integer _level = level.get();
-        return _level == null ? -1 : _level;
+        return _level == null ? 0 : _level;
     }
 
     private static int getIsolation(int level) {
@@ -83,17 +77,16 @@ public class TransactionManager {
      * 开始一个事务
      */
     public static void start() {
-        int _level;
+        int level;
 
         if (!isInTransaction()) {
-            _level = 1;
+            level = 1;
         } else {
-            _level = level.get() + 1;
+            level = getLevel() + 1;
         }
 
-        LOG.debug("Starting transaction level " + _level);
-        level.set(_level);
-        executorCache.get().put(_level, new HashMap<>());
+        LOG.debug("Starting transaction level " + level);
+        TransactionManager.level.set(level);
     }
 
     /**
@@ -104,14 +97,13 @@ public class TransactionManager {
             return;
         }
 
-        int _level = level.get();
-        Map<String, Executor> executorMap = executorCache.get().get(_level);
-        for (Executor executor : executorMap.values()) {
-            executor.close();
-        }
+        int level = getLevel();
+        connectionContextCache.get()
+            .getOrDefault(level, Collections.emptyMap())
+            .forEach((dataSourceName, context) -> context.commit());
 
-        LOG.info(() -> "Transaction level " + _level + " commited.");
-        level.set(_level - 1);
+        LOG.info(() -> "Transaction level " + level + " committed.");
+        TransactionManager.level.set(level - 1);
     }
 
     /**
@@ -122,14 +114,13 @@ public class TransactionManager {
             return;
         }
 
-        int _level = level.get();
-        Map<String, Executor> executorMap = executorCache.get().get(_level);
-        for (Executor executor : executorMap.values()) {
-            executor.rollbackAndClose();
-        }
+        int level = TransactionManager.level.get();
+        connectionContextCache.get()
+            .getOrDefault(level, Collections.emptyMap())
+            .forEach((dataSourceName, context) -> context.rollback());
 
-        LOG.info(() -> "Transaction level " + _level + " rollbacked.");
-        level.set(_level - 1);
+        LOG.info(() -> "Transaction level " + level + " rollbacked.");
+        TransactionManager.level.set(level - 1);
     }
 
     /**
@@ -142,40 +133,49 @@ public class TransactionManager {
             return;
         }
 
-        int _level = getLevel();
-        isolations.get().put(_level, isolation);
+        isolations.get().put(getLevel(), isolation);
     }
 
     /////////////////////////////////////////////////////////////////
 
+    /**
+     * 获取一个适合上下文的 ConnectionContext 对象，用完之后必须调用 {@link ConnectionContext#closeIfAutoCommit()} 方法。
+     */
     public static ConnectionContext getConnectionContext(DAO dao) {
+        // 如果要求独立于事务之外，则直接返回不妨到缓存
+        if (dao.isStandAlone() || !isInTransaction()) {
+            return createConnectionContext(dao);
+        }
+
+        // 否则优先从缓存获取
+        return connectionContextCache.get()
+            .computeIfAbsent(getLevel(), any -> new ConcurrentHashMap<>())
+            .computeIfAbsent(dao.getDataSourceName(), any -> createConnectionContext(dao));
+    }
+
+    private static ConnectionContext createConnectionContext(DAO dao) {
         DataSources dataSources = DataSources.getInstance();
         Connection connection;
 
-        try {
-            if (dao.isStandAlone() || !isInTransaction()) {
-                // 不打算以事务方式执行，或当前没有进行中的事务
-                connection = getStandAloneConnection(dao, dataSources);
-            } else {
-                // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
-                connection = getInTransactionConnection(dao, dataSources);
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e);
+        if (dao.isStandAlone() || !isInTransaction()) {
+            // 不打算以事务方式执行，或当前没有进行中的事务
+            connection = getStandAloneConnection(dao, dataSources);
+        } else {
+            // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
+            connection = getInTransactionConnection(dao, dataSources);
         }
-
         return new ConnectionContext(dao.getDataSourceName(), connection, dao.getNameConverter());
     }
 
     @SuppressWarnings("MagicConstant")
-    private static Connection getInTransactionConnection(DAO dao, DataSources dataSources)  {
+    private static Connection getInTransactionConnection(DAO dao, DataSources dataSources) {
         try {
             int level = getLevel();
             int isolation = getIsolation(level);
             String dataSourceName = dao.getDataSourceName();
 
             DataSource dataSource = dataSourceCache.get()
-                .computeIfAbsent(level, __ -> new ConcurrentHashMap<>())
+                .computeIfAbsent(level, any -> new ConcurrentHashMap<>())
                 .computeIfAbsent(dataSourceName, dataSources::getDataSource);
 
             Connection connection;
@@ -188,6 +188,7 @@ public class TransactionManager {
                 }
             } else {
                 connection = dataSource.getConnection();
+                connection.setAutoCommit(false);
                 connection.setTransactionIsolation(isolation);
             }
 
@@ -197,12 +198,16 @@ public class TransactionManager {
         }
     }
 
-    private static Connection getStandAloneConnection(DAO dao, DataSources dataSources) throws SQLException {
-        String dataSourceName = dao.getDataSourceName();
-        DataSource dataSource = dataSources.getDataSource(dataSourceName);
-        LOG.info("DataSource numActive: " + ((BasicDataSource)dataSource).getNumActive());
-        Connection connection = dataSource.getConnection();
-        connection.setAutoCommit(true);
-        return connection;
+    private static Connection getStandAloneConnection(DAO dao, DataSources dataSources) {
+        try {
+            String dataSourceName = dao.getDataSourceName();
+            DataSource dataSource = dataSources.getDataSource(dataSourceName);
+            Connection connection = dataSource.getConnection();
+            connection.setAutoCommit(true);
+            // LOG.info("DataSource numActive: " + ((BasicDataSource) dataSource).getNumActive());
+            return connection;
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
     }
 }

@@ -1,13 +1,31 @@
 root = true
 
-[*]
-end_of_line = lf
-insert_final_newline = true
-indent_size = 4
-indent_style = space
+[*.{txt, java, xml, md, properties}]
 charset = utf-8
+indent_style = space
+end_of_line = lf
+
+[*.{txt, java, xml}]
+indent_size = 2
+insert_final_newline = true
 trim_trailing_whitespace = true
 
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
 [*.java]
-ij_any_blank_lines_around_field = 1
+indent_size = 4
+ij_java_blank_lines_around_field = 1
+ij_java_blank_lines_after_class_header = 1
+ij_java_doc_add_blank_line_after_return = true
 ij_java_doc_add_blank_line_after_param_comments = true
+ij_java_doc_add_blank_line_after_description = true
+ij_java_doc_keep_empty_parameter_tag = false
+ij_java_doc_keep_empty_return_tag = false
+ij_java_doc_keep_empty_throws_tag = false
+
+[*.properties]
+ij_properties_keep_blank_lines = true
+ij_properties_spaces_around_key_value_delimiter = true
+

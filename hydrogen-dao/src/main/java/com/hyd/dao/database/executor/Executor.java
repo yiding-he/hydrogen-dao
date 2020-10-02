@@ -11,7 +11,6 @@ import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.snapshot.ExecutorInfo;
-import com.hyd.dao.transaction.TransactionManager;
 
 import java.sql.Connection;
 import java.util.List;
@@ -47,21 +46,11 @@ public abstract class Executor {
     }
 
     /**
-     * 提交，关闭连接，释放资源
-     */
-    public abstract void close();
-
-    /**
      * 判断连接是否已经关闭
      *
      * @return 如果链接已经关闭，则返回 true
      */
     public abstract boolean isClosed();
-
-    /**
-     * 回滚并关闭连接
-     */
-    public abstract void rollbackAndClose();
 
     /**
      * 执行 sql 语句
@@ -228,9 +217,7 @@ public abstract class Executor {
      * 关闭 executor 对象，如果当前不处于事务当中。
      */
     public void finish() {
-        if (!TransactionManager.isInTransaction()) {
-            close();
-        }
+        this.context.closeIfAutoCommit();
     }
 
 }
