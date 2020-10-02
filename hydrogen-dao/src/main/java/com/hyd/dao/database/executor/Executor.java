@@ -42,6 +42,10 @@ public abstract class Executor {
         this.context = context;
     }
 
+    public ConnectionContext getContext() {
+        return context;
+    }
+
     /**
      * 提交，关闭连接，释放资源
      */

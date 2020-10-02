@@ -10,6 +10,7 @@ import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public final class QueryCommandBuilder {
 
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
+                statement += helper.getStrictColName(info.getColumnName()) + "=?";
                 primaryFound = true;
                 break;
             }
@@ -63,16 +64,28 @@ public final class QueryCommandBuilder {
         ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
 
         List<Object> values = new ArrayList<>();
-        String statement = "select * from " + tableName + " where ";
-        for (ColumnInfo info : infos) {
-            if (info.isPrimary()) {
-                statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
-                String fieldName = nameConverter.column2Field(info.getColumnName());
-                values.add(BeanUtil.getValue(obj, fieldName));
-                break;
+        StringBuilder statement = new StringBuilder("select * from " + tableName);
+
+        if (obj != null) {
+            StringBuilder where = new StringBuilder();
+
+            Arrays.stream(infos)
+                .forEach(info -> {
+                    String fieldName = nameConverter.column2Field(info.getColumnName());
+                    Object value = BeanUtil.getValue(obj, fieldName);
+
+                    if (value != null) {
+                        values.add(value);
+                        String columnName = helper.getStrictColName(info.getColumnName());
+                        where.append(columnName).append("=?");
+                    }
+                });
+
+            if (!values.isEmpty()) {
+                statement.append(" where ").append(where);
             }
         }
 
-        return new Command(statement, values);
+        return new Command(statement.toString(), values);
     }
 }

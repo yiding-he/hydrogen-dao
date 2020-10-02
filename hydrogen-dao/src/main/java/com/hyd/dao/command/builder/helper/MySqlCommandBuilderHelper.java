@@ -38,7 +38,7 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    public String getColumnNameForSql(String colName) {
+    public String getStrictColName(String colName) {
         return "`" + colName + "`";
     }
 

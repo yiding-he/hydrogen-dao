@@ -10,7 +10,6 @@ import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.transaction.TransactionManager;
@@ -177,10 +176,6 @@ public class DAO {
      */
     public String getDataSourceName() {
         return dataSourceName;
-    }
-
-    private ConnectionContext getContext() {
-        return TransactionManager.getConnectionContext(this);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -626,7 +621,7 @@ public class DAO {
      */
     private void insert(Map row, String tableName) throws DAOException {
         runWithExecutor(executor -> {
-            Command command = new InsertCommandBuilder(getContext()).build(tableName, row);
+            Command command = new InsertCommandBuilder(executor.getContext()).build(tableName, row);
             executor.execute(command);
         });
     }
@@ -645,7 +640,7 @@ public class DAO {
         }
 
         runWithExecutor(executor -> {
-            BatchCommand command = new InsertCommandBuilder(getContext()).buildBatch(tableName, rows);
+            BatchCommand command = new InsertCommandBuilder(executor.getContext()).buildBatch(tableName, rows);
             executor.execute(command);
         });
     }

@@ -36,7 +36,7 @@ public final class DeleteCommandBuilder {
 
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                whereMarks.append(helper.getColumnNameForSql(info.getColumnName())).append("=? and");
+                whereMarks.append(helper.getStrictColName(info.getColumnName())).append("=? and");
                 whereParams.add(helper.generateParamValue(object, info));
             }
         }
@@ -64,7 +64,7 @@ public final class DeleteCommandBuilder {
         String statement = "delete from " + tableName + " where ";
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getColumnNameForSql(info.getColumnName()) + "=?";
+                statement += helper.getStrictColName(info.getColumnName()) + "=?";
                 break;
             }
         }

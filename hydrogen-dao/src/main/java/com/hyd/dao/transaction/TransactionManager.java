@@ -74,10 +74,6 @@ public class TransactionManager {
         return _level == null ? -1 : _level;
     }
 
-    private static Map<String, Executor> getExecutors(int level) {
-        return executorCache.get().computeIfAbsent(level, __ -> new ConcurrentHashMap<>());
-    }
-
     private static int getIsolation(int level) {
         return isolations.get().getOrDefault(level, DEFAULT_ISOLATION_LEVEL);
     }

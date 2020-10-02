@@ -1,6 +1,5 @@
 package com.hyd.dao.basictest;
 
-import com.hyd.dao.DAO;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.src.models.Blog;
@@ -8,16 +7,10 @@ import com.hyd.daotests.JUnitRuleTestBase;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
 public class DaoTest extends JUnitRuleTestBase {
-
-    @Override
-    protected Supplier<DAO> getDAOSupplier() {
-        return () -> dao;
-    }
 
     @Test
     public void query() throws Exception {

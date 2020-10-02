@@ -18,9 +18,11 @@ public abstract class InMemoryTestBase {
 
     protected static DAO dao2;
 
+    protected static BasicDataSource dataSource;
+
     @BeforeClass
     public static void beforeClass() {
-        BasicDataSource dataSource = DBCPDataSource.newH2MemDataSource();
+        dataSource = DBCPDataSource.newH2MemDataSource();
         dataSources.setDataSource("h20", dataSource);
         dataSources.setDataSource("h21", dataSource);
 

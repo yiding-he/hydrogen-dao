@@ -202,9 +202,9 @@ public class CommandBuilderHelper {
      * @param column column name
      *
      * @return fixed column name
-     * @throws SQLException when fails
+     * @throws DAOException when fails
      */
-    public String getColumnNameForSql(String column) throws DAOException {
+    public String getStrictColName(String column) throws DAOException {
         return column;
     }
 

@@ -18,7 +18,7 @@ public class OracleCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    public String getColumnNameForSql(String column) {
+    public String getStrictColName(String column) {
         return "\"" + column.toUpperCase() + "\"";
     }
 
