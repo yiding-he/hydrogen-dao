@@ -1,6 +1,6 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.mate.util.ConnectionContext;
+import java.sql.Connection;
 
 /**
  * (description)
@@ -8,24 +8,20 @@ import com.hyd.dao.mate.util.ConnectionContext;
  *
  * @author Yiding
  */
-public class HSQLDBCommandBuildHelper extends CommandBuilderHelper {
-
-    public HSQLDBCommandBuildHelper(ConnectionContext context) {
-        super(context);
-    }
+public class HsqldbSqlFix implements SqlFix {
 
     @Override
-    protected String getSchema(String schema) {
+    public String getSchema(String schema) {
         return "PUBLIC";
     }
 
     @Override
-    protected String getTableNameForMeta(String tableName) {
+    public String getTableNameForMeta(String tableName) {
         return tableName.toUpperCase();
     }
 
     @Override
-    protected String getCatalog() {
+    public String getCatalog(Connection connection) {
         return null;
     }
 

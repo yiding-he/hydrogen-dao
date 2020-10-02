@@ -1,7 +1,6 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.mate.util.ConnectionContext;
-
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -9,14 +8,11 @@ import java.sql.SQLException;
  *
  * @author yiding.he
  */
-public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
+public class MySqlSqlFix implements SqlFix {
 
-    public MySqlCommandBuilderHelper(ConnectionContext context) {
-        super(context);
-    }
 
     @Override
-    protected ColumnMeta getColumnMeta() {
+    public ColumnMeta getColumnMeta() {
         return ColumnMeta.MySQL;
     }
 
@@ -27,8 +23,8 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    protected String getCatalog() throws SQLException {
-        String catalog = super.getCatalog();
+    public String getCatalog(Connection connection) throws SQLException {
+        String catalog = SqlFix.super.getCatalog(connection);
         return catalog == null || catalog.isEmpty() ? null : catalog;
     }
 
@@ -38,8 +34,8 @@ public class MySqlCommandBuilderHelper extends CommandBuilderHelper {
     }
 
     @Override
-    public String getStrictColName(String colName) {
-        return "`" + colName + "`";
+    public String getStrictName(String name) {
+        return "`" + name + "`";
     }
 
     @Override

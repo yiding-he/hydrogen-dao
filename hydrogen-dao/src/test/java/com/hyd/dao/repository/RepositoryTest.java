@@ -27,9 +27,9 @@ public class RepositoryTest extends JUnitRuleTestBase {
     }
 
     @Test
-    public void testFindBlog() throws Exception {
+    public void testQueryById() throws Exception {
         Repository<Blog> repository = getRepository();
-        Blog blog1 = repository.findById(1);
+        Blog blog1 = repository.queryById(1);
         assertNotNull(blog1);
     }
 
@@ -66,5 +66,40 @@ public class RepositoryTest extends JUnitRuleTestBase {
         blogs = repository.queryByInstance(blog);
         assertFalse(blogs.isEmpty());
         assertEquals(1, blogs.size());
+    }
+
+    @Test
+    public void testDeleteById() throws Exception {
+        Repository<Blog> repository = getRepository();
+
+        assertNotNull(repository.queryById(1));
+        repository.deleteById(1);
+        assertNull(repository.queryById(1));
+    }
+
+    @Test
+    public void testDeleteByNullInstance() throws Exception {
+        Repository<Blog> repository = getRepository();
+
+        assertEquals(0, repository.deleteByInstance(null)); // no record deleted
+
+        List<Blog> blogs = repository.queryByInstance(null);
+        assertFalse(blogs.isEmpty());
+        assertEquals(3, blogs.size());
+    }
+
+    @Test
+    public void testDeleteByEmptyInstance() throws Exception {
+        try {
+            Repository<Blog> repository = getRepository();
+
+            Blog blog = new Blog();
+            assertEquals(0, repository.deleteByInstance(blog)); // no record deleted
+
+            fail("should throw exception");
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("dangerous operation prohibited"));
+        }
+
     }
 }

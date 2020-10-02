@@ -39,7 +39,7 @@ public final class QueryCommandBuilder {
 
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getStrictColName(info.getColumnName()) + "=?";
+                statement += helper.getStrictName(info.getColumnName()) + "=?";
                 primaryFound = true;
                 break;
             }
@@ -76,7 +76,7 @@ public final class QueryCommandBuilder {
 
                     if (value != null) {
                         values.add(value);
-                        String columnName = helper.getStrictColName(info.getColumnName());
+                        String columnName = helper.getStrictName(info.getColumnName());
                         where.append(columnName).append("=?");
                     }
                 });

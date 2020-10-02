@@ -16,10 +16,7 @@ import com.hyd.dao.mate.util.Str;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,10 +29,30 @@ public class CommandBuilderHelper {
     // 缓存已经生成的字段info
     private static final Map<String, ColumnInfo[]> cache = new ConcurrentHashMap<>();
 
+    private static final Map<DatabaseType, SqlFix> REGISTRY = new HashMap<>();
+
+    static {
+        REGISTRY.put(DatabaseType.Oracle, new OracleSqlFix());
+        REGISTRY.put(DatabaseType.HSQLDB, new HsqldbSqlFix());
+        REGISTRY.put(DatabaseType.MySQL, new MySqlSqlFix());
+        REGISTRY.put(DatabaseType.SQLServer, new SQLServerSqlFix());
+        REGISTRY.put(DatabaseType.Others, SqlFix.DEFAULT);
+    }
+
     private final ConnectionContext context;
+
+    private final DatabaseType databaseType;
+
+    private final SqlFix sqlFix;
 
     public CommandBuilderHelper(ConnectionContext context) {
         this.context = context;
+        this.databaseType = DatabaseType.of(context.getConnection());
+        this.sqlFix = REGISTRY.getOrDefault(databaseType, SqlFix.DEFAULT);
+    }
+
+    public DatabaseType getDatabaseType() {
+        return databaseType;
     }
 
     /**
@@ -45,19 +62,7 @@ public class CommandBuilderHelper {
      * @throws DAOException 如果获取数据库连接信息失败
      */
     public static CommandBuilderHelper getHelper(ConnectionContext context) throws DAOException {
-        DatabaseType databaseType = DatabaseType.of(context.getConnection());
-        switch (databaseType) {
-            case Oracle:
-                return new OracleCommandBuilderHelper(context);
-            case HSQLDB:
-                return new HSQLDBCommandBuildHelper(context);
-            case MySQL:
-                return new MySqlCommandBuilderHelper(context);
-            case SQLServer:
-                return new SQLServerCommandBuilderHelper(context);
-            default:
-                return new CommandBuilderHelper(context);
-        }
+        return new CommandBuilderHelper(context);
     }
 
     /**
@@ -75,7 +80,7 @@ public class CommandBuilderHelper {
      * @return 表的字段信息
      */
     public ColumnInfo[] getColumnInfos(String tableName) {
-        return getColumnInfos(getSchema("%"), tableName);
+        return getColumnInfos(sqlFix.getSchema("%"), tableName);
     }
 
     /**
@@ -115,12 +120,13 @@ public class CommandBuilderHelper {
         LOG.debug("Reading columns of table " + fullTableName + "...");
 
         String fixedSchema = schema.toUpperCase(Locale.ENGLISH);
-        String fixedTableName = getTableNameForMeta(tableName);
+        String fixedTableName = sqlFix.getTableNameForMeta(tableName);
 
         Connection connection = this.context.getConnection();
-        ColumnMeta columnMeta = getColumnMeta();
+        ColumnMeta columnMeta = sqlFix.getColumnMeta();
         DatabaseMetaData dbMeta = connection.getMetaData();
-        ResultSet columns = dbMeta.getColumns(getCatalog(), getSchema(fixedSchema), fixedTableName, "%");
+        ResultSet columns = dbMeta.getColumns(
+            sqlFix.getCatalog(connection), sqlFix.getSchema(fixedSchema), fixedTableName, "%");
 
         List<String> keyNames = getPrimaryKeyColumns(fixedSchema, fixedTableName, dbMeta);
 
@@ -156,10 +162,13 @@ public class CommandBuilderHelper {
     private List<String> getPrimaryKeyColumns(
         String fixedSchema, String fixedTableName, DatabaseMetaData dbMeta) throws SQLException {
 
-        ColumnMeta columnMeta = getColumnMeta();
+        ColumnMeta columnMeta = sqlFix.getColumnMeta();
         List<String> keyNames = new ArrayList<>();
 
-        try (ResultSet keys = dbMeta.getPrimaryKeys(getCatalog(), getSchema(fixedSchema), fixedTableName)) {
+        try (ResultSet keys = dbMeta.getPrimaryKeys(
+            sqlFix.getCatalog(this.context.getConnection()),
+            sqlFix.getSchema(fixedSchema), fixedTableName
+        )) {
             while (keys.next()) {
                 keyNames.add(keys.getString(columnMeta.columnName));
             }
@@ -168,44 +177,9 @@ public class CommandBuilderHelper {
         return keyNames;
     }
 
-    protected ColumnMeta getColumnMeta() {
-        return ColumnMeta.Oracle;
-    }
-
     private boolean isPrimaryKey(String typeName, List<String> keyNames, String columnName) {
         return (typeName != null && typeName.toLowerCase().contains("identity"))
             || keyNames.contains(columnName);
-    }
-
-    protected String getSchema(String schema) {
-        return schema;
-    }
-
-    protected String getCatalog() throws SQLException {
-        Connection connection = this.context.getConnection();
-        return connection.getCatalog();
-    }
-
-    // 当查询 meta 数据需要时，修正表名
-    protected String getTableNameForMeta(String tableName) {
-        return tableName;
-    }
-
-    // 当组合 SQL 语句需要时，修正表名
-    public String getTableNameForSql(String tableName) {
-        return tableName;
-    }
-
-    /**
-     * Fix column name in the sql statement.
-     *
-     * @param column column name
-     *
-     * @return fixed column name
-     * @throws DAOException when fails
-     */
-    public String getStrictColName(String column) throws DAOException {
-        return column;
     }
 
     /**
@@ -330,17 +304,23 @@ public class CommandBuilderHelper {
         return field.isAnnotationPresent(Sequence.class);
     }
 
+    public String getTableNameForSql(String tableName) {
+        return sqlFix.getTableNameForSql(tableName);
+    }
+
     public String getSysdateMark() {
-        return "CURRENT_TIMESTAMP";
+        return sqlFix.getSysdateMark();
     }
 
-    // 根据当前的 SQL 语句生成带查询范围的语句
+    public String getStrictName(String name) {
+        return sqlFix.getStrictName(name);
+    }
+
     public String getRangedSql(String sql, int startPos, int endPos) {
-        return null;
+        return sqlFix.getRangedSql(sql, startPos, endPos);
     }
 
-    // 根据当前的 SQL 语句生成返回查询结果数量的语句
     public String getCountSql(String sql) {
-        return "select count(*) cnt from (" + sql + ")";
+        return sqlFix.getCountSql(sql);
     }
 }

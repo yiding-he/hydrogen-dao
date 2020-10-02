@@ -1,25 +1,20 @@
 package com.hyd.dao.command.builder.helper;
 
-import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.ResultSetUtil;
 
 /**
  * @author hyd
  */
-public class OracleCommandBuilderHelper extends CommandBuilderHelper {
-
-    public OracleCommandBuilderHelper(ConnectionContext context) {
-        super(context);
-    }
+public class OracleSqlFix implements SqlFix {
 
     @Override
-    protected String getTableNameForMeta(String tableName) {
+    public String getTableNameForMeta(String tableName) {
         return tableName.toUpperCase();
     }
 
     @Override
-    public String getStrictColName(String column) {
-        return "\"" + column.toUpperCase() + "\"";
+    public String getStrictName(String name) {
+        return "\"" + name.toUpperCase() + "\"";
     }
 
     @Override

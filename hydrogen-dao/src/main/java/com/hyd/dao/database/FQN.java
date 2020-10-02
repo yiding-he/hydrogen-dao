@@ -1,6 +1,7 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
+import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
 
@@ -21,6 +22,8 @@ public class FQN {
 
     private final String name;
 
+    private final ConnectionContext context;
+
     public FQN(ConnectionContext context, String fqn) {
         if (Str.isEmpty(fqn)) {
             throw new IllegalArgumentException("FQN parameter cannot be empty");
@@ -40,6 +43,7 @@ public class FQN {
         });
 
         this.name = fqn.contains(".") ? Str.subStringAfterLast(fqn, ".") : fqn;
+        this.context = context;
     }
 
     public String getSchema(String defaultValue) {
@@ -56,5 +60,10 @@ public class FQN {
 
     public String getName() {
         return name;
+    }
+
+    public String getStrictName() {
+        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        return helper.getStrictName(schema) + "." + helper.getStrictName(name);
     }
 }

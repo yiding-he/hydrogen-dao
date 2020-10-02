@@ -29,7 +29,7 @@ public class Repository<T> {
         return TransactionManager.getConnectionContext(this.dao);
     }
 
-    public T findById(Object singlePrimaryKey) {
+    public T queryById(Object singlePrimaryKey) {
         QueryCommandBuilder builder = new QueryCommandBuilder(getContext());
         Command command = builder.buildByKey(tableName, singlePrimaryKey);
         return dao.queryFirst(type, command);
@@ -48,6 +48,10 @@ public class Repository<T> {
     }
 
     public int deleteByInstance(T t) {
+        if (t == null) {
+            return 0;
+        }
+
         DeleteCommandBuilder builder = new DeleteCommandBuilder(getContext());
         Command command = builder.build(tableName, t);
         return dao.execute(command);

@@ -8,6 +8,7 @@ import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.spring.SpringConnectionFactory;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -199,6 +200,7 @@ public class TransactionManager {
     private static Connection getStandAloneConnection(DAO dao, DataSources dataSources) throws SQLException {
         String dataSourceName = dao.getDataSourceName();
         DataSource dataSource = dataSources.getDataSource(dataSourceName);
+        LOG.info("DataSource numActive: " + ((BasicDataSource)dataSource).getNumActive());
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(true);
         return connection;

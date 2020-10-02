@@ -5,14 +5,13 @@ import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.exception.NoPrimaryKeyException;
 import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 生成 update 语句
+ * 生成 delete 语句
  */
 public final class DeleteCommandBuilder {
 
@@ -23,34 +22,35 @@ public final class DeleteCommandBuilder {
     }
 
     /**
-     * 从 object 中提取主键值作为参数
+     * 从 object 中提取参数
      */
     public Command build(String tableName, Object object) throws DAOException {
-        FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
+        if (object == null) {
+            throw new NullPointerException("object is null");
+        }
 
-        String command = "delete from " + tableName;
-        StringBuilder whereMarks = new StringBuilder();
-        List<Object> whereParams = new ArrayList<>();
+        final FQN fqn = new FQN(context, tableName);
+        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        final ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
+
+        final String command = "delete from " + fqn.getStrictName() + " where ";
+        final List<String> whereStatements = new ArrayList<>();
+        final List<Object> whereParams = new ArrayList<>();
 
         for (ColumnInfo info : infos) {
-            if (info.isPrimary()) {
-                whereMarks.append(helper.getStrictColName(info.getColumnName())).append("=? and");
-                whereParams.add(helper.generateParamValue(object, info));
+            Object param = helper.generateParamValue(object, info);
+            if (param != null) {
+                whereParams.add(param);
+                whereStatements.add(helper.getStrictName(info.getColumnName()) + "=?");
             }
         }
 
-        if ("".equals(whereMarks.toString())) {
-            throw new NoPrimaryKeyException("no primary key found in table \"" + tableName + "\"");
+        if (whereStatements.isEmpty()) {
+            throw new IllegalStateException(
+                "Delete command has no condition, dangerous operation prohibited.");
         }
 
-        if (whereMarks.toString().endsWith("and")) {
-            whereMarks = new StringBuilder(whereMarks.substring(0, whereMarks.length() - 3));
-        }
-
-        command += " where " + whereMarks;
-        return new Command(command, whereParams);
+        return new Command(command + String.join(" and ", whereStatements), whereParams);
     }
 
     /**
@@ -64,7 +64,7 @@ public final class DeleteCommandBuilder {
         String statement = "delete from " + tableName + " where ";
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                statement += helper.getStrictColName(info.getColumnName()) + "=?";
+                statement += helper.getStrictName(info.getColumnName()) + "=?";
                 break;
             }
         }
