@@ -13,9 +13,9 @@ import java.util.List;
 /**
  * 生成 delete 语句
  */
-public final class DeleteCommandBuilder extends CommandBuilder {
+public final class DeleteBuilder extends CommandBuilder {
 
-    public DeleteCommandBuilder(ConnectionContext context) {
+    public DeleteBuilder(ConnectionContext context) {
         super(context);
     }
 

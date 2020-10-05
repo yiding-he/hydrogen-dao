@@ -4,7 +4,7 @@ import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
 import com.hyd.dao.command.MappedCommand;
-import com.hyd.dao.command.builder.InsertCommandBuilder;
+import com.hyd.dao.command.builder.InsertBuilder;
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.executor.Executor;
@@ -621,7 +621,7 @@ public class DAO {
      */
     private void insert(Map row, String tableName) throws DAOException {
         runWithExecutor(executor -> {
-            Command command = new InsertCommandBuilder(executor.getContext()).build(tableName, row);
+            Command command = new InsertBuilder(executor.getContext()).build(tableName, row);
             executor.execute(command);
         });
     }
@@ -640,7 +640,7 @@ public class DAO {
         }
 
         runWithExecutor(executor -> {
-            BatchCommand command = new InsertCommandBuilder(executor.getContext()).buildBatch(tableName, rows);
+            BatchCommand command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
             executor.execute(command);
         });
     }

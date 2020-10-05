@@ -7,9 +7,9 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.mate.util.ConnectionContext;
 
-public class UpdateCommandBuilder extends CommandBuilder {
+public class UpdateBuilder extends CommandBuilder {
 
-    public UpdateCommandBuilder(ConnectionContext context) {
+    public UpdateBuilder(ConnectionContext context) {
         super(context);
     }
 

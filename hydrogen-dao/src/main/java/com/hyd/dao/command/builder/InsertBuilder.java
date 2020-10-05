@@ -18,9 +18,9 @@ import java.util.List;
 /**
  * 创建 insert 语句
  */
-public final class InsertCommandBuilder extends CommandBuilder {
+public final class InsertBuilder extends CommandBuilder {
 
-    public InsertCommandBuilder(ConnectionContext context) {
+    public InsertBuilder(ConnectionContext context) {
         super(context);
     }
 

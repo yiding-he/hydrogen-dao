@@ -18,9 +18,9 @@ import java.util.List;
  *
  * @author yiding.he
  */
-public final class QueryCommandBuilder extends CommandBuilder {
+public final class QueryBuilder extends CommandBuilder {
 
-    public QueryCommandBuilder(ConnectionContext context) {
+    public QueryBuilder(ConnectionContext context) {
         super(context);
     }
 

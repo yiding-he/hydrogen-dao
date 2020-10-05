@@ -3,10 +3,10 @@ package com.hyd.dao.repository;
 import com.hyd.dao.DAO;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
-import com.hyd.dao.command.builder.DeleteCommandBuilder;
-import com.hyd.dao.command.builder.InsertCommandBuilder;
-import com.hyd.dao.command.builder.QueryCommandBuilder;
-import com.hyd.dao.command.builder.UpdateCommandBuilder;
+import com.hyd.dao.command.builder.DeleteBuilder;
+import com.hyd.dao.command.builder.InsertBuilder;
+import com.hyd.dao.command.builder.QueryBuilder;
+import com.hyd.dao.command.builder.UpdateBuilder;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.transaction.TransactionManager;
 
@@ -38,21 +38,21 @@ public class Repository<T> {
 
     public T queryById(Object singlePrimaryKey) {
         Command command = withConnectionContext(
-            context -> new QueryCommandBuilder(context).buildByKey(tableName, singlePrimaryKey)
+            context -> new QueryBuilder(context).buildByKey(tableName, singlePrimaryKey)
         );
         return dao.queryFirst(type, command);
     }
 
     public List<T> queryByInstance(T t) {
         Command command = withConnectionContext(
-            context -> new QueryCommandBuilder(context).build(tableName, t)
+            context -> new QueryBuilder(context).build(tableName, t)
         );
         return dao.query(type, command);
     }
 
     public int deleteById(Object singlePrimaryKey) {
         Command command = withConnectionContext(
-            context -> new DeleteCommandBuilder(context).buildByKey(tableName, singlePrimaryKey)
+            context -> new DeleteBuilder(context).buildByKey(tableName, singlePrimaryKey)
         );
         return dao.execute(command);
     }
@@ -63,28 +63,28 @@ public class Repository<T> {
         }
 
         Command command = withConnectionContext(
-            context -> new DeleteCommandBuilder(context).build(tableName, t)
+            context -> new DeleteBuilder(context).build(tableName, t)
         );
         return dao.execute(command);
     }
 
     public int insertInstance(T t) {
         Command command = withConnectionContext(
-            context -> new InsertCommandBuilder(context).build(tableName, t)
+            context -> new InsertBuilder(context).build(tableName, t)
         );
         return dao.execute(command);
     }
 
     public int insertBatch(List<T> list) {
         BatchCommand command = withConnectionContext(
-            context -> new InsertCommandBuilder(context).buildBatch(tableName, list)
+            context -> new InsertBuilder(context).buildBatch(tableName, list)
         );
         return dao.execute(command);
     }
 
     public int updateById(T t) {
         Command command = withConnectionContext(
-            context -> new UpdateCommandBuilder(context).buildByKey(tableName, t)
+            context -> new UpdateBuilder(context).buildByKey(tableName, t)
         );
         return dao.execute(command);
     }
