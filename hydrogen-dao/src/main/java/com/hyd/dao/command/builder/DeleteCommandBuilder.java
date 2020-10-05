@@ -13,12 +13,10 @@ import java.util.List;
 /**
  * 生成 delete 语句
  */
-public final class DeleteCommandBuilder {
-
-    private final ConnectionContext context;
+public final class DeleteCommandBuilder extends CommandBuilder {
 
     public DeleteCommandBuilder(ConnectionContext context) {
-        this.context = context;
+        super(context);
     }
 
     /**

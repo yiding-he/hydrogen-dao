@@ -18,12 +18,10 @@ import java.util.List;
  *
  * @author yiding.he
  */
-public final class QueryCommandBuilder {
-
-    private final ConnectionContext context;
+public final class QueryCommandBuilder extends CommandBuilder {
 
     public QueryCommandBuilder(ConnectionContext context) {
-        this.context = context;
+        super(context);
     }
 
     /**

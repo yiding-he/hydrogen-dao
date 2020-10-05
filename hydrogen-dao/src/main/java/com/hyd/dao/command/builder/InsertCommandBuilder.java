@@ -18,12 +18,10 @@ import java.util.List;
 /**
  * 创建 insert 语句
  */
-public final class InsertCommandBuilder {
-
-    private final ConnectionContext context;
+public final class InsertCommandBuilder extends CommandBuilder {
 
     public InsertCommandBuilder(ConnectionContext context) {
-        this.context = context;
+        super(context);
     }
 
     /**

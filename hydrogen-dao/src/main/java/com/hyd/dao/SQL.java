@@ -110,6 +110,14 @@ public class SQL {
             return table;
         }
 
+        public boolean hasConditions() {
+            return !conditions.isEmpty();
+        }
+
+        public boolean hasParams() {
+            return !params.isEmpty();
+        }
+
         protected String joinNames(List<Pair> pairs) {
             if (pairs.isEmpty()) {
                 return "";

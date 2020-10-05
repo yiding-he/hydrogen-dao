@@ -6,6 +6,7 @@ import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.DeleteCommandBuilder;
 import com.hyd.dao.command.builder.InsertCommandBuilder;
 import com.hyd.dao.command.builder.QueryCommandBuilder;
+import com.hyd.dao.command.builder.UpdateCommandBuilder;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.transaction.TransactionManager;
 
@@ -77,6 +78,13 @@ public class Repository<T> {
     public int insertBatch(List<T> list) {
         BatchCommand command = withConnectionContext(
             context -> new InsertCommandBuilder(context).buildBatch(tableName, list)
+        );
+        return dao.execute(command);
+    }
+
+    public int updateById(T t) {
+        Command command = withConnectionContext(
+            context -> new UpdateCommandBuilder(context).buildByKey(tableName, t)
         );
         return dao.execute(command);
     }

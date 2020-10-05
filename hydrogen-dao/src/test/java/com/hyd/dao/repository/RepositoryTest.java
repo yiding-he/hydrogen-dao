@@ -100,6 +100,46 @@ public class RepositoryTest extends JUnitRuleTestBase {
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("dangerous operation prohibited"));
         }
+    }
 
+    @Test
+    public void testInsertInstance() throws Exception {
+        Blog blog = new Blog();
+        blog.setId(4L);
+        blog.setTitle("blog4");
+        blog.setContent("content of blog 4");
+
+        Repository<Blog> repository = getRepository();
+        int count = repository.insertInstance(blog);
+        assertEquals(1, count);
+
+        Blog _blog = repository.queryById(4);
+        assertEquals(Long.valueOf(4), _blog.getId());
+        assertEquals("blog4", _blog.getTitle());
+    }
+
+    @Test
+    public void testUpdateByEmptyInstance() throws Exception {
+        try {
+            Blog blog = new Blog();
+            getRepository().updateById(blog);
+            fail();
+        } catch (Exception e) {
+            assertEquals("Update command missing param value for column ID", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUpdateByInstance() throws Exception {
+        Blog update = new Blog();
+        update.setId(1L);
+        update.setTitle("Changed Title");
+
+        Repository<Blog> repository = getRepository();
+        int count = repository.updateById(update);
+        assertEquals(1, count);
+
+        Blog blog = repository.queryById(1L);
+        assertEquals("Changed Title", blog.getTitle());
     }
 }

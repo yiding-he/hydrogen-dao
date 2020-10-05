@@ -67,7 +67,7 @@ public class Str {
             return columnName.toUpperCase();
         }
 
-        return columnName.contains("_") ? underscore2Property(columnName) : columnName;
+        return columnName.contains("_") ? underscore2Property(columnName) : columnName.toLowerCase();
     }
 
     public static String underscore2Property(String underscore) {
