@@ -103,6 +103,18 @@ public class RepositoryTest extends JUnitRuleTestBase {
     }
 
     @Test
+    public void testDeleteByInstance() throws Exception {
+        Repository<Blog> repository = getRepository();
+        Blog blog = new Blog();
+        blog.setTitle("blog1");
+
+        assertNotNull(repository.queryById(1L));
+        repository.deleteByInstance(blog);
+        assertNull(repository.queryById(1L));
+        assertNotNull(repository.queryById(2L));
+    }
+
+    @Test
     public void testInsertInstance() throws Exception {
         Blog blog = new Blog();
         blog.setId(4L);
