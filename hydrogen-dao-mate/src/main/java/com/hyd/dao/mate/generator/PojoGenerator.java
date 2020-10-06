@@ -3,6 +3,7 @@ package com.hyd.dao.mate.generator;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.generator.code.AnnotationDef;
 import com.hyd.dao.mate.generator.code.ClassDef;
@@ -64,7 +65,7 @@ public class PojoGenerator {
         );
 
         CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] columnInfos = helper.getColumnInfos(this.catalog, this.tableName);
+        ColumnInfo[] columnInfos = helper.getColumnInfos(new FQN(context, tableName));
 
         ModelClassBuilder builder = new ModelClassBuilder(
             null, tableName, columnInfos, DatabaseType.of(connection), context.getNameConverter()

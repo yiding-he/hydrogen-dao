@@ -13,4 +13,17 @@ public class Cls {
             return null;
         }
     }
+
+    public static boolean hasField(Class<?> type, String field) {
+        Class<?> _type = type;
+        while (_type != null) {
+            try {
+                type.getDeclaredField(field);
+                return true;
+            } catch (NoSuchFieldException e) {
+                _type = _type.getSuperclass();
+            }
+        }
+        return false;
+    }
 }

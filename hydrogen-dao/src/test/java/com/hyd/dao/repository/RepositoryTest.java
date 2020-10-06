@@ -5,6 +5,8 @@ import com.hyd.dao.src.models.Blog;
 import com.hyd.daotests.JUnitRuleTestBase;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -29,8 +31,8 @@ public class RepositoryTest extends JUnitRuleTestBase {
     @Test
     public void testQueryById() throws Exception {
         Repository<Blog> repository = getRepository();
-        Blog blog1 = repository.queryById(1);
-        assertNotNull(blog1);
+        assertNotNull(repository.queryById(1));
+        assertNull(repository.queryById(-1));
     }
 
     @Test
@@ -64,6 +66,18 @@ public class RepositoryTest extends JUnitRuleTestBase {
         blog = new Blog();
         blog.setTitle("blog1");
         blogs = repository.queryByInstance(blog);
+        assertFalse(blogs.isEmpty());
+        assertEquals(1, blogs.size());
+    }
+
+    @Test
+    public void testQueryByInstanceMultiField() throws Exception {
+        Blog blog = new Blog();
+        blog.setId(1L);
+        blog.setTitle("blog1");
+
+        Repository<Blog> repository = getRepository();
+        List<Blog> blogs = repository.queryByInstance(blog);
         assertFalse(blogs.isEmpty());
         assertEquals(1, blogs.size());
     }
@@ -115,6 +129,19 @@ public class RepositoryTest extends JUnitRuleTestBase {
     }
 
     @Test
+    public void testDeleteByInstanceMultiField() throws Exception {
+        Repository<Blog> repository = getRepository();
+        Blog blog = new Blog();
+        blog.setTitle("blog1");
+        blog.setId(1L);
+
+        assertNotNull(repository.queryById(1L));
+        repository.deleteByInstance(blog);
+        assertNull(repository.queryById(1L));
+        assertNotNull(repository.queryById(2L));
+    }
+
+    @Test
     public void testInsertInstance() throws Exception {
         Blog blog = new Blog();
         blog.setId(4L);
@@ -128,6 +155,21 @@ public class RepositoryTest extends JUnitRuleTestBase {
         Blog _blog = repository.queryById(4);
         assertEquals(Long.valueOf(4), _blog.getId());
         assertEquals("blog4", _blog.getTitle());
+    }
+
+    @Test
+    public void testInsertBatch() throws Exception {
+        List<Blog> blogs = Arrays.asList(
+            new Blog(4L, "blog4", "content of blog4", new Date()),
+            new Blog(5L, "blog5", "content of blog5", new Date()),
+            new Blog(6L, "blog6", "content of blog6", new Date())
+        );
+
+        Repository<Blog> repository = getRepository();
+        repository.insertBatch(blogs);
+
+        List<Blog> blogList = repository.queryByInstance(null);
+        assertEquals(6, blogList.size());
     }
 
     @Test

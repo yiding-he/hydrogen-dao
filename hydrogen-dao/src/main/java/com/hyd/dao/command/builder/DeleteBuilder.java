@@ -27,14 +27,14 @@ public final class DeleteBuilder extends CommandBuilder {
 
         final FQN fqn = new FQN(context, tableName);
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
+        final ColumnInfo[] infos = helper.getColumnInfos(fqn);
 
         SQL.Delete delete = new SQL.Delete(fqn.getStrictName());
         for (ColumnInfo info : infos) {
             String columnName = helper.getStrictName(info.getColumnName());
             Object param = helper.generateParamValue(object, info);
             if (param != null) {
-                delete.Where(columnName + "=?", param);
+                delete.And(columnName + "=?", param);
             }
         }
 
@@ -56,7 +56,7 @@ public final class DeleteBuilder extends CommandBuilder {
 
         FQN fqn = new FQN(context, tableName);
         CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
+        ColumnInfo[] infos = helper.getColumnInfos(fqn);
 
         SQL.Delete delete = new SQL.Delete(fqn.getStrictName());
         for (ColumnInfo info : infos) {

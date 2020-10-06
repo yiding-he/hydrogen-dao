@@ -26,11 +26,6 @@ public class ColumnInfo {
     private boolean autoIncrement;
 
     /**
-     * 序列名
-     */
-    private String sequenceName;
-
-    /**
      * 注释
      */
     private String comment;
@@ -59,14 +54,6 @@ public class ColumnInfo {
 
     public void setAutoIncrement(boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
     }
 
     /**
@@ -162,14 +149,13 @@ public class ColumnInfo {
     @Override
     public String toString() {
         return "ColumnInfo{" +
-                "columnName='" + columnName + '\'' +
-                ", dataType=" + dataType +
-                ", primary=" + primary +
-                ", autoIncrement=" + autoIncrement +
-                ", sequenceName='" + sequenceName + '\'' +
-                ", comment='" + comment + '\'' +
-                ", size=" + size +
-                ", nullable=" + nullable +
-                '}';
+            "columnName='" + columnName + '\'' +
+            ", dataType=" + dataType +
+            ", primary=" + primary +
+            ", autoIncrement=" + autoIncrement +
+            ", comment='" + comment + '\'' +
+            ", size=" + size +
+            ", nullable=" + nullable +
+            '}';
     }
 }

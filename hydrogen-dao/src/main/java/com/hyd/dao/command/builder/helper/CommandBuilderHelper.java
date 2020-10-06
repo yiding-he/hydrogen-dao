@@ -2,15 +2,15 @@ package com.hyd.dao.command.builder.helper;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
-import com.hyd.dao.Sequence;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.exception.DataConversionException;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
+import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.mate.util.ConnectionContext;
-import com.hyd.dao.mate.util.Locker;
 import com.hyd.dao.mate.util.Str;
 
 import java.lang.reflect.Field;
@@ -59,6 +59,7 @@ public class CommandBuilderHelper {
      * 获取一个 CommandBuilderHelper 对象
      *
      * @return 根据数据库类型产生的 CommandBuilderHelper 对象
+     *
      * @throws DAOException 如果获取数据库连接信息失败
      */
     public static CommandBuilderHelper getHelper(ConnectionContext context) throws DAOException {
@@ -75,88 +76,58 @@ public class CommandBuilderHelper {
     /**
      * 获得指定库表的字段信息
      *
-     * @param tableName 表名
+     * @param fqn 表名信息
      *
      * @return 表的字段信息
      */
-    public ColumnInfo[] getColumnInfos(String tableName) {
-        return getColumnInfos(sqlFix.getSchema("%"), tableName);
+    public ColumnInfo[] getColumnInfos(FQN fqn) {
+        String strictName = fqn.getStrictName();
+
+        return cache.computeIfAbsent(strictName, any -> {
+            try {
+                return getColumnInfos0(fqn);
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        });
     }
 
-    /**
-     * 获得指定库表的字段信息
-     *
-     * @param schema    登录数据库的用户名
-     * @param tableName 表名
-     *
-     * @return 表的字段信息
-     */
-    public ColumnInfo[] getColumnInfos(String schema, String tableName) {
-        String fullTableName = schema + "." + tableName;
+    private ColumnInfo[] getColumnInfos0(FQN fqn) throws SQLException {
 
-        if (cache.get(fullTableName) == null) {
-            return Locker.lockAndRun(fullTableName, () -> getColumnInfos(schema, tableName, fullTableName));
-        } else {
-            return cache.get(fullTableName);
-        }
-    }
+        String strictName = fqn.getStrictName();
 
-    private ColumnInfo[] getColumnInfos(
-        String schema, String tableName, String fullTableName) {
-        try {
-            return getColumnInfos0(schema, tableName, fullTableName);
-        } catch (SQLException e) {
-            throw new DAOException(e);
-        }
-    }
+        LOG.debug("Reading columns of table " + strictName + "...");
 
-    private ColumnInfo[] getColumnInfos0(
-        String schema, String tableName, String fullTableName) throws SQLException {
-
-        if (cache.get(fullTableName) != null) {
-            return cache.get(fullTableName);
-        }
-
-        LOG.debug("Reading columns of table " + fullTableName + "...");
-
-        String fixedSchema = schema.toUpperCase(Locale.ENGLISH);
-        String fixedTableName = sqlFix.getTableNameForMeta(tableName);
+        String fixedSchema = sqlFix.getSchema(fqn.getSchema());
+        String fixedTableName = sqlFix.getTableNameForMeta(fqn.getName());
 
         Connection connection = this.context.getConnection();
         ColumnMeta columnMeta = sqlFix.getColumnMeta();
         DatabaseMetaData dbMeta = connection.getMetaData();
-        ResultSet columns = dbMeta.getColumns(
-            sqlFix.getCatalog(connection), sqlFix.getSchema(fixedSchema), fixedTableName, "%");
 
-        List<String> keyNames = getPrimaryKeyColumns(fixedSchema, fixedTableName, dbMeta);
+        try (ResultSet columns = dbMeta.getColumns(
+            sqlFix.getCatalog(connection), sqlFix.getSchema(fixedSchema), fixedTableName, "%")) {
 
-        List<ColumnInfo> infos = new ArrayList<>();
+            List<String> keyNames = getPrimaryKeyColumns(fixedSchema, fixedTableName, dbMeta);
+            List<ColumnInfo> infos = new ArrayList<>();
 
-        while (columns.next()) {
+            while (columns.next()) {
+                String columnName = columns.getString(columnMeta.columnName);
+                String typeName = columns.getString(columnMeta.typeName);
+                boolean primaryKey = isPrimaryKey(typeName, keyNames, columnName);
 
-            String columnName = columns.getString(columnMeta.columnName);
-            String typeName = columns.getString(columnMeta.typeName);
-            boolean primaryKey = isPrimaryKey(typeName, keyNames, columnName);
+                ColumnInfo info = new ColumnInfo();
+                info.setColumnName(columnName);
+                info.setDataType(Integer.parseInt(columns.getString(columnMeta.dataType)));
+                info.setPrimary(primaryKey);
+                info.setComment(columns.getString(columnMeta.remarks));
+                info.setSize(columns.getInt(columnMeta.columnSize));
+                info.setNullable("1".equals(columns.getString(columnMeta.nullable)));
+                infos.add(info);
+            }
 
-            ColumnInfo info = new ColumnInfo();
-            info.setColumnName(columnName);
-            info.setDataType(Integer.parseInt(columns.getString(columnMeta.dataType)));
-            info.setPrimary(primaryKey);
-            info.setComment(columns.getString(columnMeta.remarks));
-            info.setSize(columns.getInt(columnMeta.columnSize));
-            info.setNullable("1".equals(columns.getString(columnMeta.nullable)));
-            infos.add(info);
+            return infos.toArray(new ColumnInfo[0]);
         }
-
-        ColumnInfo[] result = infos.toArray(new ColumnInfo[0]);
-        cache.put(fullTableName, result);
-
-        try {
-            columns.close();
-        } catch (SQLException e) {
-            LOG.error("", e);
-        }
-        return result;
     }
 
     private List<String> getPrimaryKeyColumns(
@@ -190,7 +161,7 @@ public class CommandBuilderHelper {
      *
      * @return 生成的 SQL 语句参数
      */
-    public List generateParams(ColumnInfo[] infos, Object object) {
+    public List<Object> generateParams(ColumnInfo[] infos, Object object) {
         List<Object> params = new ArrayList<>();
         for (ColumnInfo info : infos) {
             if (info.getDataType() != DAO.SYSDATE_TYPE) {
@@ -201,10 +172,28 @@ public class CommandBuilderHelper {
     }
 
     /**
+     * 根据 bean 类型过滤字段列表，删除类型中没有定义的字段
+     */
+    public ColumnInfo[] filterColumnsByType(ColumnInfo[] original, Class<?> type) {
+        if (!Map.class.isAssignableFrom(type)) {
+            List<ColumnInfo> infoList = new ArrayList<>();
+            for (ColumnInfo info : original) {
+                String field = context.getNameConverter().column2Field(info.getColumnName());
+                if (Cls.hasField(type, field)) {
+                    infoList.add(info);
+                }
+            }
+            return infoList.toArray(new ColumnInfo[0]);
+        } else {
+            return Arrays.copyOf(original, original.length);
+        }
+    }
+
+    /**
      * 根据字段信息，从对象中取得相应的属性值
      *
-     * @param object        对象
-     * @param info          字段信息
+     * @param object 对象
+     * @param info   字段信息
      *
      * @return 属性值。如果获取失败或需要跳过该字段则返回 null
      */
@@ -228,14 +217,6 @@ public class CommandBuilderHelper {
         } else {
             Field field = getObjectField(object, fieldName);
             if (field == null) {
-                return null;
-            }
-
-            // 判断属性是否被标记了 @Sequence
-            if (isAnnotatedWithSequence(field)) {
-                info.setAutoIncrement(true);
-                String sequenceName = field.getAnnotation(Sequence.class).sequenceName();
-                info.setSequenceName(sequenceName);
                 return null;
             }
 
@@ -300,10 +281,6 @@ public class CommandBuilderHelper {
         return field;
     }
 
-    private static boolean isAnnotatedWithSequence(Field field) {
-        return field.isAnnotationPresent(Sequence.class);
-    }
-
     public String getTableNameForSql(String tableName) {
         return sqlFix.getTableNameForSql(tableName);
     }
@@ -313,7 +290,7 @@ public class CommandBuilderHelper {
     }
 
     public String getStrictName(String name) {
-        return sqlFix.getStrictName(name);
+        return name.equals("%") ? name : sqlFix.getStrictName(name);
     }
 
     public String getRangedSql(String sql, int startPos, int endPos) {

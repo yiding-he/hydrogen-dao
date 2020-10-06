@@ -5,6 +5,7 @@ import com.hyd.dao.DataSources;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.DBCPDataSource;
@@ -55,7 +56,8 @@ public class H2InMemoryDBTest {
             try {
                 ConnectionContext context = new ConnectionContext("", connection, NameConverter.DEFAULT);
                 CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-                ColumnInfo[] columnInfos = helper.getColumnInfos("PUBLIC", "table1");
+                FQN table1 = new FQN(context, "table1");
+                ColumnInfo[] columnInfos = helper.getColumnInfos(table1);
                 for (ColumnInfo columnInfo : columnInfos) {
                     System.out.println(columnInfo);
                 }

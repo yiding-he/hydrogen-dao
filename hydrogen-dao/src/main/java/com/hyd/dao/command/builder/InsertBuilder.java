@@ -2,17 +2,14 @@ package com.hyd.dao.command.builder;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
+import com.hyd.dao.SQL;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.mate.util.ConnectionContext;
-import com.hyd.dao.mate.util.Str;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,37 +30,33 @@ public final class InsertBuilder extends CommandBuilder {
      *
      * @return 批处理插入命令
      */
-    public BatchCommand buildBatch(String tableName, List objects) {
+    public BatchCommand buildBatch(String tableName, List<?> objects) {
 
         if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
         }
 
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, objects.get(0));
+        final FQN fqn = new FQN(context, tableName);
+        final Object sample = objects.get(0);
+        final ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, sample);
+        final SQL.Insert insert = new SQL.Insert(fqn.getStrictName());
 
-        StringBuilder statement = new StringBuilder("insert into " + helper.getTableNameForSql(tableName) + "(");
-        StringBuilder values = new StringBuilder();
         for (ColumnInfo info : infos) {
+            boolean isUsingSysdate = info.getDataType() == DAO.SYSDATE_TYPE;
             String columnName;
 
-            boolean isUsingSysdate = info.getDataType() == DAO.SYSDATE_TYPE;
             if (isUsingSysdate) {
                 columnName = helper.getSysdateMark();
             } else {
                 columnName = helper.getStrictName(info.getColumnName());
             }
 
-            statement.append(columnName).append(",");
-            values.append("?,");
+            insert.Values(columnName, new Object());
         }
 
-        statement = new StringBuilder(Str.removeEnd(statement.toString(), ",")
-            + ") values ("
-            + Str.removeEnd(values.toString(), ",") + ")");
-
         // 生成命令
-        BatchCommand bc = new BatchCommand(statement.toString());
+        BatchCommand bc = new BatchCommand(insert.toCommand().getStatement());
         bc.setColumnInfos(infos);
 
         for (Object object : objects) {
@@ -78,15 +71,17 @@ public final class InsertBuilder extends CommandBuilder {
     ) {
 
         FQN fqn = new FQN(context, tableName);
-        ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
-        List list = helper.generateParams(infos, sample);
+        ColumnInfo[] originColInfos = helper.getColumnInfos(fqn);
+        ColumnInfo[] infos = helper.filterColumnsByType(originColInfos, sample.getClass());
 
+        List<Object> list = helper.generateParams(infos, sample);
         for (int i = 0, listSize = list.size(); i < listSize; i++) {
             Object propertyValue = list.get(i);
             if (propertyValue == DAO.SYSDATE) {
                 infos[i].setDataType(DAO.SYSDATE_TYPE);
             }
         }
+
         return infos;
     }
 
@@ -97,13 +92,14 @@ public final class InsertBuilder extends CommandBuilder {
      * @param object    要插入的对象
      *
      * @return 插入命令
-     * @throws SQLException 如果获取数据库信息失败
+     *
+     * @throws DAOException 如果获取数据库信息失败
      */
     public Command build(String tableName, Object object) throws DAOException {
         FQN fqn = new FQN(context, tableName);
         CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema(), fqn.getName());
-        List params = helper.generateParams(infos, object);
+        ColumnInfo[] infos = helper.filterColumnsByType(helper.getColumnInfos(fqn), object.getClass());
+        List<Object> params = helper.generateParams(infos, object);
         return buildCommand(tableName, infos, params, context);
     }
 
@@ -118,62 +114,23 @@ public final class InsertBuilder extends CommandBuilder {
      * @return 插入命令
      */
     private Command buildCommand(
-        String tableName, ColumnInfo[] infos, List params, ConnectionContext context
+        String tableName, ColumnInfo[] infos, List<Object> params, ConnectionContext context
     ) {
-
-        DatabaseType databaseType = DatabaseType.of(context.getConnection());
-        List<Object> finalParams = new ArrayList<>();
-
+        final FQN fqn = new FQN(context, tableName);
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-
-        StringBuilder command = new StringBuilder("insert into " + tableName + "(");
-        StringBuilder questionMarks = new StringBuilder();
+        final SQL.Insert insert = new SQL.Insert(fqn.getStrictName());
 
         for (int i = 0; i < infos.length; i++) {
             Object value = params.get(i);
-
             if (value == null) {
                 continue;
             }
 
             String columnName = helper.getStrictName(infos[i].getColumnName());
-            command.append(columnName).append(",");
-
-            // 属性值是一个 sysdate 占位符
-            if (value == DAO.SYSDATE) {
-                questionMarks.append(helper.getSysdateMark()).append(",");
-                continue;
-            }
-
-            // 如果属性值是一个 sequence 占位符，那么生成相应的 SQL，而 value 就不必作为参数了。
-            if (infos[i].isAutoIncrement()) {
-                if (databaseType.isSequenceSupported() && infos[i].getSequenceName() == null) {
-                    throw new DAOException("没有指定全局序列");
-                }
-
-                if (infos[i].getSequenceName() != null && databaseType.isSequenceSupported()) {
-                    questionMarks.append(infos[i].getSequenceName()).append(".nextval,");
-                }
-
-                // 如果没有指定 sequenceName，说明数据库会自动加1（例如 MySQL），所以语句中可以忽略该字段
-                continue;
-            }
-
-            finalParams.add(value);
-
-            questionMarks.append("?" + ",");
+            insert.Values(columnName, value);
         }
 
-        command = new StringBuilder(Str.removeEnd(command.toString(), ","));
-        questionMarks = new StringBuilder(Str.removeEnd(questionMarks.toString(), ","));
-
-        command.append(") values (").append(questionMarks).append(")");
-
-        List<Integer> paramTypes = new ArrayList<>();
-        for (ColumnInfo info : infos) {
-            paramTypes.add(info.getDataType());
-        }
-        return new Command(command.toString(), finalParams);
+        return insert.toCommand();
     }
 
 }

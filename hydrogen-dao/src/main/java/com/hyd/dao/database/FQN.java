@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FQN {
 
+    // Map<DataSourceName, Schema>
     private static final Map<String, String> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
     private final String schema;
@@ -32,10 +33,11 @@ public class FQN {
         String dataSourceName = context.getDataSourceName();
         this.schema = SCHEMA_CACHE.computeIfAbsent(dataSourceName, _ds -> {
             try {
+                // 如果表名带 "." 则取前面部分，否则从 Connection 对象中取，如果取不到则使用 "%"
                 if (fqn.contains(".")) {
                     return Str.subStringBeforeLast(fqn, ".");
                 } else {
-                    return context.getConnection().getSchema();
+                    return Str.defaultIfEmpty(context.getConnection().getSchema(), "%");
                 }
             } catch (SQLException e) {
                 throw new DAOException(e);

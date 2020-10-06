@@ -12,6 +12,16 @@ public class Blog {
 
     private Date createTime;
 
+    public Blog() {
+    }
+
+    public Blog(Long id, String title, String content, Date createTime) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.createTime = createTime;
+    }
+
     public Long getId() {
         return this.id;
     }

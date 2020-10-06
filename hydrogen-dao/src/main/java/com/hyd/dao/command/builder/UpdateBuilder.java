@@ -13,6 +13,14 @@ public class UpdateBuilder extends CommandBuilder {
         super(context);
     }
 
+    /**
+     * 生成根据主键值更新字段 Update 命令
+     *
+     * @param tableName 表名
+     * @param object    包含主键值和要更新的字段值的对象
+     *
+     * @return 生成的命令
+     */
     public Command buildByKey(String tableName, Object object) {
         if (object == null) {
             throw new NullPointerException("object is null");
@@ -20,7 +28,7 @@ public class UpdateBuilder extends CommandBuilder {
 
         final FQN fqn = new FQN(context, tableName);
         final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final ColumnInfo[] infos = helper.getColumnInfos(fqn.getSchema("%"), fqn.getName());
+        final ColumnInfo[] infos = helper.getColumnInfos(fqn);
         SQL.Update update = new SQL.Update(tableName);
 
         for (ColumnInfo info : infos) {
