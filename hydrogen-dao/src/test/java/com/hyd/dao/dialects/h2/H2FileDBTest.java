@@ -1,4 +1,4 @@
-package com.hyd.dao.h2;
+package com.hyd.dao.dialects.h2;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;

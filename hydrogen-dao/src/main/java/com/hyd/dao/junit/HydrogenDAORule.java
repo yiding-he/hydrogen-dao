@@ -1,19 +1,16 @@
 package com.hyd.dao.junit;
 
 import com.hyd.dao.DAO;
-import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.util.CSVReader;
 import com.hyd.dao.mate.util.ScriptExecutor;
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.io.File;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * 用于单元测试的 Rule
@@ -64,7 +61,7 @@ public class HydrogenDAORule implements TestRule {
     private List<File> scanCsvFiles() {
         String classPath = System.getProperty("java.class.path", ".");
         String[] classPathElements = classPath.split(System.getProperty("path.separator"));
-        List<File> csvFiles = new Page<>();
+        List<File> csvFiles = new ArrayList<>();
 
         for (String pathElement : classPathElements) {
             File file = new File(pathElement);

@@ -12,8 +12,6 @@ import org.junit.BeforeClass;
  */
 public abstract class InMemoryTestBase {
 
-    private static DataSources dataSources = DataSources.getInstance();
-
     protected static DAO dao;
 
     protected static DAO dao2;
@@ -22,6 +20,8 @@ public abstract class InMemoryTestBase {
 
     @BeforeClass
     public static void beforeClass() {
+        DataSources dataSources = DataSources.getInstance();
+
         dataSource = DBCPDataSource.newH2MemDataSource();
         dataSources.setDataSource("h20", dataSource);
         dataSources.setDataSource("h21", dataSource);
