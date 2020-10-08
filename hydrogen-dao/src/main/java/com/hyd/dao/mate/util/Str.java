@@ -1,5 +1,6 @@
 package com.hyd.dao.mate.util;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import java.util.stream.Stream;
  * 处理字符串的类
  */
 public class Str {
+
+    public static final Pattern VARIABLE_PATTERN = Pattern.compile("(\\\\\\{)|(\\\\})|(\\{[^}]*})");
 
     /**
      * 查找指定字符串中包含匹配指定正则表达式的次数
@@ -227,5 +230,32 @@ public class Str {
         }
 
         return false;
+    }
+
+    public static String eval(String template, Map<String, Object> variables) {
+
+        if (variables == null || variables.isEmpty() || template == null) {
+            return template;
+        }
+
+        Matcher matcher = VARIABLE_PATTERN.matcher(template);
+        StringBuffer buffer = new StringBuffer();
+
+        while (matcher.find()) {
+            String group = matcher.group();
+            if (group.startsWith("\\")) {
+                matcher.appendReplacement(buffer, "\\" + group);
+            } else {
+                String varName = group.substring(1, group.length() - 1);
+                if (varName.length() == 0) {
+                    matcher.appendReplacement(buffer, "");
+                } else {
+                    matcher.appendReplacement(buffer, variables.getOrDefault(varName, "").toString());
+                }
+            }
+        }
+
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 }
