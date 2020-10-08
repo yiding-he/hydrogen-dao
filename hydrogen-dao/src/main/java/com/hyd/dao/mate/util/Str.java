@@ -222,6 +222,15 @@ public class Str {
         return isEmptyString(s) ? defaultValue : s;
     }
 
+    public static String fromCandidates(String... candidates) {
+        for (String candidate : candidates) {
+            if (!isEmptyString(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
     public static boolean isAnyEmpty(String... strs) {
         for (String str : strs) {
             if (isEmptyString(str)) {

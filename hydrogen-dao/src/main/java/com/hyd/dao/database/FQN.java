@@ -37,7 +37,11 @@ public class FQN {
                 if (fqn.contains(".")) {
                     return Str.subStringBeforeLast(fqn, ".");
                 } else {
-                    return Str.defaultIfEmpty(context.getConnection().getSchema(), "%");
+                    return Str.fromCandidates(
+                        context.getConnection().getSchema(),
+                        context.getConnection().getCatalog(),
+                        "%"
+                    );
                 }
             } catch (SQLException e) {
                 throw new DAOException(e);
