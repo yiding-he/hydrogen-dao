@@ -39,7 +39,7 @@ public class ConnectionContext {
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.commit();
             }
-            LOG.info("Connection committed.");
+            LOG.debug("Connection committed.");
         } catch (SQLException e) {
             LOG.error("Error committing database connection, dataSource=" + this.dataSourceName, e);
         }
@@ -50,7 +50,7 @@ public class ConnectionContext {
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.rollback();
             }
-            LOG.info("Connection rolled back.");
+            LOG.debug("Connection rolled back.");
         } catch (SQLException e) {
             LOG.error("Error rolling back database connection, dataSource=" + this.dataSourceName, e);
         }
@@ -61,7 +61,7 @@ public class ConnectionContext {
             if (!connection.isClosed()) {
                 connection.close();
             }
-            LOG.info("Connection closed.");
+            LOG.debug("Connection closed.");
         } catch (SQLException e) {
             LOG.error("Error closing database connection, dataSource=" + this.dataSourceName, e);
         }

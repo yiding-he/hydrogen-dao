@@ -2,6 +2,7 @@ package com.hyd.dao;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * 分页查询结果
@@ -22,11 +23,23 @@ public class Page<T> extends ArrayList<T> {
     }
 
     public Page(Collection<? extends T> c) {
-        super(c);
+        this(c, 0, 0, 0);
     }
 
     public Page(int total, int pageIndex, int pageSize) {
+        this(Collections.emptyList(), total, pageIndex, pageSize);
+    }
+
+    public Page(Collection<? extends T> c, int total, int pageIndex, int pageSize) {
+        super(c);
         this.total = total;
+        this.pageIndex = pageIndex;
+        this.pageSize = pageSize;
+    }
+
+    public Page(Collection<? extends T> c, int pageIndex, int pageSize) {
+        super(c);
+        this.total = c.size();
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
     }

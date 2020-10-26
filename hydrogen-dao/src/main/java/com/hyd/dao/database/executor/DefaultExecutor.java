@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("MagicConstant")
 public class DefaultExecutor extends Executor {
 
-    private static final Logger LOG = Logger.getLogger(DefaultExecutor.class);
+    private static final Logger LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".sql");
 
     private static final Logger BATCH_LOG = Logger.getLogger(DefaultExecutor.class.getName() + ".batch");
 
@@ -40,7 +40,7 @@ public class DefaultExecutor extends Executor {
 
     private ResultSet rs;
 
-    public DefaultExecutor(ConnectionContext context, NameConverter nameConverter) {
+    public DefaultExecutor(ConnectionContext context) {
         super(context);
     }
 
