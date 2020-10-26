@@ -2,239 +2,262 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.yiding-he</groupId>
-    <artifactId>hydrogen-dao</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+  <groupId>com.github.yiding-he</groupId>
+  <artifactId>hydrogen-dao</artifactId>
+  <version>4.0.0-${version-type}</version>
+  <packaging>jar</packaging>
 
-    <name>hydrogen-dao</name>
-    <description>A Light Weight JDBC Access Framework</description>
-    <url>https://github.com/yiding-he/hydrogen-dao</url>
+  <name>hydrogen-dao</name>
+  <description>A Light Weight JDBC Access Framework</description>
+  <url>https://github.com/yiding-he/hydrogen-dao</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
-    </properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
+  </properties>
 
-    <dependencies>
+  <dependencies>
 
-        <!-- Logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-            <scope>test</scope>
-        </dependency>
+    <!-- Logging -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
 
-        <!-- Optional DataSource Libraries -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-dbcp2</artifactId>
-            <version>2.5.0</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.1.12</version>
-            <optional>true</optional>
-        </dependency>
+    <!-- Optional DataSource Libraries -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>2.5.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>1.1.12</version>
+      <optional>true</optional>
+    </dependency>
 
-        <!-- Optional JDBC Drivers -->
-        <dependency>
-            <groupId>com.oracle.driver</groupId>
-            <artifactId>jdbc-driver</artifactId>
-            <version>LATEST</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/local-lib/ojdbc6.jar</systemPath>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft</groupId>
-            <artifactId>sqlserver-jdbc-driver</artifactId>
-            <version>LATEST</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/local-lib/sqljdbc4.jar</systemPath>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-        <!-- Supported Server: 5.5, 5.6, 5.7, 8.0 -->
-        <!-- @see https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.16</version>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.4.1</version>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.200</version>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.25.2</version>
-            <optional>true</optional>
-        </dependency>
+    <!-- Optional JDBC Drivers -->
+    <dependency>
+      <groupId>com.oracle.driver</groupId>
+      <artifactId>jdbc-driver</artifactId>
+      <version>LATEST</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/local-lib/ojdbc6.jar</systemPath>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft</groupId>
+      <artifactId>sqlserver-jdbc-driver</artifactId>
+      <version>LATEST</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/local-lib/sqljdbc4.jar</systemPath>
+      <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+    <!-- Supported Server: 5.5, 5.6, 5.7, 8.0 -->
+    <!-- @see https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-versions.html -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.16</version>
+      <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.4.1</version>
+      <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.200</version>
+      <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.25.2</version>
+      <optional>true</optional>
+    </dependency>
 
-        <!-- Unit Testing -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <!-- Needs to be provided for HydrogenDAORule -->
-            <scope>provided</scope>
-        </dependency>
+    <!-- Unit Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.1</version>
+      <!-- Needs to be provided for HydrogenDAORule -->
+      <scope>provided</scope>
+    </dependency>
 
-        <!-- Provided Spring Boot -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>5.2.7.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <!-- Provided Spring Boot -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>5.2.7.RELEASE</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
-    <!-- //////////////////////////////////////////////////////////// -->
+  <!-- //////////////////////////////////////////////////////////// -->
 
-    <developers>
-        <developer>
-            <name>Yiding He</name>
-            <url>https://heyiding.com:666</url>
-            <email>yiding.he@gmail.com</email>
-            <roles>
-                <role>owner</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
+  <developers>
+    <developer>
+      <name>Yiding He</name>
+      <url>https://heyiding.com:666</url>
+      <email>yiding.he@gmail.com</email>
+      <roles>
+        <role>owner</role>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
-    <scm>
-        <url>https://git-scm.com/</url>
-        <connection>https://github.com/yiding-he/hydrogen-dao.git</connection>
-    </scm>
+  <scm>
+    <url>https://git-scm.com/</url>
+    <connection>https://github.com/yiding-he/hydrogen-dao.git</connection>
+  </scm>
 
-    <profiles>
-        <!-- Please disable profile "aliyun" if you're not in mainland China. -->
-        <profile>
-            <id>aliyun</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>aliyun</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>aliyun</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </pluginRepository>
-            </pluginRepositories>
-        </profile>
-        <profile>
-            <id>maven-central-for-deploy</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>central-snapshots</id>
-                    <name>Sonatype Nexus Snapshots</name>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-                <repository>
-                    <id>central-staging</id>
-                    <name>Nexus Release Repository</name>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <version-type>SNAPSHOT</version-type>
+      </properties>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>dev-nexus-server</id>
+          <name>Snapshots</name>
+          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+      <repositories>
+        <repository>
+          <id>dev-nexus-server</id>
+          <name>znxunzhi Repository</name>
+          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>mainland-prc-china</id>
+      <repositories>
+        <repository>
+          <id>aliyun</id>
+          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>aliyun</id>
+          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>maven-central-for-deploy</id>
+      <properties>
+        <version-type>RELEASE</version-type>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.1.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>central-snapshots</id>
+          <name>Sonatype Nexus Snapshots</name>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+          <id>central-staging</id>
+          <name>Nexus Release Repository</name>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 
 </project>
