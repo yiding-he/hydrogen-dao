@@ -30,30 +30,43 @@ public class SQL {
 
     /////////////////////////////////////////////////////////
 
-    public static Select Select(String columns) {  // NOSONAR
+    public static Select Select(String columns) {
         return new Select(columns);
     }
 
-    public static Select Select(String... columns) {  // NOSONAR
+    public static Select Select(String... columns) {
         return new Select(columns);
     }
 
-    public static Update Update(String table) {  // NOSONAR
+    public static Update Update(String table) {
         return new Update(table);
     }
 
-    public static Insert Insert(String table) {  // NOSONAR
+    public static Insert Insert(String table) {
         return new Insert(table);
     }
 
-    public static Delete Delete(String table) {  // NOSONAR
+    public static Delete Delete(String table) {
         return new Delete(table);
     }
 
     /////////////////////////////////////////////////////////
 
-    public static enum Joint {
+    public enum Joint {
         AND, OR
+    }
+
+    public enum JoinType {
+        InnerJoin(" INNER JOIN "), OuterJoin(" OUTER JOIN "), LeftJoin(" LEFT JOIN "), RightJoin(" RIGHT JOIN ");
+        private final String code;
+
+        JoinType(String code) {
+            this.code = code;
+        }
+
+        public String getCode() {
+            return code;
+        }
     }
 
     public static class Pair {
@@ -89,49 +102,21 @@ public class SQL {
         public boolean hasArg() {
             return this.args != null && this.args.length > 0;
         }
-    }
 
-    /////////////////////////////////////////////////////////
-
-    @SuppressWarnings("unchecked")
-    public static abstract class Generatable<T extends Generatable> {
-
-        protected String table;
-
-        protected String statement;
-
-        protected List<Object> params = new ArrayList<>();
-
-        protected List<Pair> conditions = new ArrayList<>();
-
-        public abstract Command toCommand();
-
-        public String getTable() {
-            return table;
-        }
-
-        public boolean hasConditions() {
-            return !conditions.isEmpty();
-        }
-
-        public boolean hasParams() {
-            return !params.isEmpty();
-        }
-
-        protected String joinNames(List<Pair> pairs) {
+        protected static String joinPairName(List<Pair> pairs) {
             if (pairs.isEmpty()) {
                 return "";
             } else {
-                String result = "";
+                StringBuilder result = new StringBuilder();
                 for (Pair pair : pairs) {
-                    result += pair.statement + ",";
+                    result.append(pair.statement).append(",");
                 }
-                result = result.substring(0, result.length() - 1);
-                return result;
+                result = new StringBuilder(result.substring(0, result.length() - 1));
+                return result.toString();
             }
         }
 
-        protected String joinQuestionMarks(List<Pair> pairs) {
+        protected static String joinPairHolder(List<Pair> pairs) {
             StringBuilder s = new StringBuilder();
 
             for (int size = pairs.size(), i = 0; i < size; i++) {
@@ -148,7 +133,7 @@ public class SQL {
             return s.toString();
         }
 
-        protected List<Object> joinValues(List<Pair> pairs) {
+        protected static List<Object> joinPairValue(List<Pair> pairs) {
             if (pairs.isEmpty()) {
                 return Collections.emptyList();
             }
@@ -165,8 +150,77 @@ public class SQL {
 
             return result;
         }
+    }
 
-        public T Where(String statement) {  // NOSONAR
+    public static class Join {
+
+        public final JoinType type;
+
+        public final String statement;
+
+        public final List<Object> params;
+
+        public Join(JoinType type, String statement) {
+            this(type, statement, Collections.emptyList());
+        }
+
+        public Join(JoinType type, String statement, Object... params) {
+            this.type = type;
+            this.statement = statement;
+            this.params = Arrays.asList(params);
+        }
+    }
+
+    /////////////////////////////////////////////////////////
+
+    @SuppressWarnings("unchecked")
+    public static abstract class Generatable<T extends Generatable> {
+
+        protected String table;
+
+        protected String statement;
+
+        protected List<Object> params = new ArrayList<>();
+
+        protected List<Pair> conditions = new ArrayList<>();
+
+        protected List<Join> joins = new ArrayList<>();
+
+        public abstract Command toCommand();
+
+        public String getTable() {
+            return table;
+        }
+
+        public boolean hasConditions() {
+            return !conditions.isEmpty();
+        }
+
+        public boolean hasParams() {
+            return !params.isEmpty();
+        }
+
+        public T LeftJoin(String statement, Object... params) {
+            this.joins.add(new Join(JoinType.LeftJoin, statement, params));
+            return (T) this;
+        }
+
+        public T RightJoin(String statement, Object... params) {
+            this.joins.add(new Join(JoinType.RightJoin, statement, params));
+            return (T) this;
+        }
+
+        public T InnerJoin(String statement, Object... params) {
+            this.joins.add(new Join(JoinType.InnerJoin, statement, params));
+            return (T) this;
+        }
+
+        public T OuterJoin(String statement, Object... params) {
+            this.joins.add(new Join(JoinType.OuterJoin, statement, params));
+            return (T) this;
+        }
+
+        public T Where(String statement) {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -174,7 +228,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(String statement, Object... args) {  // NOSONAR
+        public T Where(String statement, Object... args) {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -182,7 +236,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(boolean exp, String statement) {  // NOSONAR
+        public T Where(boolean exp, String statement) {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -192,7 +246,7 @@ public class SQL {
             return (T) this;
         }
 
-        public T Where(boolean exp, String statement, Object... args) {  // NOSONAR
+        public T Where(boolean exp, String statement, Object... args) {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
@@ -202,84 +256,93 @@ public class SQL {
             return (T) this;
         }
 
-        public T And(String statement) {  // NOSONAR
+        public T And(String statement) {
             this.conditions.add(new Pair(Joint.AND, statement));
             return (T) this;
         }
 
-        public T And(String statement, Object... args) {  // NOSONAR
+        public T And(String statement, Object... args) {
             this.conditions.add(new Pair(Joint.AND, statement, args));
             return (T) this;
         }
 
-        public T And(boolean exp, String statement) {  // NOSONAR
+        public T And(boolean exp, String statement) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.AND, statement));
             }
             return (T) this;
         }
 
-        public T And(boolean exp, String statement, Object... args) {  // NOSONAR
+        public T And(boolean exp, String statement, Object... args) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.AND, statement, args));
             }
             return (T) this;
         }
 
-        public T AndIfNotEmpty(String statement, Object value) {  // NOSONAR
+        public T AndIfNotEmpty(String statement, Object value) {
             return And(!isEmpty(value), statement, value);
         }
 
-        public T Or(String statement) {  // NOSONAR
+        public T Or(String statement) {
             this.conditions.add(new Pair(Joint.OR, statement));
             return (T) this;
         }
 
-        public T Or(String statement, Object... args) {  // NOSONAR
+        public T Or(String statement, Object... args) {
             this.conditions.add(new Pair(Joint.OR, statement, args));
             return (T) this;
         }
 
-        public T Or(boolean exp, String statement) {  // NOSONAR
+        public T Or(boolean exp, String statement) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.OR, statement));
             }
             return (T) this;
         }
 
-        public T Or(boolean exp, String statement, Object... args) {  // NOSONAR
+        public T Or(boolean exp, String statement, Object... args) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.OR, statement, args));
             }
             return (T) this;
         }
 
-        public T OrIfNotEmpty(String column, Object value) {  // NOSONAR
+        public T OrIfNotEmpty(String column, Object value) {
             return Or(!isEmpty(value), column, value);
         }
 
-        public T Append(String statement) {  // NOSONAR
+        public T Append(String statement) {
             this.conditions.add(new Pair(statement));
             return (T) this;
         }
 
-        public T Append(String column, Object... args) {  // NOSONAR
+        public T Append(String column, Object... args) {
             this.conditions.add(new Pair(column, args));
             return (T) this;
         }
 
-        public T Append(boolean exp, String statement) {  // NOSONAR
+        public T Append(boolean exp, String statement) {
             if (exp) {
                 this.conditions.add(new Pair(statement));
             }
             return (T) this;
         }
 
-        public T Append(boolean exp, String statement, Object... args) {  // NOSONAR
+        public T Append(boolean exp, String statement, Object... args) {
             if (exp) {
                 this.conditions.add(new Pair(statement, args));
             }
             return (T) this;
+        }
+
+        protected String generateJoinBlock() {
+            StringBuilder joinBlock = new StringBuilder();
+            for (Join join : joins) {
+                joinBlock.append(join.type.getCode()).append(join.statement);
+                this.params.addAll(join.params);
+            }
+            return joinBlock.toString();
         }
 
         protected String generateWhereBlock() {
@@ -365,18 +428,18 @@ public class SQL {
             this.table = table;
         }
 
-        public Insert Values(String column, Object value) {  // NOSONAR
+        public Insert Values(String column, Object value) {
             return Values(!isEmpty(value), column, value);
         }
 
-        public Insert Values(boolean ifTrue, String column, Object value) {  // NOSONAR
+        public Insert Values(boolean ifTrue, String column, Object value) {
             if (ifTrue) {
                 pairs.add(new Pair(column, value));
             }
             return this;
         }
 
-        public Insert Values(Map<String, Object> map) {  // NOSONAR
+        public Insert Values(Map<String, Object> map) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 Values(entry.getKey(), entry.getValue());
             }
@@ -385,8 +448,10 @@ public class SQL {
 
         @Override
         public Command toCommand() {
-            this.statement = "insert into " + table + "(" + joinNames(pairs) + ") values (" + joinQuestionMarks(pairs) + ")";
-            this.params = joinValues(pairs);
+            this.statement = "insert into " + table +
+                "(" + Pair.joinPairName(pairs) + ") values " +
+                "(" + Pair.joinPairHolder(pairs) + ")";
+            this.params = Pair.joinPairValue(pairs);
 
             return new Command(statement, params);
         }
@@ -413,7 +478,7 @@ public class SQL {
         public Command toCommand() {
             this.params.clear();
             this.statement = "update " + table +
-                    " set " + generateSetBlock() + " " + generateWhereBlock();
+                " set " + generateSetBlock() + " " + generateWhereBlock();
 
             return new Command(this.statement, this.params);
         }
@@ -441,35 +506,35 @@ public class SQL {
             return statement;
         }
 
-        public Update Set(boolean exp, String column, Object value) {  // NOSONAR
+        public Update Set(boolean exp, String column, Object value) {
             if (exp) {
                 this.updates.add(new Pair(column, value));
             }
             return this;
         }
 
-        public Update Set(String column, Object value) {  // NOSONAR
+        public Update Set(String column, Object value) {
             this.updates.add(new Pair(column, value));
             return this;
         }
 
-        public Update Set(String setStatement) {  // NOSONAR
+        public Update Set(String setStatement) {
             this.updates.add(new Pair(setStatement));
             return this;
         }
 
-        public Update Set(boolean exp, String setStatement) {  // NOSONAR
+        public Update Set(boolean exp, String setStatement) {
             if (exp) {
                 this.updates.add(new Pair(setStatement));
             }
             return this;
         }
 
-        public Update SetIfNotNull(String column, Object value) {  // NOSONAR
+        public Update SetIfNotNull(String column, Object value) {
             return Set(value != null, column, value);
         }
 
-        public Update SetIfNotEmpty(String column, Object value) {  // NOSONAR
+        public Update SetIfNotEmpty(String column, Object value) {
             return Set(!isEmpty(value), column, value);
         }
     }
@@ -497,22 +562,22 @@ public class SQL {
             this.columns = String.join(",", columns);
         }
 
-        public Select From(String from) {  // NOSONAR
+        public Select From(String from) {
             this.from = from;
             return this;
         }
 
-        public Select From(String... from) {  // NOSONAR
+        public Select From(String... from) {
             this.from = String.join(",", from);
             return this;
         }
 
-        public Select OrderBy(String orderBy) {  // NOSONAR
+        public Select OrderBy(String orderBy) {
             this.orderBy = orderBy;
             return this;
         }
 
-        public Select GroupBy(String groupBy) {  // NOSONAR
+        public Select GroupBy(String groupBy) {
             this.groupBy = groupBy;
             return this;
         }
@@ -521,20 +586,20 @@ public class SQL {
         public Command toCommand() {
             this.params.clear();
             this.statement = "select " + this.columns + " from " + this.from + " ";
-
+            this.statement += generateJoinBlock();
             this.statement += generateWhereBlock();
-
-            if (!isEmpty(this.groupBy)) {
-                this.statement += " group by " + this.groupBy;
-            }
-
-            if (!isEmpty(this.orderBy)) {
-                this.statement += " order by " + this.orderBy;
-            }
-
+            this.statement += generateGroupBy();
+            this.statement += generateOrderBy();
             return new Command(this.statement, this.params);
         }
 
+        private String generateGroupBy() {
+            return isEmpty(this.groupBy) ? "" : (" group by " + this.groupBy);
+        }
+
+        private String generateOrderBy() {
+            return isEmpty(this.orderBy) ? "" : (" order by " + this.orderBy);
+        }
     }
 
     /////////////////////////////////////////////////////////
