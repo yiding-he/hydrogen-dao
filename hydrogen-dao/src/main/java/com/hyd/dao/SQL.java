@@ -4,6 +4,8 @@ package com.hyd.dao;
 import com.hyd.dao.command.Command;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * 生成 Command 的帮助类
@@ -282,6 +284,20 @@ public class SQL {
 
         public T AndIfNotEmpty(String statement, Object value) {
             return And(!isEmpty(value), statement, value);
+        }
+
+        public <V> T IfNotEmpty(V value, Consumer<T> consumer) {
+            if (!isEmpty(value) && consumer != null) {
+                consumer.accept((T)this);
+            }
+            return (T) this;
+        }
+
+        public <V> T IfNotEmpty(V value, BiConsumer<T, V> consumer) {
+            if (!isEmpty(value) && consumer != null) {
+                consumer.accept((T)this, value);
+            }
+            return (T) this;
         }
 
         public T Or(String statement) {
