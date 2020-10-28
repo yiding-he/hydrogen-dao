@@ -201,10 +201,9 @@ public class TransactionManager {
             DataSource dataSource = dataSources.getDataSource(dataSourceName);
             Connection connection = dataSource.getConnection();
             connection.setAutoCommit(true);
-            // LOG.info("DataSource numActive: " + ((BasicDataSource) dataSource).getNumActive());
             return connection;
-        } catch (SQLException e) {
-            throw new DAOException(e);
+        } catch (Exception e) {
+            throw new DAOException("Error getting connection, dataSourceName=" + dao.getDataSourceName(), e);
         }
     }
 }
