@@ -183,15 +183,12 @@ public class TransactionManager {
             if (Cls.exists("org.springframework.jdbc.datasource.DataSourceUtils")) {
                 LOG.debug("Getting connection from Spring DataSourceUtils...");
                 connection = SpringConnectionFactory.getConnection(dataSource);
-                if (!connection.getAutoCommit()) {
-                    TransactionManager.start();
-                }
             } else {
                 connection = dataSource.getConnection();
-                connection.setAutoCommit(false);
                 connection.setTransactionIsolation(isolation);
             }
 
+            connection.setAutoCommit(false);
             return connection;
         } catch (SQLException e) {
             throw new DAOException(e);

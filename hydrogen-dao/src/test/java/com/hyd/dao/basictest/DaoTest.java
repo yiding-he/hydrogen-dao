@@ -52,4 +52,10 @@ public class DaoTest extends JUnitRuleTestBase {
         assertNotNull(rows.get(0).get("id"));
     }
 
+    @Test
+    public void testDelete() {
+        assertNotNull(dao.queryFirst("select * from blog where id=?", 1));
+        dao.execute("delete from blog where id=?", 1);
+        assertNull(dao.queryFirst("select * from blog where id=?", 1));
+    }
 }
