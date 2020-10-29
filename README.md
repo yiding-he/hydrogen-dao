@@ -26,7 +26,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前分支的版本为 `3.5.0`。
+当前分支的版本为 `4.0.0`。
 
 ## 添加依赖关系
 
@@ -49,12 +49,12 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 DataSource dataSource = new com.zaxxer.hikari.HikariDataSource();
 ...
 
-// 初始化 DataSources 对象。DataSources 中可包含多个数据源。
-com.hyd.dao.DataSources dataSources = new DataSources();
+// 将 DataSource 对象注册到 DataSources。
+com.hyd.dao.DataSources dataSources = DataSources.getInstance();
 dataSources.setDataSource("default", dataSource);
 
 // 获得针对某个数据源的 DAO 对象
-DAO dao = dataSources.getDAO("default");
+DAO dao = new DAO("default");
 ```
 
 ### Spring Boot 自动初始化
@@ -106,9 +106,9 @@ userList.forEach(user -> {
 
 ```Java
 MappedCommand cmd =
-        new MappedCommand("update USERS set ROLE=#role# where ID in(#userid#)")
-        .setParam("role", "admin")
-        .setParam("userid", 1, 2, 3, 4);  // 数组或 List 都可以
+    new MappedCommand("update USERS set ROLE=#role# where ID in(#userid#)")
+    .setParam("role", "admin")
+    .setParam("userid", 1, 2, 3, 4);  // 数组或 List 都可以
 dao.execute(cmd);
 ```
 
@@ -120,11 +120,11 @@ _不用写恶心的 `where 1=1` 了_
 
 ```Java
 dao.query(SQL
-        .Select("ID", "NAME", "DESCRIPTION")
-        .From("USERS")
-        .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"。也可以用 List 作为参数
-        .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会加入该查询条件
-        .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
+    .Select("ID", "NAME", "DESCRIPTION")
+    .From("USERS")
+    .Where("ID in ?", 10, 22, 135)                 // 会自动扩展为 "ID in (?,?,?)"。也可以用 List 作为参数
+    .And(disabled != null, "DISABLED=?", disabled) // 仅当变量 disabled 值不为 null 时才会加入该查询条件
+    .AndIfNotEmpty("DISABLED=?", disabled)         // 效果同上
 );
 ```
 
@@ -140,6 +140,12 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ```
 
 ## 更新
+
+#### 2020-10-31
+* 版本号更新到 4.0.0-SNAPSHOT；
+* Page 类不再继承 ArrayList，因为序列化出来的 JSON 内容缺少分页属性；
+* DataSources 类现在是单例模式，节省其在 Spring 或其他 IoC 容器中初始化的步骤；
+* SQL 类支持 Join 语法。
 
 #### 2020-07-25
 
