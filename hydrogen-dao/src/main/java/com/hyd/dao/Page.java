@@ -3,11 +3,12 @@ package com.hyd.dao;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * 分页查询结果
  */
-public class Page<T> extends ArrayList<T> {
+public class Page<T> {
 
     private int total;      // 总记录数
 
@@ -15,9 +16,7 @@ public class Page<T> extends ArrayList<T> {
 
     private int pageSize;
 
-    public Page(int initialCapacity) {
-        super(initialCapacity);
-    }
+    private List<T> list;
 
     public Page() {
     }
@@ -30,16 +29,13 @@ public class Page<T> extends ArrayList<T> {
         this(Collections.emptyList(), total, pageIndex, pageSize);
     }
 
-    public Page(Collection<? extends T> c, int total, int pageIndex, int pageSize) {
-        super(c);
-        this.total = total;
-        this.pageIndex = pageIndex;
-        this.pageSize = pageSize;
+    public Page(Collection<? extends T> c, int pageIndex, int pageSize) {
+        this(c, c.size(), pageIndex, pageSize);
     }
 
-    public Page(Collection<? extends T> c, int pageIndex, int pageSize) {
-        super(c);
-        this.total = c.size();
+    public Page(Collection<? extends T> c, int total, int pageIndex, int pageSize) {
+        this.list = new ArrayList<>(c);
+        this.total = total;
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
     }
@@ -70,5 +66,29 @@ public class Page<T> extends ArrayList<T> {
 
     public int getTotalPage() {
         return (this.total + this.pageSize - 1) / this.pageSize;
+    }
+
+    public int size() {
+        return this.list == null ? 0 : this.list.size();
+    }
+
+    public void addAll(Collection<T> collection) {
+        if (list != null) {
+            list.addAll(collection);
+        } else {
+            list = new ArrayList<>(collection);
+        }
+    }
+
+    public boolean isEmpty() {
+        return list == null || list.isEmpty();
+    }
+
+    public T get(int index) {
+        return list == null ? null : list.get(index);
+    }
+
+    public List<T> getList() {
+        return list;
     }
 }

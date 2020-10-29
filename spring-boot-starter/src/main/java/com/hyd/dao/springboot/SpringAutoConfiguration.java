@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
-import static com.hyd.dao.DataSources.getInstance;
 
 /**
  * Spring Boot 的自动化配置，目前只支持单个 DataSource。
@@ -31,9 +30,9 @@ public class SpringAutoConfiguration {
     public DAO dao(
         DataSource dataSource
     ) {
-        DataSources dataSources = getInstance();
+        DataSources dataSources = new DataSources();
         dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, dataSource);
-        DAO dao = new DAO(DEFAULT_DATA_SOURCE_NAME);
+        DAO dao = dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
         LOG.info("DAO '" + DEFAULT_DATA_SOURCE_NAME + "' initialized as " + dao);
         return dao;
     }
