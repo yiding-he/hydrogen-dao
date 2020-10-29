@@ -79,14 +79,12 @@ public class TypeUtil {
         }
 
         try {
-            if (type.getDeclaredMethod("dateValue") != null) {
-                return (Date) type.getDeclaredMethod("dateValue").invoke(value);
-            }
+            return (Date) type.getDeclaredMethod("dateValue").invoke(value);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("Value of type " + type + " cannot be cast to Date");
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-
-        throw new IllegalStateException("Value of type " + type + " cannot be cast to Date");
     }
 
     private static Date toDateFromString(String s) {
@@ -102,7 +100,7 @@ public class TypeUtil {
     }
 
     /**
-     * 对用户提供的执行参数进行一些修复
+     * 对 SQL 的参数进行转换
      *
      * @param obj 参数值
      *
@@ -111,6 +109,8 @@ public class TypeUtil {
     public static Object convertParamValue(Object obj) {
         if (obj == null) {
             return "";
+        } else if (obj.getClass().isEnum()) {
+            return ((Enum<?>) obj).name();
         } else if (obj.getClass().equals(Date.class)) {
             return new Timestamp(((Date) obj).getTime());     // 将 Date 转化为 TimeStamp，以避免时间丢失
         } else {
