@@ -3,6 +3,7 @@ package com.hyd.dao;
 
 import com.hyd.dao.command.Command;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -24,6 +25,14 @@ public class SQL {
     private static boolean isEmpty(Object obj) {
         if (obj == null) {
             return true;
+        }
+
+        if (obj.getClass().isArray()) {
+            return Array.getLength(obj) > 0;
+        }
+
+        if (obj instanceof Collection) {
+            return ((Collection<?>) obj).isEmpty();
         }
 
         String str = obj.toString();
