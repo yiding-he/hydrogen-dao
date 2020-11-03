@@ -65,7 +65,7 @@ public class Page<T> {
     }
 
     public int getTotalPage() {
-        return (this.total + this.pageSize - 1) / this.pageSize;
+        return this.pageSize == 0? 0: ((this.total + this.pageSize - 1) / this.pageSize);
     }
 
     public int size() {
