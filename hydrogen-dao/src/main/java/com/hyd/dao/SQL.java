@@ -7,6 +7,8 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 生成 Command 的帮助类
@@ -69,6 +71,7 @@ public class SQL {
 
     public enum JoinType {
         InnerJoin(" INNER JOIN "), OuterJoin(" OUTER JOIN "), LeftJoin(" LEFT JOIN "), RightJoin(" RIGHT JOIN ");
+
         private final String code;
 
         JoinType(String code) {
@@ -82,7 +85,7 @@ public class SQL {
 
     public static class Pair {
 
-        private Joint joint = null;  // AND/OR
+        private Joint joint = Joint.AND;  // AND/OR
 
         private final String statement;
 
@@ -235,7 +238,7 @@ public class SQL {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
-            this.conditions.add(new Pair(statement));
+            this.conditions.add(new Pair(Joint.AND, statement));
             return (T) this;
         }
 
@@ -243,7 +246,7 @@ public class SQL {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
-            this.conditions.add(new Pair(statement, args));
+            this.conditions.add(new Pair(Joint.AND, statement, args));
             return (T) this;
         }
 
@@ -252,7 +255,7 @@ public class SQL {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
             if (exp) {
-                this.conditions.add(new Pair(statement));
+                this.conditions.add(new Pair(Joint.AND, statement));
             }
             return (T) this;
         }
@@ -262,7 +265,7 @@ public class SQL {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
             }
             if (exp) {
-                this.conditions.add(new Pair(statement, args));
+                this.conditions.add(new Pair(Joint.AND, statement, args));
             }
             return (T) this;
         }
@@ -297,14 +300,14 @@ public class SQL {
 
         public <V> T IfNotEmpty(V value, Consumer<T> consumer) {
             if (!isEmpty(value) && consumer != null) {
-                consumer.accept((T)this);
+                consumer.accept((T) this);
             }
             return (T) this;
         }
 
         public <V> T IfNotEmpty(V value, BiConsumer<T, V> consumer) {
             if (!isEmpty(value) && consumer != null) {
-                consumer.accept((T)this, value);
+                consumer.accept((T) this, value);
             }
             return (T) this;
         }
@@ -392,11 +395,7 @@ public class SQL {
 
             // 第一个条件不能加 and 和 or 前缀
             if (index > 0 && !where.endsWith("(")) {
-                if (condition.joint == Joint.AND) {
-                    where += " and ";
-                } else if (condition.joint == Joint.OR) {
-                    where += " or ";
-                }
+                where += (condition.joint == null ? "" : (" " + condition.joint.name() + " "));
             }
 
             where += " ";
@@ -404,35 +403,35 @@ public class SQL {
             if (!condition.hasArg()) {       // 不带参数的条件
                 where += condition.statement;
 
-            } else if (condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
-                String marks = "(";
+            } else if (condition.args.length == 1 && condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
+                List<?> objects = (List<?>) condition.firstArg();
 
-                for (Object o : (List) condition.firstArg()) {
-                    marks += "?,";
-                    this.params.add(o);
-                }
+                // marks = "(?,?,?,...,?)"
+                String marks = "(" +
+                    objects.stream()
+                        .map(o -> {
+                            this.params.add(o);
+                            return "?";
+                        })
+                        .collect(Collectors.joining(",")) +
+                    ")";
 
-                if (marks.endsWith(",")) {
-                    marks = marks.substring(0, marks.length() - 1);
-                }
-                marks += ")";                                 // marks = "(?,?,?,...,?)"
-
-                where += condition.statement.replace("?", marks);  // "A in ?" -> "A in (?,?,?)"
+                // "A in ?" -> "A in (?,?,?)"
+                where += condition.statement.replace("?", marks);
 
             } else if (condition.statement.endsWith("in ?")) {
-                String marks = "(";
 
-                for (Object o : condition.args) {
-                    marks += "?,";
-                    this.params.add(o);
-                }
+                // marks = "(?,?,?,...,?)"
+                String marks = "(" +
+                    Stream.of(condition.args)
+                        .map(o -> {
+                            this.params.add(o);
+                            return "?";
+                        }).collect(Collectors.joining(",")) +
+                    ")";
 
-                if (marks.endsWith(",")) {
-                    marks = marks.substring(0, marks.length() - 1);
-                }
-                marks += ")";                                 // marks = "(?,?,?,...,?)"
-
-                where += condition.statement.replace("?", marks);  // "A in ?" -> "A in (?,?,?)"
+                // "A in ?" -> "A in (?,?,?)"
+                where += condition.statement.replace("?", marks);
 
             } else {
                 where += condition.statement;
