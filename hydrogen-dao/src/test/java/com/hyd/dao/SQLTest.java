@@ -15,11 +15,12 @@ public class SQLTest {
 
     @Test
     public void testJoin() throws Exception {
+        String name = null;
         SQL.Select select = SQL.Select("*")
             .From("table1 t1")
             .InnerJoin("Table2 t2 on t1.id=t2.id+?", 10)
-            .Where("t2.name=?", "aaa");
-
+            .IfNotEmpty(name, (_select, _name) ->
+                _select.Where("t2.name=?", _name.toUpperCase()));
         output(select);
     }
 
