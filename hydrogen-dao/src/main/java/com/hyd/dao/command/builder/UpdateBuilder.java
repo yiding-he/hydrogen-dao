@@ -4,8 +4,11 @@ import com.hyd.dao.SQL;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.database.type.NameConverter;
+
+import java.util.List;
 
 public class UpdateBuilder extends CommandBuilder {
 
@@ -26,14 +29,14 @@ public class UpdateBuilder extends CommandBuilder {
             throw new NullPointerException("object is null");
         }
 
+        final NameConverter nameConverter = context.getNameConverter();
         final FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final ColumnInfo[] infos = helper.getColumnInfos(fqn);
-        SQL.Update update = new SQL.Update(tableName);
+        final List<ColumnInfo> infos = CommandBuilderHelper.getColumnInfos(fqn, context);
+        final SQL.Update update = new SQL.Update(tableName);
 
         for (ColumnInfo info : infos) {
-            String columnName = helper.getStrictName(info.getColumnName());
-            Object param = helper.generateParamValue(object, info);
+            String columnName = context.getDialect().quote(info.getColumnName());
+            Object param = CommandBuilderHelper.generateParamValue(object, info, nameConverter);
 
             if (info.isPrimary()) {
                 if (param == null) {

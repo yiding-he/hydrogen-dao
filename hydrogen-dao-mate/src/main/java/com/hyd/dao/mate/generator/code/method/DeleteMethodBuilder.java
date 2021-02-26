@@ -1,9 +1,10 @@
 package com.hyd.dao.mate.generator.code.method;
 
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.mate.generator.code.CodeBlock;
 import com.hyd.dao.mate.generator.code.ParamInfo;
 import com.hyd.dao.mate.generator.code.RepoMethodDef;
+
 import java.util.List;
 
 /**
@@ -12,8 +13,8 @@ import java.util.List;
 public class DeleteMethodBuilder extends QueryOneMethodBuilder {
 
     public DeleteMethodBuilder(
-            DatabaseType databaseType, String tableName, String methodName, List<ParamInfo> paramInfoList) {
-        super(databaseType, tableName, methodName, paramInfoList);
+        Dialect dialect, String tableName, String methodName, List<ParamInfo> paramInfoList) {
+        super(dialect, tableName, methodName, paramInfoList);
     }
 
 

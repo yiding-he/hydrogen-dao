@@ -1,11 +1,18 @@
-package com.hyd.dao.mate.util;
+package com.hyd.dao.database;
 
+import com.hyd.dao.DAOException;
+import com.hyd.dao.database.dialects.Dialect;
+import com.hyd.dao.database.dialects.Dialects;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@Builder
+@Getter
 public class ConnectionContext {
 
     private static final Logger LOG = Logger.getLogger(ConnectionContext.class);
@@ -16,22 +23,31 @@ public class ConnectionContext {
 
     private final NameConverter nameConverter;
 
-    public ConnectionContext(String dataSourceName, Connection connection, NameConverter nameConverter) {
-        this.dataSourceName = dataSourceName;
-        this.connection = connection;
-        this.nameConverter = nameConverter;
+    private final String databaseProductName;
+
+    private final String databaseVersion;
+
+    private final Dialect dialect;
+
+    public static ConnectionContext create(String dataSourceName, Connection connection, NameConverter nameConverter) {
+        try {
+            String databaseProductName = connection.getMetaData().getDatabaseProductName();
+            String databaseProductVersion = connection.getMetaData().getDatabaseProductVersion();
+            return ConnectionContext.builder()
+                .databaseProductName(databaseProductName)
+                .databaseVersion(databaseProductVersion)
+                .dataSourceName(dataSourceName)
+                .connection(connection)
+                .nameConverter(nameConverter)
+                .dialect(Dialects.getDialect(connection))
+                .build();
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public String getDataSourceName() {
-        return dataSourceName;
-    }
-
-    public NameConverter getNameConverter() {
-        return nameConverter;
+    public static ConnectionContext create(Connection connection) {
+        return create("", connection, NameConverter.DEFAULT);
     }
 
     public void commit() {

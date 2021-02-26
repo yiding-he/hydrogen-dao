@@ -5,12 +5,14 @@ import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.IteratorBatchCommand;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.function.FunctionHelper;
-import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
-import com.hyd.dao.mate.util.*;
+import com.hyd.dao.mate.util.Arr;
+import com.hyd.dao.mate.util.ResultSetUtil;
+import com.hyd.dao.mate.util.Str;
+import com.hyd.dao.mate.util.TypeUtil;
 import com.hyd.dao.sp.SpParam;
 import com.hyd.dao.sp.SpParamType;
 import com.hyd.dao.sp.StorageProcedureHelper;
@@ -92,7 +94,7 @@ public class DefaultExecutor extends Executor {
      * @return 包装好的分页查询语句。对于未知类型的数据库，返回 null。
      */
     private String getRangedSql(String sql, int startPos, int endPos) {
-        return getHelper().getRangedSql(sql, startPos, endPos);
+        return getDialect().wrapRangeQuery(sql, startPos, endPos);
     }
 
     /**
@@ -120,7 +122,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private String getCountSql(String sql) throws SQLException {
-        return getHelper().getCountSql(sql);
+        return getDialect().wrapCountQuery(sql);
     }
 
     @Override
@@ -386,17 +388,12 @@ public class DefaultExecutor extends Executor {
                 SpParam param = params[i];
                 if (param.getType() == SpParamType.OUT || param.getType() == SpParamType.IN_OUT) {
                     Object value = cs.getObject(i + 1);
-
-                    // 对 Oracle 的 CURSOR 类型进行特殊处理
-                    if (databaseType == DatabaseType.Oracle && param.getSqlType() == -10) {
-                        ResultSet rs1 = (ResultSet) value;
-                        result.add(ResultSetUtil.readResultSet(rs1, null, NameConverter.DEFAULT, -1, -1));
-
-                    } else {
-                        result.add(TypeUtil.convertDatabaseValue(param.getSqlType(), value));
-                    }
+                    Object parsedValue = getDialect().parseCallableStatementResult(param.getSqlType(), value);
+                    result.add(parsedValue);
                 }
             }
+        } catch (DAOException e) {
+            throw e;
         } catch (Exception e) {
             throw new DAOException("Reading result failed: " + e.getMessage(), e);
         }
@@ -420,15 +417,11 @@ public class DefaultExecutor extends Executor {
 
     private int getResultSetType() {
 
-        // Oracle 可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
+        // 普通数据库可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
         // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
         // 但是 SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
 
-        if (databaseType == DatabaseType.SQLServer) {
-            return ResultSet.TYPE_SCROLL_SENSITIVE;
-        } else {
-            return ResultSet.TYPE_FORWARD_ONLY;
-        }
+        return getDialect().resultSetTypeForReading();
     }
 
     ////////////////////////////////////////////////////////////////

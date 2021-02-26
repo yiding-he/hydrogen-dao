@@ -5,12 +5,14 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.SQL;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.database.type.NameConverter;
 
 import java.util.List;
+
+import static com.hyd.dao.command.builder.helper.CommandBuilderHelper.*;
 
 /**
  * 创建 insert 语句
@@ -36,20 +38,20 @@ public final class InsertBuilder extends CommandBuilder {
             return BatchCommand.EMPTY;
         }
 
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
+        final NameConverter nameConverter = context.getNameConverter();
         final FQN fqn = new FQN(context, tableName);
         final Object sample = objects.get(0);
-        final ColumnInfo[] infos = getBatchColumnInfo(context, tableName, helper, sample);
-        final SQL.Insert insert = new SQL.Insert(fqn.getStrictName());
+        final List<ColumnInfo> infos = getBatchColumnInfo(context, tableName, sample);
+        final SQL.Insert insert = new SQL.Insert(fqn.getQuotedName());
 
         for (ColumnInfo info : infos) {
             boolean isUsingSysdate = info.getDataType() == DAO.SYSDATE_TYPE;
             String columnName;
 
             if (isUsingSysdate) {
-                columnName = helper.getSysdateMark();
+                columnName = context.getDialect().currentTimeExpression();
             } else {
-                columnName = helper.getStrictName(info.getColumnName());
+                columnName = context.getDialect().quote(info.getColumnName());
             }
 
             insert.Values(columnName, new Object());
@@ -60,25 +62,26 @@ public final class InsertBuilder extends CommandBuilder {
         bc.setColumnInfos(infos);
 
         for (Object object : objects) {
-            bc.addParams(helper.generateParams(infos, object));
+            bc.addParams(generateParams(infos, object, nameConverter));
         }
         return bc;
     }
 
     // 获取要批量插入的表字段信息
-    private static ColumnInfo[] getBatchColumnInfo(
-        ConnectionContext context, String tableName, CommandBuilderHelper helper, Object sample
+    private static List<ColumnInfo> getBatchColumnInfo(
+        ConnectionContext context, String tableName, Object sample
     ) {
 
+        NameConverter nameConverter = context.getNameConverter();
         FQN fqn = new FQN(context, tableName);
-        ColumnInfo[] originColInfos = helper.getColumnInfos(fqn);
-        ColumnInfo[] infos = helper.filterColumnsByType(originColInfos, sample.getClass());
+        List<ColumnInfo> originColInfos = getColumnInfos(fqn, context);
+        List<ColumnInfo> infos = filterColumnsByType(originColInfos, sample.getClass(), nameConverter);
 
-        List<Object> list = helper.generateParams(infos, sample);
+        List<Object> list = generateParams(infos, sample, nameConverter);
         for (int i = 0, listSize = list.size(); i < listSize; i++) {
             Object propertyValue = list.get(i);
             if (propertyValue == DAO.SYSDATE) {
-                infos[i].setDataType(DAO.SYSDATE_TYPE);
+                infos.get(i).setDataType(DAO.SYSDATE_TYPE);
             }
         }
 
@@ -97,10 +100,10 @@ public final class InsertBuilder extends CommandBuilder {
      */
     public Command build(String tableName, Object object) throws DAOException {
         FQN fqn = new FQN(context, tableName);
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = helper.filterColumnsByType(helper.getColumnInfos(fqn), object.getClass());
-        List<Object> params = helper.generateParams(infos, object);
-        return buildCommand(tableName, infos, params, context);
+        NameConverter nameConverter = context.getNameConverter();
+        List<ColumnInfo> infos = filterColumnsByType(getColumnInfos(fqn, context), object.getClass(), nameConverter);
+        List<Object> params = generateParams(infos, object, nameConverter);
+        return buildCommand(tableName, infos, params);
     }
 
     /**
@@ -109,24 +112,20 @@ public final class InsertBuilder extends CommandBuilder {
      * @param tableName 表名
      * @param infos     表的字段信息
      * @param params    参数值
-     * @param context   数据库操作上下文
      *
      * @return 插入命令
      */
-    private Command buildCommand(
-        String tableName, ColumnInfo[] infos, List<Object> params, ConnectionContext context
-    ) {
+    private Command buildCommand(String tableName, List<ColumnInfo> infos, List<Object> params) {
         final FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final SQL.Insert insert = new SQL.Insert(fqn.getStrictName());
+        final SQL.Insert insert = new SQL.Insert(fqn.getQuotedName());
 
-        for (int i = 0; i < infos.length; i++) {
+        for (int i = 0; i < infos.size(); i++) {
             Object value = params.get(i);
             if (value == null) {
                 continue;
             }
 
-            String columnName = helper.getStrictName(infos[i].getColumnName());
+            String columnName = context.getDialect().quote(infos.get(i).getColumnName());
             insert.Values(columnName, value);
         }
 

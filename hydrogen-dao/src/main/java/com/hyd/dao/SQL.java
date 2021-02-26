@@ -206,6 +206,10 @@ public class SQL {
             return table;
         }
 
+        public List<Object> getParams() {
+            return params;
+        }
+
         public boolean hasConditions() {
             return !conditions.isEmpty();
         }

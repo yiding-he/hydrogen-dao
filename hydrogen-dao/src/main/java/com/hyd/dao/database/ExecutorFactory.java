@@ -13,6 +13,7 @@ import com.hyd.dao.transaction.TransactionManager;
 public class ExecutorFactory {
 
     public static Executor getExecutor(DAO dao) {
-        return new DefaultExecutor(TransactionManager.getConnectionContext(dao));
+        final ConnectionContext connectionContext = TransactionManager.getConnectionContext(dao);
+        return new DefaultExecutor(connectionContext);
     }
 }

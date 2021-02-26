@@ -3,12 +3,14 @@ package com.hyd.dao.command.builder;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.SQL;
 import com.hyd.dao.command.Command;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.database.type.NameConverter;
 
-import java.util.Arrays;
+import java.util.List;
+
+import static com.hyd.dao.command.builder.helper.CommandBuilderHelper.*;
 
 /**
  * 构建查询语句的类
@@ -26,13 +28,12 @@ public final class QueryBuilder extends CommandBuilder {
      */
     public Command buildByKey(String tableName, Object primaryKey) throws DAOException {
         final FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final ColumnInfo[] infos = helper.getColumnInfos(fqn);
-        final SQL.Select select = new SQL.Select("*").From(fqn.getStrictName());
+        final List<ColumnInfo> infos = getColumnInfos(fqn, context);
+        final SQL.Select select = new SQL.Select("*").From(fqn.getQuotedName());
 
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                select.And(helper.getStrictName(info.getColumnName()) + "=?", primaryKey);
+                select.And(context.getDialect().quote(info.getColumnName()) + "=?", primaryKey);
                 break;
             }
         }
@@ -49,18 +50,18 @@ public final class QueryBuilder extends CommandBuilder {
      */
     public Command build(String tableName, Object obj) {
         final FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final SQL.Select select = new SQL.Select("*").From(fqn.getStrictName());
+        final SQL.Select select = new SQL.Select("*").From(fqn.getQuotedName());
 
-        final ColumnInfo[] infos = obj == null ?
-            helper.getColumnInfos(fqn) :
-            helper.filterColumnsByType(helper.getColumnInfos(fqn), obj.getClass());
+        final NameConverter nameConverter = context.getNameConverter();
+        final List<ColumnInfo> infos = obj == null ?
+            getColumnInfos(fqn, context) :
+            filterColumnsByType(getColumnInfos(fqn, context), obj.getClass(), nameConverter);
 
         if (obj != null) {
-            Arrays.stream(infos).forEach(info -> {
-                Object value = helper.generateParamValue(obj, info);
+            infos.forEach(info -> {
+                Object value = generateParamValue(obj, info, nameConverter);
                 if (value != null) {
-                    select.And(helper.getStrictName(info.getColumnName()) + "=?", value);
+                    select.And(context.getDialect().quote(info.getColumnName()) + "=?", value);
                 }
             });
         }

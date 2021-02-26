@@ -40,6 +40,10 @@ public class BatchCommand {
         this.columnInfos = columnInfos;
     }
 
+    public void setColumnInfos(List<ColumnInfo> columnInfos) {
+        setColumnInfos(columnInfos.toArray(new ColumnInfo[0]));
+    }
+
     /**
      * 构造函数
      *

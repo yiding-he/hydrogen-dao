@@ -1,11 +1,12 @@
 package com.hyd.dao.mate.generator.code.method;
 
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.mate.generator.code.MethodArg;
 import com.hyd.dao.mate.generator.code.ParamInfo;
 import com.hyd.dao.mate.generator.code.RepoMethodDef;
 import com.hyd.dao.mate.generator.code.RepoMethodReturnType;
 import com.hyd.dao.mate.util.Str;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,9 +16,9 @@ import java.util.List;
 public class QueryPageMethodBuilder extends QueryOneMethodBuilder {
 
     public QueryPageMethodBuilder(
-            DatabaseType databaseType, String tableName,
-            String methodName, List<ParamInfo> paramInfoList) {
-        super(databaseType, tableName, methodName, paramInfoList);
+        Dialect dialect, String tableName,
+        String methodName, List<ParamInfo> paramInfoList) {
+        super(dialect, tableName, methodName, paramInfoList);
     }
 
     @Override

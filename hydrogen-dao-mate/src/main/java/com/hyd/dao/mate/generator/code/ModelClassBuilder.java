@@ -1,9 +1,10 @@
 package com.hyd.dao.mate.generator.code;
 
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.Str;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -26,9 +27,9 @@ public class ModelClassBuilder extends ClassDefBuilder {
     private final List<BiConsumer<ColumnInfo, FieldDef>> afterFieldListeners = new ArrayList<>();
 
     public ModelClassBuilder(
-            String packageName, String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType, NameConverter nameConverter) {
-        super(packageName, tableName, columnInfos, databaseType, nameConverter);
+        String packageName, String tableName, List<ColumnInfo> columnInfos,
+        Dialect dialect, NameConverter nameConverter) {
+        super(packageName, tableName, columnInfos, dialect, nameConverter);
     }
 
     public void setSettersEnabled(boolean settersEnabled) {

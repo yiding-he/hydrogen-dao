@@ -1,26 +1,21 @@
 package com.hyd.dao.repository;
 
-import com.hyd.dao.DAO;
 import com.hyd.dao.src.models.Blog;
+import com.hyd.daotests.DataSourceFactories;
 import com.hyd.daotests.JUnitRuleTestBase;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
 public class RepositoryTest extends JUnitRuleTestBase {
 
-    @Override
-    protected Supplier<DAO> getDAOSupplier() {
-        return () -> dao;
-    }
-
     private Repository<Blog> getRepository() {
-        return new Repository<>(Blog.class, dao, "blog");
+        return new Repository<>(Blog.class, getDao(), "blog");
     }
 
     @Test
@@ -179,7 +174,7 @@ public class RepositoryTest extends JUnitRuleTestBase {
             getRepository().updateById(blog);
             fail();
         } catch (Exception e) {
-            assertEquals("Update command missing param value for column ID", e.getMessage());
+            assertTrue(e.getMessage().contains("Update command missing param value for column"));
         }
     }
 
@@ -195,5 +190,10 @@ public class RepositoryTest extends JUnitRuleTestBase {
 
         Blog blog = repository.queryById(1L);
         assertEquals("Changed Title", blog.getTitle());
+    }
+
+    @Override
+    protected DataSource createDataSource() {
+        return DataSourceFactories.mysqlDataSource();
     }
 }

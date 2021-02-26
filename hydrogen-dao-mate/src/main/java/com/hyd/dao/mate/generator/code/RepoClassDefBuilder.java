@@ -1,9 +1,11 @@
 package com.hyd.dao.mate.generator.code;
 
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.Str;
+
+import java.util.List;
 
 /**
  * (description)
@@ -16,9 +18,9 @@ public class RepoClassDefBuilder extends ClassDefBuilder {
     private final String modelPackage;
 
     public RepoClassDefBuilder(
-        String repoPackage, String modelPackage, String tableName, ColumnInfo[] columnInfos,
-        DatabaseType databaseType, NameConverter nameConverter) {
-        super(repoPackage, tableName, columnInfos, databaseType, nameConverter);
+        String repoPackage, String modelPackage, String tableName, List<ColumnInfo> columnInfos,
+        Dialect dialect, NameConverter nameConverter) {
+        super(repoPackage, tableName, columnInfos, dialect, nameConverter);
         this.modelPackage = modelPackage;
     }
 

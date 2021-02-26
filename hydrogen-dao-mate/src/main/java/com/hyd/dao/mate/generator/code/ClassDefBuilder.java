@@ -1,9 +1,9 @@
 package com.hyd.dao.mate.generator.code;
 
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.mate.util.TypeUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ public abstract class ClassDefBuilder {
 
     protected ColumnInfo[] columnInfos;
 
-    protected DatabaseType databaseType;
+    protected Dialect dialect;
 
     protected NameConverter nameConverter;
 
@@ -36,13 +36,13 @@ public abstract class ClassDefBuilder {
     protected List<Consumer<ClassDef>> afterClassListeners = new ArrayList<>();
 
     public ClassDefBuilder(
-            String packageName, String tableName, ColumnInfo[] columnInfos,
-            DatabaseType databaseType, NameConverter nameConverter
+            String packageName, String tableName, List<ColumnInfo> columnInfos,
+            Dialect dialect, NameConverter nameConverter
     ) {
         this.packageName = packageName;
         this.tableName = tableName;
-        this.columnInfos = columnInfos;
-        this.databaseType = databaseType;
+        this.columnInfos = columnInfos.toArray(new ColumnInfo[0]);
+        this.dialect = dialect;
         this.nameConverter = nameConverter;
     }
 
@@ -94,6 +94,6 @@ public abstract class ClassDefBuilder {
     protected abstract ClassDef build(String tableName);
 
     protected String getJavaType(ColumnInfo columnInfo) {
-        return TypeUtil.getJavaType(databaseType, columnInfo);
+        return dialect.getJavaType(columnInfo);
     }
 }

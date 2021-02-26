@@ -7,7 +7,7 @@ import com.hyd.dao.command.builder.DeleteBuilder;
 import com.hyd.dao.command.builder.InsertBuilder;
 import com.hyd.dao.command.builder.QueryBuilder;
 import com.hyd.dao.command.builder.UpdateBuilder;
-import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.transaction.TransactionManager;
 
 import java.util.List;

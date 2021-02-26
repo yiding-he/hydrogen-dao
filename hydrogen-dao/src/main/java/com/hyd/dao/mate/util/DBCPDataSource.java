@@ -1,8 +1,9 @@
 package com.hyd.dao.mate.util;
 
 
-import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+
+import javax.sql.DataSource;
 
 /**
  * 创建基于 DBCP 的 DataSource 对象
@@ -71,7 +72,7 @@ public final class DBCPDataSource {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
         ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database +
-                "?useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
+                "?serverTimezone=UTC&useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
         ds.setUsername(username);
         ds.setPassword(password);
         return ds;

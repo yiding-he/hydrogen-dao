@@ -22,6 +22,14 @@
 
   <dependencies>
 
+    <!-- Coding -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.18</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -34,6 +42,13 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.7.25</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- Caching -->
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>2.9.0</version>
     </dependency>
 
     <!-- Optional DataSource Libraries -->

@@ -2,16 +2,17 @@ package com.hyd.dao.mate.generator;
 
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
+import com.hyd.dao.database.dialects.Dialects;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.generator.code.AnnotationDef;
 import com.hyd.dao.mate.generator.code.ClassDef;
 import com.hyd.dao.mate.generator.code.ModelClassBuilder;
-import com.hyd.dao.mate.util.ConnectionContext;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class PojoGenerator {
 
@@ -60,15 +61,12 @@ public class PojoGenerator {
     //////////////////////////////////////////////////////////////
 
     public String generateCode() throws SQLException {
-        ConnectionContext context = new ConnectionContext(
-            "", connection, nameConverter
-        );
-
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] columnInfos = helper.getColumnInfos(new FQN(context, tableName));
+        ConnectionContext context = ConnectionContext.create("", connection, nameConverter);
+        FQN fqn = new FQN(context, catalog + "." + tableName);
+        List<ColumnInfo> columnInfos = CommandBuilderHelper.getColumnInfos(fqn, context);
 
         ModelClassBuilder builder = new ModelClassBuilder(
-            null, tableName, columnInfos, DatabaseType.of(connection), context.getNameConverter()
+            null, tableName, columnInfos, Dialects.getDialect(connection), context.getNameConverter()
         );
 
         if (useLombok) {

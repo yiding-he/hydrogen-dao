@@ -5,16 +5,14 @@ import com.hyd.dao.Row;
 import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.RowIterator;
+import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.database.type.NameConverter;
-import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.snapshot.ExecutorInfo;
 
 import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -31,18 +29,19 @@ public abstract class Executor {
 
     protected ExecutorInfo info;            // 当前状态
 
-    protected DatabaseType databaseType;    // 数据库类型
-
     protected ConnectionContext context;
 
     public Executor(ConnectionContext context) {
         this.info = new ExecutorInfo(context.getDataSourceName());
-        this.databaseType = DatabaseType.of(context.getConnection());
         this.context = context;
     }
 
     public ConnectionContext getContext() {
         return context;
+    }
+
+    protected Dialect getDialect() {
+        return context.getDialect();
     }
 
     /**
@@ -116,45 +115,6 @@ public abstract class Executor {
     public abstract List query(Class clazz, String sql, List<Object> params, int startPosition, int endPosition);
 
     /**
-     * 根据主键和表名查询指定的记录
-     *
-     * @param wrapperClass 包装类
-     * @param key          主键
-     * @param tableName    表名
-     *
-     * @return 记录。如果查询不到则返回 null
-     *
-     * @deprecated
-     */
-    public <T> T find(Class<T> wrapperClass, Object key, String tableName) {
-        return null;
-    }
-
-    /**
-     * 插入记录
-     *
-     * @param object    要插入的记录
-     * @param tableName 表名
-     *
-     * @deprecated
-     */
-    public void insert(Object object, String tableName) {
-
-    }
-
-    /**
-     * 将一个 Map 对象插入数据库
-     *
-     * @param row       包含字段名和值的 Map 对象。
-     * @param tableName 表名
-     *
-     * @deprecated
-     */
-    public void insertMap(Map row, String tableName) {
-
-    }
-
-    /**
      * 调用存储过程并返回结果
      *
      * @param name   存储过程名称
@@ -181,20 +141,6 @@ public abstract class Executor {
      */
     public abstract RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor);
 
-    /**
-     * 根据对象属性判断数据库记录是否存在
-     *
-     * @param obj       包含查询条件的对象
-     * @param tableName 表名
-     *
-     * @return 记录是否存在
-     *
-     * @deprecated
-     */
-    public boolean exists(Object obj, String tableName) {
-        return false;
-    }
-
     //////////////////////////////////////////////////////////////
 
     public ExecutorInfo getInfo() {
@@ -203,10 +149,6 @@ public abstract class Executor {
 
     protected NameConverter getNameConverter() {
         return this.context.getNameConverter();
-    }
-
-    protected CommandBuilderHelper getHelper() {
-        return CommandBuilderHelper.getHelper(this.context);
     }
 
     protected Connection getConnection() {

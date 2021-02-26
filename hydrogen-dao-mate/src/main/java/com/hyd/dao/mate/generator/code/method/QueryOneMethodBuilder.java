@@ -1,14 +1,9 @@
 package com.hyd.dao.mate.generator.code.method;
 
-import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.mate.generator.code.AccessType;
-import com.hyd.dao.mate.generator.code.CodeBlock;
-import com.hyd.dao.mate.generator.code.Comparator;
-import com.hyd.dao.mate.generator.code.MethodArg;
-import com.hyd.dao.mate.generator.code.ParamInfo;
-import com.hyd.dao.mate.generator.code.RepoMethodDef;
-import com.hyd.dao.mate.generator.code.RepoMethodReturnType;
+import com.hyd.dao.database.dialects.Dialect;
+import com.hyd.dao.mate.generator.code.*;
 import com.hyd.dao.mate.util.Str;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +14,9 @@ import java.util.stream.Collectors;
 public class QueryOneMethodBuilder extends RepoMethodBuilder {
 
     public QueryOneMethodBuilder(
-            DatabaseType databaseType,
+        Dialect dialect,
             String tableName, String methodName, List<ParamInfo> paramInfoList) {
-        super(tableName, databaseType, paramInfoList, methodName);
+        super(tableName, dialect, paramInfoList, methodName);
 
     }
 

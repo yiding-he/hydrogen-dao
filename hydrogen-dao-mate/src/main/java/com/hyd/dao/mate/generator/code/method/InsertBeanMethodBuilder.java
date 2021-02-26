@@ -1,12 +1,9 @@
 package com.hyd.dao.mate.generator.code.method;
 
-import com.hyd.dao.database.DatabaseType;
-import com.hyd.dao.mate.generator.code.AccessType;
-import com.hyd.dao.mate.generator.code.CodeBlock;
-import com.hyd.dao.mate.generator.code.MethodArg;
-import com.hyd.dao.mate.generator.code.ParamInfo;
-import com.hyd.dao.mate.generator.code.RepoMethodDef;
+import com.hyd.dao.database.dialects.Dialect;
+import com.hyd.dao.mate.generator.code.*;
 import com.hyd.dao.mate.util.Str;
+
 import java.util.List;
 
 /**
@@ -14,16 +11,8 @@ import java.util.List;
  */
 public class InsertBeanMethodBuilder extends RepoMethodBuilder {
 
-    /**
-     * 构造方法
-     *
-     * @param tableName     表名
-     * @param databaseType  数据库类型
-     * @param paramInfoList （可选）用户配置后的参数列表
-     * @param methodName    （可选）用户配置的方法名
-     */
-    public InsertBeanMethodBuilder(String tableName, DatabaseType databaseType, List<ParamInfo> paramInfoList, String methodName) {
-        super(tableName, databaseType, paramInfoList, methodName);
+    public InsertBeanMethodBuilder(String tableName, Dialect dialect, List<ParamInfo> paramInfoList, String methodName) {
+        super(tableName, dialect, paramInfoList, methodName);
     }
 
     @Override

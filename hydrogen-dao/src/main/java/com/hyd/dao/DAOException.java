@@ -18,6 +18,10 @@ public class DAOException extends RuntimeException {
         return command;
     }
 
+    public static DAOException wrap(Throwable t) {
+        return t instanceof DAOException ? (DAOException) t : new DAOException(t);
+    }
+
     public DAOException() {
         this.command = null;
     }

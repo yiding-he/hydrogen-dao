@@ -222,6 +222,10 @@ public class Str {
         return isEmptyString(s) ? defaultValue : s;
     }
 
+    public static String appendIfNotEmpty(String s, String append, String ifEmpty) {
+        return isEmptyString(s) ? ifEmpty : (s + append);
+    }
+
     public static String fromCandidates(String... candidates) {
         for (String candidate : candidates) {
             if (!isEmptyString(candidate)) {

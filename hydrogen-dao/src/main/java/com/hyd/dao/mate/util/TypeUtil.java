@@ -1,14 +1,15 @@
 package com.hyd.dao.mate.util;
 
-import com.hyd.dao.database.ColumnInfo;
-import com.hyd.dao.database.DatabaseType;
+import com.hyd.dao.DAOException;
 import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,22 +38,26 @@ public class TypeUtil {
      * @param value      值
      *
      * @return 转化后的类型
-     * @throws java.io.IOException   如果读取 LOB 流失败
-     * @throws java.sql.SQLException 如果读取 LOB 字段失败
+     *
+     * @throws DAOException 如果读取 LOB 失败
      */
-    public static Object convertDatabaseValue(int columnType, Object value) throws IOException, SQLException {
-        if (value == null) {
-            return null;
-        } else if (isNumericType(columnType)) {
-            return (value instanceof BigDecimal ? value : new BigDecimal(value.toString()));
-        } else if (isDateType(columnType)) {
-            return toDate(value);
-        } else if (value instanceof Clob) {
-            return ClobUtil.read((Clob) value);
-        } else if (value instanceof Blob) {
-            return BlobReader.readBytes((Blob) value);
+    public static Object convertDatabaseValue(int columnType, Object value) {
+        try {
+            if (value == null) {
+                return null;
+            } else if (isNumericType(columnType)) {
+                return (value instanceof BigDecimal ? value : new BigDecimal(value.toString()));
+            } else if (isDateType(columnType)) {
+                return toDate(value);
+            } else if (value instanceof Clob) {
+                return ClobUtil.read((Clob) value);
+            } else if (value instanceof Blob) {
+                return BlobReader.readBytes((Blob) value);
+            }
+            return value;
+        } catch (Exception e) {
+            throw DAOException.wrap(e);
         }
-        return value;
     }
 
     private static boolean isNumericType(int columnType) {
@@ -118,70 +123,7 @@ public class TypeUtil {
         }
     }
 
-    public static String getJavaType(DatabaseType databaseType, ColumnInfo columnInfo) {
-
-        int dataType = columnInfo.getDataType();
-        int size = columnInfo.getSize();
-
-        switch (dataType) {
-            case Types.VARCHAR:
-            case Types.CHAR:
-            case Types.LONGVARCHAR:
-                return "String";
-            case Types.BIT:
-                return "Boolean";
-            case Types.NUMERIC:
-                return "BigDecimal";
-            case Types.TINYINT:
-                return "Integer";
-            case Types.SMALLINT:
-                return "Short";
-            case Types.INTEGER:
-                return size < 10 ? "Integer" : "Long";
-            case Types.BIGINT:
-                return "Long";
-            case Types.REAL:
-            case Types.FLOAT:
-                return "Float";
-            case Types.DOUBLE:
-                return "Double";
-            case Types.VARBINARY:
-            case Types.BINARY:
-                return "byte[]";
-            case Types.DATE:
-            case Types.TIME:
-            case Types.TIMESTAMP:
-                return "Date";
-            default:
-                return getJavaTypeByDatabase(databaseType, dataType);
-        }
-    }
-
-    public static String getJavaTypeByDatabase(DatabaseType databaseType, int dataType) {
-        switch (databaseType) {
-            case MySQL:
-                return getMySQLJavaType(dataType);
-            case Oracle:
-                return getOracleJavaType(dataType);
-            default:
-                return "String";
-        }
-    }
-
-    public static String getMySQLJavaType(int dataType) {
-        switch (dataType) {
-            case 3:
-                return "Double";
-            default:
-                return "String";
-        }
-    }
-
-    public static String getOracleJavaType(int dataType) {
-        return "String";
-    }
-
-    public static Field getFieldIgnoreCase(Class type, String fieldName) {
+    public static Field getFieldIgnoreCase(Class<?> type, String fieldName) {
         if (type == Object.class) {
             return null;
         }

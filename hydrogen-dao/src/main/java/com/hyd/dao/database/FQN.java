@@ -1,9 +1,8 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
-import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.mate.util.Str;
+import lombok.EqualsAndHashCode;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -14,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yiding.he
  */
+@EqualsAndHashCode
 public class FQN {
 
     // Map<DataSourceName, Schema>
@@ -23,7 +23,7 @@ public class FQN {
 
     private final String name;
 
-    private final ConnectionContext context;
+    private final String quotedName;
 
     public FQN(ConnectionContext context, String fqn) {
         if (Str.isEmpty(fqn)) {
@@ -49,7 +49,7 @@ public class FQN {
         });
 
         this.name = fqn.contains(".") ? Str.subStringAfterLast(fqn, ".") : fqn;
-        this.context = context;
+        this.quotedName = context.getDialect().quote(this.schema, this.name);
     }
 
     public String getSchema(String defaultValue) {
@@ -68,8 +68,11 @@ public class FQN {
         return name;
     }
 
-    public String getStrictName() {
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        return helper.getStrictName(schema) + "." + helper.getStrictName(name);
+    public String getQuotedName() {
+        return quotedName;
+    }
+
+    public String getFullName() {
+        return Str.appendIfNotEmpty(schema, ".", "") + name;
     }
 }

@@ -3,10 +3,16 @@ package com.hyd.dao.command.builder;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.SQL;
 import com.hyd.dao.command.Command;
-import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
-import com.hyd.dao.mate.util.ConnectionContext;
+import com.hyd.dao.database.dialects.Dialect;
+import com.hyd.dao.database.type.NameConverter;
+
+import java.util.List;
+
+import static com.hyd.dao.command.builder.helper.CommandBuilderHelper.generateParamValue;
+import static com.hyd.dao.command.builder.helper.CommandBuilderHelper.getColumnInfos;
 
 /**
  * 生成 delete 语句
@@ -26,13 +32,14 @@ public final class DeleteBuilder extends CommandBuilder {
         }
 
         final FQN fqn = new FQN(context, tableName);
-        final CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        final ColumnInfo[] infos = helper.getColumnInfos(fqn);
+        final NameConverter nameConverter = context.getNameConverter();
+        final List<ColumnInfo> infos = getColumnInfos(fqn, context);
+        final Dialect dialect = context.getDialect();
 
-        SQL.Delete delete = new SQL.Delete(fqn.getStrictName());
+        SQL.Delete delete = new SQL.Delete(fqn.getQuotedName());
         for (ColumnInfo info : infos) {
-            String columnName = helper.getStrictName(info.getColumnName());
-            Object param = helper.generateParamValue(object, info);
+            String columnName = dialect.quote(info.getColumnName());
+            Object param = generateParamValue(object, info, nameConverter);
             if (param != null) {
                 delete.And(columnName + "=?", param);
             }
@@ -54,14 +61,14 @@ public final class DeleteBuilder extends CommandBuilder {
             throw new NullPointerException("key is null");
         }
 
-        FQN fqn = new FQN(context, tableName);
-        CommandBuilderHelper helper = CommandBuilderHelper.getHelper(context);
-        ColumnInfo[] infos = helper.getColumnInfos(fqn);
+        final FQN fqn = new FQN(context, tableName);
+        final List<ColumnInfo> infos = getColumnInfos(fqn, context);
+        final Dialect dialect = context.getDialect();
 
-        SQL.Delete delete = new SQL.Delete(fqn.getStrictName());
+        SQL.Delete delete = new SQL.Delete(fqn.getQuotedName());
         for (ColumnInfo info : infos) {
             if (info.isPrimary()) {
-                String columnName = helper.getStrictName(info.getColumnName());
+                String columnName = dialect.quote(info.getColumnName());
                 delete.Where(columnName + "=?", key);
                 break;
             }

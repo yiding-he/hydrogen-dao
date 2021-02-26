@@ -5,6 +5,7 @@ import com.hyd.dao.command.Command;
 import com.hyd.dao.command.IteratorBatchCommand;
 import com.hyd.dao.command.MappedCommand;
 import com.hyd.dao.command.builder.InsertBuilder;
+import com.hyd.dao.command.builder.QueryBuilder;
 import com.hyd.dao.database.ExecutorFactory;
 import com.hyd.dao.database.RowIterator;
 import com.hyd.dao.database.executor.Executor;
@@ -324,6 +325,15 @@ public class DAO {
     public <T> T queryFirst(Class<T> clazz, SQL.Generatable generatable) {
         Command command = generatable.toCommand();
         return queryFirst(clazz, command.getStatement(), command.getParams());
+    }
+
+    public Row queryById(Object key, String tableName) {
+        return returnWithExecutor(executor -> {
+            final QueryBuilder queryBuilder = new QueryBuilder(executor.getContext());
+            final Command command = queryBuilder.buildByKey(tableName, key);
+            final List list = executor.query(null, command.getStatement(), command.getParams(), 0, -1);
+            return list.isEmpty() ? null : (Row) list.get(0);
+        });
     }
 
     ////////////////////////////////////////////////////////////////

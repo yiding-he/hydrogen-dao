@@ -1,3 +1,6 @@
+drop table if exists blog;
+drop table if exists blog2;
+
 CREATE TABLE if not exists blog (
   id INT PRIMARY KEY ,
   title VARCHAR(100),

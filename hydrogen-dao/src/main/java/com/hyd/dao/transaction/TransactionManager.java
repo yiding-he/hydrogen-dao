@@ -3,9 +3,9 @@ package com.hyd.dao.transaction;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.DataSources;
+import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;
-import com.hyd.dao.mate.util.ConnectionContext;
 import com.hyd.dao.spring.SpringConnectionFactory;
 
 import javax.sql.DataSource;
@@ -164,7 +164,7 @@ public class TransactionManager {
             // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
             connection = getInTransactionConnection(dao, dataSources);
         }
-        return new ConnectionContext(dao.getDataSourceName(), connection, dao.getNameConverter());
+        return ConnectionContext.create(dao.getDataSourceName(), connection, dao.getNameConverter());
     }
 
     @SuppressWarnings("MagicConstant")
