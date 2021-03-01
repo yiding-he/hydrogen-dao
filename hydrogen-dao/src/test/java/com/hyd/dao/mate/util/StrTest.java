@@ -31,4 +31,13 @@ public class StrTest {
         assertEquals("Hello, HydrogenDAO, now is 2020.",
             Str.eval("Hello, {name}, now is {year}.", variableMap));
     }
+
+    @Test
+    public void testUnderscore2Property() throws Exception {
+        assertEquals("", Str.underscore2Property(""));
+        assertEquals("123", Str.underscore2Property("123"));
+        assertEquals("123456", Str.underscore2Property("123_456"));
+        assertEquals("abcDef", Str.underscore2Property("abc_def"));
+        assertEquals("abcDef", Str.underscore2Property("abc_def_"));
+    }
 }

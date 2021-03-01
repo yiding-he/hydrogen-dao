@@ -15,6 +15,8 @@ public interface NameConverter {
 
     //////////////////////////////////////////////////////////////
 
+    // 这个方法暂时没用到，因为目前属性名转字段名的方法是
+    // 先分析表字段，再转成属性名，再在类的属性中寻找匹配
     String field2Column(String prop);
 
     String column2Field(String column);

@@ -3,8 +3,6 @@ package com.hyd.dao.mate.util;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 处理字符串的类
@@ -70,13 +68,23 @@ public class Str {
             return columnName.toUpperCase();
         }
 
-        return columnName.contains("_") ? underscore2Property(columnName) : columnName.toLowerCase();
+        return underscore2Property(columnName);
     }
 
     public static String underscore2Property(String underscore) {
-        return uncapitalize(Stream.of(underscore.toLowerCase().split("_"))
-            .map(Str::capitalize)
-            .collect(Collectors.joining()));
+        StringBuilder sb = new StringBuilder();
+        boolean cap = false;
+        for (char c : underscore.toCharArray()) {
+            if (c == '_') {
+                cap = true;
+            } else if (cap) {
+                cap = false;
+                sb.append(Character.toUpperCase(c));
+            } else {
+                sb.append(Character.toLowerCase(c));
+            }
+        }
+        return sb.toString();
     }
 
     public static String underscore2Class(String underscore) {
@@ -106,9 +114,9 @@ public class Str {
     /**
      * 将属性名转换为字段名。属性名应符合 JavaBean 命名规范。
      *
-     * @param propertyName 属性名，如："name", "parentNode"
+     * @param propertyName 属性名，如："name", "parentNode", "keyName1"
      *
-     * @return 字段名，如："name", "parent_node"
+     * @return 字段名，如："name", "parent_node", "key_name1"
      */
     public static String propertyToColumn(String propertyName) {
         return propertyName.replaceAll("([A-Z])", "_$1").toLowerCase();

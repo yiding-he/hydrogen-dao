@@ -35,6 +35,13 @@ public final class DBCPDataSource {
         return ds;
     }
 
+    public static BasicDataSource newH2ServerDataSource(String host, int port, String database) {
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("org.h2.Driver");
+        ds.setUrl("jdbc:h2:tcp://" + host + ":" + port + "/" + database + ";IFNOTEXISTS=true");
+        return ds;
+    }
+
     public static BasicDataSource newH2FileDataSource(String filePath, boolean onlyIfExists) {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");

@@ -23,7 +23,6 @@
     <logger name="org" level="ERROR"/>
     <logger name="net" level="ERROR"/>
 
-    <logger name="com.hyd" level="DEBUG"/>
     <logger name="com.hyd.dao.database.executor.DefaultExecutor.batch" level="ERROR"/>
 
 </configuration>

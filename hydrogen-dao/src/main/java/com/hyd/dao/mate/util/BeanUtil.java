@@ -3,6 +3,7 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Table;
 import com.hyd.dao.database.type.TypeConverter;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -13,10 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 处理 bean 对象的帮助类
@@ -207,12 +205,46 @@ public class BeanUtil {
      * @return 值。如果对象中没有该属性或该属性不可读，则返回null
      */
     public static Object getValue(Object obj, String fieldName) {
+        Method getter = null;
         try {
-            Method getter = getPropertyMethod(obj.getClass(), fieldName, true);
+            getter = getPropertyMethod(obj.getClass(), fieldName, true);
             return getter == null ? null: getter.invoke(obj);
         } catch (Exception e) {
-            throw new DAOException("Error getting property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
+            if (getter == null) {
+                throw new DAOException(
+                    "Error getting property " + obj.getClass().getCanonicalName() + "#" + fieldName, e);
+            } else {
+                throw new DAOException(
+                    "Error executing method " + obj.getClass().getCanonicalName() + "#" +
+                        getter.getName() + " " + modifiers(getter.getModifiers()), e);
+            }
         }
+    }
+
+    public static List<String> modifiers(int modifiers) {
+        List<String> result = new ArrayList<>();
+        if (Modifier.isStatic(modifiers)) {
+            result.add("static");
+        }
+        if (Modifier.isAbstract(modifiers)) {
+            result.add("abstract");
+        }
+        if (Modifier.isFinal(modifiers)) {
+            result.add("final");
+        }
+        if (Modifier.isPrivate(modifiers)) {
+            result.add("private");
+        }
+        if (Modifier.isProtected(modifiers)) {
+            result.add("protected");
+        }
+        if (Modifier.isPublic(modifiers)) {
+            result.add("public");
+        }
+        if (Modifier.isSynchronized(modifiers)) {
+            result.add("synchronized");
+        }
+        return result;
     }
 
     /**
