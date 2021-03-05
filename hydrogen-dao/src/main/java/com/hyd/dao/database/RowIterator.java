@@ -4,16 +4,15 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.database.type.TypeConverter;
-import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.ResultSetUtil;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.function.Consumer;
+
+import static com.hyd.dao.mate.util.Closer.closeResultSet;
 
 /**
  * <p>查询结果迭代器。当查询返回大量结果，又没有足够的内存进行缓存时，可以使用 DAO.queryIterator
@@ -38,8 +37,6 @@ import java.util.function.Consumer;
  * </code></p>
  */
 public class RowIterator implements Closeable {
-
-    private static final Logger LOG = Logger.getLogger(RowIterator.class);
 
     private final ResultSet rs;
 
@@ -120,36 +117,9 @@ public class RowIterator implements Closeable {
             return;
         }
 
-        if (rs != null) {
-            Statement st;
-            Connection conn;
-            try {
-                // 如果先执行 rs.close()，那么 st 和 conn 就会为 null。
-                st = rs.getStatement();
-                conn = st.getConnection();
-            } catch (SQLException e) {
-                LOG.warn(e.getMessage(), e);
-                return;
-            } finally {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-
-            try {
-                st.close();
-            } catch (SQLException e) {
-                LOG.warn(e.getMessage(), e);
-            }
-
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOG.warn(e.getMessage(), e);
-            }
-
+        try {
+            closeResultSet(rs);
+        } finally {
             closed = true;
         }
     }
