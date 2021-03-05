@@ -500,8 +500,10 @@ public class DAO {
         String fixedSql = fixSql(sql);
         List<Object> paramList = Arrays.asList(params);
 
-        return returnWithExecutor(executor ->
-            executor.queryIterator(fixedSql, paramList, preProcessor));
+        return returnWithExecutor(executor -> {
+            executor.setAutoCommit(false);
+            return executor.queryIterator(fixedSql, paramList, preProcessor);
+        });
     }
 
     /**

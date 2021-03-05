@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -45,6 +46,16 @@ public abstract class AbstractDaoTest extends JUnitRuleTestBase {
         assertNotNull(page.get(0));
         assertEquals(2, page.getTotalPage());
         assertEquals(3, page.getTotal());
+    }
+
+    @Test
+    public void testQueryIterator() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        getDao().queryIterator("select * from blog").iterate(row -> {
+            counter.incrementAndGet();
+            System.out.println(row);
+        });
+        assertEquals(3, counter.get());
     }
 
     @Test

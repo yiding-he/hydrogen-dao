@@ -1,5 +1,6 @@
 package com.hyd.dao.database.executor;
 
+import com.hyd.dao.DAOException;
 import com.hyd.dao.Page;
 import com.hyd.dao.Row;
 import com.hyd.dao.command.BatchCommand;
@@ -12,6 +13,7 @@ import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.snapshot.ExecutorInfo;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,6 +44,14 @@ public abstract class Executor {
 
     protected Dialect getDialect() {
         return context.getDialect();
+    }
+
+    public void setAutoCommit(boolean autoCommit) {
+        try {
+            this.context.getConnection().setAutoCommit(autoCommit);
+        } catch (SQLException e) {
+            throw DAOException.wrap(e);
+        }
     }
 
     /**
