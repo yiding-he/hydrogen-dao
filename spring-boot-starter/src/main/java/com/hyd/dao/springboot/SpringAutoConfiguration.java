@@ -30,9 +30,9 @@ public class SpringAutoConfiguration {
     public DAO dao(
         DataSource dataSource
     ) {
-        DataSources dataSources = new DataSources();
+        DataSources dataSources = DataSources.getInstance();
         dataSources.setDataSource(DEFAULT_DATA_SOURCE_NAME, dataSource);
-        DAO dao = dataSources.getDAO(DEFAULT_DATA_SOURCE_NAME);
+        DAO dao = new DAO(DEFAULT_DATA_SOURCE_NAME);
         LOG.info("DAO '" + DEFAULT_DATA_SOURCE_NAME + "' initialized as " + dao);
         return dao;
     }

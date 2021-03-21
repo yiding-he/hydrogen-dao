@@ -29,11 +29,13 @@ public class DataSources {
 
     /**
      * dsName -> ExecutorFactory
+     * TODO: clean useless variables
      */
     private final Map<String, ExecutorFactory> executorFactories = new HashMap<>();
 
     /**
      * dsName -> NameConverter
+     * TODO: clean useless variables
      */
     private final Map<String, NameConverter> columnNameConverters = new HashMap<>();
 
