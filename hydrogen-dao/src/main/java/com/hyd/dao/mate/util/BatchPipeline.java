@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public class BatchPipeline<T> {
 
-    private List<T> buffer = new ArrayList<>();
+    private final List<T> buffer = new ArrayList<>();
 
     private Consumer<List<T>> batchOperation;
 
@@ -42,6 +42,10 @@ public class BatchPipeline<T> {
     }
 
     public void flush() {
+        if (buffer.isEmpty()) {
+            return;
+        }
+
         List<T> list = Collections.unmodifiableList(new ArrayList<>(buffer));
         buffer.clear();
         if (batchOperation != null) {

@@ -3,6 +3,7 @@ package com.hyd.dao.database.type;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.TypeUtil;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -11,11 +12,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 将查询结果封装为 pojo 对象的类
@@ -25,7 +22,7 @@ public class TypeConverter {
 
     private static final Logger LOG = Logger.getLogger(TypeConverter.class);
 
-    private static final ThreadLocal<List<String>> warnedMsgs = new ThreadLocal<>();
+    private static final Set<String> warnedTypes = new HashSet<>();
 
     static Map<Class, Class> primitiveToWrapper = new HashMap<>();
 
@@ -74,7 +71,7 @@ public class TypeConverter {
      */
     @SuppressWarnings({"unchecked"})
     public static List<Object> convert(
-            Class clazz, List<Object> simpleResult, NameConverter nameConverter
+        Class clazz, List<Object> simpleResult, NameConverter nameConverter
     ) throws Exception {
         ArrayList<Object> result = new ArrayList<>();
 
@@ -84,7 +81,6 @@ public class TypeConverter {
             result.add(converted);
         }
 
-        warnedMsgs.set(new ArrayList<>());
         return result;
     }
 
@@ -105,10 +101,10 @@ public class TypeConverter {
      * @throws IOException               如果读取 LOB 数据失败
      */
     public static Object convertRow(
-            Class clazz, Map<String, Object> row, NameConverter nameConverter
+        Class clazz, Map<String, Object> row, NameConverter nameConverter
     )
-            throws IllegalAccessException, InstantiationException, SQLException, IOException,
-            NoSuchMethodException, InvocationTargetException {
+        throws IllegalAccessException, InstantiationException, SQLException, IOException,
+        NoSuchMethodException, InvocationTargetException {
 
         // pojo 类必须有一个缺省的构造函数。
         Object result = clazz.getDeclaredConstructor().newInstance();
@@ -117,7 +113,10 @@ public class TypeConverter {
             String fieldName = nameConverter.column2Field(colName);
             Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
             if (field == null) {
-                warn("Unable to convert column '" + colName + "' to field name.");
+                warn(clazz.getCanonicalName() + "." + fieldName,
+                    "Unable to convert column '" + colName + "' to field '" +
+                        clazz.getCanonicalName() + "." + fieldName
+                        + "': field not found");
                 continue;
             }
 
@@ -126,7 +125,9 @@ public class TypeConverter {
                 try {
                     BeanUtil.setValueIgnoreCase(result, fieldName, value);
                 } catch (Exception e) {
-                    warn(String.format("Error setting value of field '%s#%s' (%s)",
+                    warn(
+                        clazz.getCanonicalName() + "." + fieldName,
+                        String.format("Error setting value of field '%s#%s' (%s)",
                             clazz.getCanonicalName(), fieldName, value.getClass().getCanonicalName()));
                 }
             }
@@ -204,15 +205,14 @@ public class TypeConverter {
      *
      * @param msg 警告信息
      */
-    private static void warn(String msg) {
-        List<String> list = warnedMsgs.get();
-        if (list == null) {
-            list = new ArrayList<>();
-            warnedMsgs.set(list);
+    private static void warn(String type, String msg) {
+        if (warnedTypes.contains(type)) {
+            return;
         }
-        if (!list.contains(msg)) {
+
+        synchronized (warnedTypes) {
+            warnedTypes.add(type);
             LOG.warn(msg);
-            list.add(msg);
         }
     }
 }

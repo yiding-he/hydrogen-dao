@@ -582,6 +582,10 @@ public class SQL {
 
         private String groupBy;
 
+        private long skip = -1;
+
+        private long limit = -1;
+
         public Select(String columns) {
             this.columns = columns;
         }
@@ -610,6 +614,16 @@ public class SQL {
             return this;
         }
 
+        public Select Skip(long skip) {
+            this.skip = skip;
+            return this;
+        }
+
+        public Select Limit(long limit) {
+            this.limit = limit;
+            return this;
+        }
+
         @Override
         public Command toCommand() {
             this.params.clear();
@@ -618,6 +632,8 @@ public class SQL {
             this.statement += generateWhereBlock();
             this.statement += generateGroupBy();
             this.statement += generateOrderBy();
+            this.statement += this.skip > 0 ? (" skip " + this.skip + " ") : "";
+            this.statement += this.limit > 0 ? (" limit " + this.limit + " ") : "";
             return new Command(this.statement, this.params);
         }
 
