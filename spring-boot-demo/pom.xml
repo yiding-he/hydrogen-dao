@@ -32,14 +32,7 @@
     <dependency>
       <groupId>com.github.yiding-he</groupId>
       <artifactId>spring-boot-starter-hydrogen-dao</artifactId>
-      <version>4.0.0-${version-type}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.github.yiding-he</groupId>
-      <artifactId>hydrogen-dao-mate</artifactId>
-      <version>1.1.0-${version-type}</version>
-      <optional>true</optional>
+      <version>4.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -55,6 +48,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>1.18.18</version> <!-- Otherwise IntelliJ won't compile -->
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -66,38 +60,11 @@
 
   <profiles>
     <profile>
-      <id>dev</id>
-      <properties>
-        <version-type>SNAPSHOT</version-type>
-      </properties>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>dev-nexus-server</id>
-          <name>Snapshots</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-      </distributionManagement>
-      <repositories>
-        <repository>
-          <id>dev-nexus-server</id>
-          <name>znxunzhi Repository</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <updatePolicy>always</updatePolicy>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-    <profile>
       <id>mainland-prc-china</id>
       <repositories>
         <repository>
           <id>aliyun</id>
-          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -109,7 +76,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>aliyun</id>
-          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -118,67 +85,6 @@
           </snapshots>
         </pluginRepository>
       </pluginRepositories>
-    </profile>
-    <profile>
-      <id>maven-central-for-deploy</id>
-      <properties>
-        <version-type>RELEASE</version-type>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.1.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>central-snapshots</id>
-          <name>Sonatype Nexus Snapshots</name>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-          <id>central-staging</id>
-          <name>Nexus Release Repository</name>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-      </distributionManagement>
     </profile>
   </profiles>
 </project>

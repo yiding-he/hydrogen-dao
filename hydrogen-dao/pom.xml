@@ -6,7 +6,7 @@
 
   <groupId>com.github.yiding-he</groupId>
   <artifactId>hydrogen-dao</artifactId>
-  <version>4.0.0-${version-type}</version>
+  <version>4.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>hydrogen-dao</name>
@@ -175,9 +175,6 @@
   <profiles>
     <profile>
       <id>dev</id>
-      <properties>
-        <version-type>SNAPSHOT</version-type>
-      </properties>
       <distributionManagement>
         <snapshotRepository>
           <id>dev-nexus-server</id>
@@ -204,7 +201,7 @@
       <repositories>
         <repository>
           <id>aliyun</id>
-          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -216,7 +213,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>aliyun</id>
-          <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+          <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -228,14 +225,12 @@
     </profile>
     <profile>
       <id>maven-central-for-deploy</id>
-      <properties>
-        <version-type>RELEASE</version-type>
-      </properties>
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
+            <version>3.2.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
