@@ -401,12 +401,18 @@ public class DAO {
     ////////////////////////////////////////////////////////////////
 
     public Page<Row> queryPage(SQL.Generatable generatable, int pageSize, int pageIndex) {
-        Command command = generatable.toCommand();
-        return queryPage(null, command.getStatement(), pageSize, pageIndex, command.getParams());
+        return queryPage(generatable.toCommand(), pageSize, pageIndex);
     }
 
     public <T> Page<T> queryPage(Class<T> clazz, SQL.Generatable generatable, int pageSize, int pageIndex) {
-        Command command = generatable.toCommand();
+        return queryPage(clazz, generatable.toCommand(), pageSize, pageIndex);
+    }
+
+    public Page<Row> queryPage(Command command, int pageSize, int pageIndex) {
+        return queryPage(null, command.getStatement(), pageSize, pageIndex, command.getParams());
+    }
+
+    public <T> Page<T> queryPage(Class<T> clazz, Command command, int pageSize, int pageIndex) {
         return queryPage(clazz, command.getStatement(), pageSize, pageIndex, command.getParams());
     }
 
