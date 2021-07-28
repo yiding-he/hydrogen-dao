@@ -4,10 +4,12 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.dialects.Dialect;
+import com.hyd.dao.database.executor.ExecuteMode;
 import com.hyd.dao.mate.util.Str;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -57,5 +59,14 @@ public class MySqlDialect implements Dialect {
     @Override
     public String fixCatalog(String connectionCatalog, FQN fqn) {
         return Str.defaultIfEmpty(fqn.getSchema(), connectionCatalog);
+    }
+
+    @Override
+    public void setupStatement(Statement statement, ExecuteMode executeMode) throws SQLException {
+        if (executeMode == ExecuteMode.Streaming) {
+            // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-implementation-notes.html
+            // Chapter "ResultSet"
+            statement.setFetchSize(Integer.MIN_VALUE);
+        }
     }
 }

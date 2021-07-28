@@ -7,6 +7,7 @@ import com.hyd.dao.command.BatchCommand;
 import com.hyd.dao.command.IteratorBatchCommand;
 import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.RowIterator;
+import com.hyd.dao.database.dialects.Dialects;
 import com.hyd.dao.database.function.FunctionHelper;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Arr;
@@ -129,6 +130,7 @@ public class DefaultExecutor extends Executor {
     public RowIterator queryIterator(String sql, List<Object> params, Consumer<Row> preProcessor) {
         printCommand(sql, params);
         try {
+            executionContext.setExecuteMode(ExecuteMode.Streaming);
             executeQuery(sql, params);
         } catch (SQLException e) {
             throw new DAOException("Query failed:", e, sql, params);
@@ -179,15 +181,17 @@ public class DefaultExecutor extends Executor {
     // 执行语句并将结果赋值给 this.rs
     private void executeQuery(String sql, List<Object> params) throws SQLException {
 
-        // PreparerdStatement 可以不用就不用，以免占用过多 Oracle 的指针。
+        // PreparedStatement 可以不用就不用，以免占用过多 Oracle 的指针。
         if (params == null || params.isEmpty()) {
             st = createNormalStatement();
+            fixStatement(st);
             if (TIMEOUT != -1) {
                 st.setQueryTimeout(TIMEOUT);
             }
             rs = st.executeQuery(sql);
         } else {
             PreparedStatement ps = createPreparedStatement(sql);
+            fixStatement(ps);
             st = ps;
             insertParams(params);
             if (TIMEOUT != -1) {
@@ -195,6 +199,10 @@ public class DefaultExecutor extends Executor {
             }
             rs = ps.executeQuery();
         }
+    }
+
+    private void fixStatement(Statement st) throws SQLException {
+        Dialects.getDialect(context.getConnection()).setupStatement(st, executionContext.getExecuteMode());
     }
 
     ////////////////////////////////////////////////////////////////

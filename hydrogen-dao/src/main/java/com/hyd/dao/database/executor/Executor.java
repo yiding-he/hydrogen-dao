@@ -31,7 +31,9 @@ public abstract class Executor {
 
     protected ExecutorInfo info;            // 当前状态
 
-    protected ConnectionContext context;
+    protected ConnectionContext context;    // 连接上下文
+
+    protected ExecutionContext executionContext = new ExecutionContext(); // 本次执行上下文
 
     public Executor(ConnectionContext context) {
         this.info = new ExecutorInfo(context.getDataSourceName());

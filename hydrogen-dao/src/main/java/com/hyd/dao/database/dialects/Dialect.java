@@ -2,12 +2,11 @@ package com.hyd.dao.database.dialects;
 
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.FQN;
+import com.hyd.dao.database.executor.ExecuteMode;
 import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.mate.util.TypeUtil;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Types;
+import java.sql.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,6 +104,10 @@ public interface Dialect {
 
     default int resultSetTypeForReading() {
         return ResultSet.TYPE_FORWARD_ONLY;
+    }
+
+    default void setupStatement(Statement statement, ExecuteMode executeMode) throws SQLException {
+
     }
 
     default String getJavaType(ColumnInfo columnInfo) {
