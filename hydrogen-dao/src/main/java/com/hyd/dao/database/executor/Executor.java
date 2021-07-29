@@ -172,6 +172,9 @@ public abstract class Executor {
      */
     public void finish() {
         this.context.closeIfAutoCommit();
+        if (info != null) {
+            info.setClosed(true);
+        }
     }
 
 }
