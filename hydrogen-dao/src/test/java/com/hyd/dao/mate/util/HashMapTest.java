@@ -1,9 +1,10 @@
 package com.hyd.dao.mate.util;
 
-import static org.junit.Assert.assertFalse;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class HashMapTest {
 

@@ -3,7 +3,6 @@ package com.hyd.daotests;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.junit.HydrogenDAORule;
-import org.junit.Rule;
 
 import javax.sql.DataSource;
 import java.util.function.Supplier;
@@ -24,7 +23,6 @@ public abstract class JUnitRuleTestBase {
         this.dao = new DAO("default");
     }
 
-    @Rule
     public HydrogenDAORule hydrogenDAORule = new HydrogenDAORule(getDAOSupplier());
 
     protected Supplier<DAO> getDAOSupplier() {

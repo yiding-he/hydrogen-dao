@@ -4,9 +4,6 @@ import com.hyd.dao.DAO;
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.util.CSVReader;
 import com.hyd.dao.mate.util.ScriptExecutor;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import java.io.File;
 import java.util.*;
@@ -17,7 +14,7 @@ import java.util.function.Supplier;
  *
  * @author yidin
  */
-public class HydrogenDAORule implements TestRule {
+public class HydrogenDAORule {
 
     private static final String SCRIPT_FOLDER = "junit-rule-scripts";
 
@@ -91,6 +88,7 @@ public class HydrogenDAORule implements TestRule {
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/before.sql", dao);
     }
 
+/*
     @Override
     public Statement apply(Statement statement, Description description) {
         return new Statement() {
@@ -103,6 +101,7 @@ public class HydrogenDAORule implements TestRule {
             }
         };
     }
+*/
 
     private void after() {
         DAO dao = daoSupplier.get();

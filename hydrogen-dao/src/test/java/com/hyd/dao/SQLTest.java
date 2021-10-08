@@ -1,7 +1,7 @@
 package com.hyd.dao;
 
 import com.hyd.dao.command.Command;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

@@ -2,17 +2,17 @@ package com.hyd.daotests;
 
 import com.hyd.dao.*;
 import com.hyd.dao.src.models.Blog;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AbstractDaoTest extends JUnitRuleTestBase {
 
-    @Before
+    @BeforeEach
     public void init() {
         if (!DataSources.getInstance().contains("default")) {
             DataSources.getInstance().setDataSource("default", createDataSource());

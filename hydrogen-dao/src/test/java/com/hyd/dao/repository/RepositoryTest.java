@@ -3,14 +3,14 @@ package com.hyd.dao.repository;
 import com.hyd.dao.src.models.Blog;
 import com.hyd.daotests.DataSourceFactories;
 import com.hyd.daotests.JUnitRuleTestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RepositoryTest extends JUnitRuleTestBase {
 

@@ -2,7 +2,7 @@ package com.hyd.dao.mate.util;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * (description)

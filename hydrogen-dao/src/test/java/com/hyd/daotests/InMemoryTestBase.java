@@ -5,7 +5,7 @@ import com.hyd.dao.DataSources;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 /**
  * @author yidin
@@ -18,7 +18,7 @@ public abstract class InMemoryTestBase {
 
     protected static BasicDataSource dataSource;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         DataSources dataSources = DataSources.getInstance();
 

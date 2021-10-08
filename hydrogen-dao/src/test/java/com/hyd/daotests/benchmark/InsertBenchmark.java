@@ -6,8 +6,8 @@ import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.dao.repository.Repository;
 import lombok.Data;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
@@ -64,7 +64,7 @@ public class InsertBenchmark {
         this.dao = new DAO(DEFAULT_DATA_SOURCE_NAME);
     }
 
-    @Before
+    @BeforeEach
     public void init() {
         this.dao.execute(DROP_TABLE);
         this.dao.execute(CREATE_TABLE);

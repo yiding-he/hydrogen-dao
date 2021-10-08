@@ -1,9 +1,9 @@
 package com.hyd.dao.database.type;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.hyd.dao.database.type.NameConverter.CAMEL_UNDERSCORE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CamelUnderscoreNameConverterTest {
 

@@ -9,7 +9,7 @@ import com.hyd.dao.database.FQN;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.dao.mate.util.ResultSetUtil;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
