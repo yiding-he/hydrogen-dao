@@ -2,11 +2,12 @@ package com.hyd.dao.demo;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.mate.util.ScriptExecutor;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 @Slf4j
@@ -24,6 +25,8 @@ public class App {
         ScriptExecutor.execute("classpath:/init.sql", dao);
         log.info("Initialization completed.");
 
+        log.info("===================================");
         dao.query("select * from book").forEach(row -> log.info(row.toString()));
+        log.info("===================================");
     }
 }

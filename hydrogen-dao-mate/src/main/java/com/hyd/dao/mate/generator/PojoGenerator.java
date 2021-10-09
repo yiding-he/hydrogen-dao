@@ -3,6 +3,7 @@ package com.hyd.dao.mate.generator;
 import com.hyd.dao.command.builder.helper.CommandBuilderHelper;
 import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.ConnectionContext;
+import com.hyd.dao.database.ConnectionHolder;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.dialects.Dialects;
 import com.hyd.dao.database.type.NameConverter;
@@ -61,7 +62,7 @@ public class PojoGenerator {
     //////////////////////////////////////////////////////////////
 
     public String generateCode() throws SQLException {
-        ConnectionContext context = ConnectionContext.create("", connection, nameConverter);
+        ConnectionContext context = ConnectionContext.create("", ConnectionHolder.fromStatic(connection), nameConverter);
         FQN fqn = new FQN(context, catalog + "." + tableName);
         List<ColumnInfo> columnInfos = CommandBuilderHelper.getColumnInfos(fqn, context);
 
