@@ -1,0 +1,1 @@
+mvn -P maven-central-for-deploy "-Dmaven.test.skip=true" "-DPASS=!" clean deploy

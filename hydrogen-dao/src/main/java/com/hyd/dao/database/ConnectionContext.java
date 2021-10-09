@@ -11,6 +11,9 @@ import lombok.Getter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ *
+ */
 @Builder
 @Getter
 public class ConnectionContext {
@@ -19,7 +22,7 @@ public class ConnectionContext {
 
     private final String dataSourceName;
 
-    private final Connection connection;
+    private final ConnectionHolder connectionHolder;
 
     private final NameConverter nameConverter;
 
@@ -29,15 +32,18 @@ public class ConnectionContext {
 
     private final Dialect dialect;
 
-    public static ConnectionContext create(String dataSourceName, Connection connection, NameConverter nameConverter) {
+    private boolean disposed;
+
+    public static ConnectionContext create(String dataSourceName, ConnectionHolder connectionHolder, NameConverter nameConverter) {
         try {
+            Connection connection = connectionHolder.getConnection();
             String databaseProductName = connection.getMetaData().getDatabaseProductName();
             String databaseProductVersion = connection.getMetaData().getDatabaseProductVersion();
             return ConnectionContext.builder()
                 .databaseProductName(databaseProductName)
                 .databaseVersion(databaseProductVersion)
                 .dataSourceName(dataSourceName)
-                .connection(connection)
+                .connectionHolder(connectionHolder)
                 .nameConverter(nameConverter)
                 .dialect(Dialects.getDialect(connection))
                 .build();
@@ -47,14 +53,27 @@ public class ConnectionContext {
     }
 
     public static ConnectionContext create(Connection connection) {
-        return create("", connection, NameConverter.DEFAULT);
+        return create("", ConnectionHolder.fromStatic(connection), NameConverter.DEFAULT);
+    }
+
+    private void validateDisposeStatus() {
+        if (this.disposed) {
+            throw new IllegalStateException("ConnectionContext is disposed.");
+        }
+    }
+
+    public Connection getConnection() {
+        return this.connectionHolder.getConnection();
     }
 
     public void commit() {
         try {
+            validateDisposeStatus();
+            Connection connection = connectionHolder.getConnection();
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.commit();
             }
+            disposed = true;
             LOG.debug("Connection committed.");
         } catch (SQLException e) {
             LOG.error("Error committing database connection, dataSource=" + this.dataSourceName, e);
@@ -63,9 +82,12 @@ public class ConnectionContext {
 
     public void rollback() {
         try {
+            validateDisposeStatus();
+            Connection connection = connectionHolder.getConnection();
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.rollback();
             }
+            disposed = true;
             LOG.debug("Connection rolled back.");
         } catch (SQLException e) {
             LOG.error("Error rolling back database connection, dataSource=" + this.dataSourceName, e);
@@ -74,9 +96,12 @@ public class ConnectionContext {
 
     public void close() {
         try {
+            validateDisposeStatus();
+            Connection connection = connectionHolder.getConnection();
             if (!connection.isClosed()) {
                 connection.close();
             }
+            disposed = true;
             LOG.debug("Connection closed.");
         } catch (SQLException e) {
             LOG.error("Error closing database connection, dataSource=" + this.dataSourceName, e);
@@ -85,6 +110,7 @@ public class ConnectionContext {
 
     public void closeIfAutoCommit() {
         try {
+            Connection connection = connectionHolder.getConnection();
             if (connection.getAutoCommit()) {
                 close();
             }

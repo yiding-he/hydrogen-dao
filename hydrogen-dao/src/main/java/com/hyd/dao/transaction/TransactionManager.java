@@ -4,6 +4,7 @@ import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.DataSources;
 import com.hyd.dao.database.ConnectionContext;
+import com.hyd.dao.database.ConnectionHolder;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Cls;
 import com.hyd.dao.spring.SpringConnectionFactory;
@@ -154,17 +155,26 @@ public class TransactionManager {
     }
 
     private static ConnectionContext createConnectionContext(DAO dao) {
-        DataSources dataSources = DataSources.getInstance();
-        Connection connection;
+        return ConnectionContext.create(
+            dao.getDataSourceName(), connectionHolder(dao), dao.getNameConverter()
+        );
+    }
 
-        if (dao.isStandAlone() || !isInTransaction()) {
-            // 不打算以事务方式执行，或当前没有进行中的事务
-            connection = getStandAloneConnection(dao, dataSources);
-        } else {
-            // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
-            connection = getInTransactionConnection(dao, dataSources);
-        }
-        return ConnectionContext.create(dao.getDataSourceName(), connection, dao.getNameConverter());
+    private static ConnectionHolder connectionHolder(DAO dao) {
+        return ConnectionHolder.fromSupplier(() -> {
+            DataSources dataSources = DataSources.getInstance();
+            Connection connection;
+
+            if (dao.isStandAlone() || !isInTransaction()) {
+                // 不打算以事务方式执行，或当前没有进行中的事务
+                connection = getStandAloneConnection(dao, dataSources);
+            } else {
+                // 获取当前事务中缓存的 Connection，如果没有则自动新建一个
+                connection = getInTransactionConnection(dao, dataSources);
+            }
+
+            return connection;
+        });
     }
 
     @SuppressWarnings("MagicConstant")
