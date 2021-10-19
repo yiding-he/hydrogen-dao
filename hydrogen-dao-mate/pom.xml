@@ -17,13 +17,14 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <hydrogen-dao.version>4.0.2</hydrogen-dao.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.github.yiding-he</groupId>
       <artifactId>hydrogen-dao</artifactId>
-      <version>4.0.0</version>
+      <version>${hydrogen-dao.version}</version>
     </dependency>
 
     <dependency>
