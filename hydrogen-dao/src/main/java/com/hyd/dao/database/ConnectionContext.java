@@ -8,6 +8,7 @@ import com.hyd.dao.log.Logger;
 import lombok.Builder;
 import lombok.Getter;
 
+import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -34,7 +35,8 @@ public class ConnectionContext {
 
     private boolean disposed;
 
-    public static ConnectionContext create(String dataSourceName, ConnectionHolder connectionHolder, NameConverter nameConverter) {
+    public static ConnectionContext create(
+        String dataSourceName, ConnectionHolder connectionHolder, NameConverter nameConverter) {
         try {
             Connection connection = connectionHolder.getConnection();
             String databaseProductName = connection.getMetaData().getDatabaseProductName();
@@ -62,6 +64,21 @@ public class ConnectionContext {
         }
     }
 
+    /**
+     * 从 ConnectionHolder 获得连接对象，然后尝试得到原始的连接。
+     */
+    public Connection getDriverConnection() {
+        try {
+            Connection connection = this.connectionHolder.getConnection();
+            return connection instanceof PooledConnection ? ((PooledConnection) connection).getConnection() : connection;
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+
+    /**
+     * 从 ConnectionHolder 直接获得连接对象。
+     */
     public Connection getConnection() {
         return this.connectionHolder.getConnection();
     }

@@ -37,8 +37,8 @@ public class FQN {
                 return Str.subStringBeforeLast(fqn, ".");
             } else {
                 return Str.fromCandidates(
-                    context.getConnection().getSchema(),
-                    context.getConnection().getCatalog(),
+                    context.getDriverConnection().getSchema(),
+                    context.getDriverConnection().getCatalog(),
                     "%"
                 );
             }
