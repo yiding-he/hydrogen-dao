@@ -18,7 +18,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hydrogen-dao.version>4.0.2</hydrogen-dao.version>
+    <hydrogen-dao.version>4.0.3-SNAPSHOT</hydrogen-dao.version>
   </properties>
 
   <dependencies>

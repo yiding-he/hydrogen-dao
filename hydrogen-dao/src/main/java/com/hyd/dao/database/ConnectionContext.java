@@ -83,12 +83,16 @@ public class ConnectionContext {
         return this.connectionHolder.getConnection();
     }
 
+    /**
+     * 提交事务并关闭连接，仅当在事务结束时调用
+     */
     public void commit() {
         try {
             validateDisposeStatus();
             Connection connection = connectionHolder.getConnection();
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.commit();
+                connection.close();
             }
             disposed = true;
             LOG.debug("Connection committed.");
@@ -97,12 +101,16 @@ public class ConnectionContext {
         }
     }
 
+    /**
+     * 回滚事务并关闭连接，仅当在事务结束时调用
+     */
     public void rollback() {
         try {
             validateDisposeStatus();
             Connection connection = connectionHolder.getConnection();
             if (!connection.getAutoCommit() && !connection.isClosed()) {
                 connection.rollback();
+                connection.close();
             }
             disposed = true;
             LOG.debug("Connection rolled back.");
@@ -111,7 +119,24 @@ public class ConnectionContext {
         }
     }
 
-    public void close() {
+    /**
+     * 关闭连接，仅当不在事务中时调用
+     */
+    public void closeIfAutoCommit() {
+        try {
+            Connection connection = connectionHolder.getConnection();
+            if (connection.getAutoCommit()) {
+                close();
+            }
+        } catch (SQLException e) {
+            LOG.error("Error closing database connection, dataSource=" + this.dataSourceName, e);
+        }
+    }
+
+    /**
+     * 关闭连接
+     */
+    private void close() {
         try {
             validateDisposeStatus();
             Connection connection = connectionHolder.getConnection();
@@ -120,17 +145,6 @@ public class ConnectionContext {
             }
             disposed = true;
             LOG.debug("Connection closed.");
-        } catch (SQLException e) {
-            LOG.error("Error closing database connection, dataSource=" + this.dataSourceName, e);
-        }
-    }
-
-    public void closeIfAutoCommit() {
-        try {
-            Connection connection = connectionHolder.getConnection();
-            if (connection.getAutoCommit()) {
-                close();
-            }
         } catch (SQLException e) {
             LOG.error("Error closing database connection, dataSource=" + this.dataSourceName, e);
         }

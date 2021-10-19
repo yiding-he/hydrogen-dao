@@ -193,7 +193,7 @@ public class RepositoryTest extends JUnitRuleTestBase {
     }
 
     @Override
-    protected DataSource createDataSource() {
+    protected DataSource getDataSource() {
         return DataSourceFactories.mysqlDataSource();
     }
 }
