@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  *
  * @author yidin
  */
-public final class Locker {
+public class Locker {
 
     public static final int CACHE_SIZE = 10000;
 
@@ -18,34 +18,26 @@ public final class Locker {
 
     private static final Lock CACHE_LOCK = new ReentrantLock();
 
-    private Locker() {
-
-    }
-
     public static void lockAndRun(String key, Runnable runnable) {
-
-        if (!CACHE.containsKey(key)) {
-            lockAndRun(CACHE_LOCK, () -> {
-                if (!CACHE.containsKey(key)) {
-                    CACHE.put(key, new ReentrantLock());
-                }
-            });
-        }
-
-        lockAndRun(CACHE.get(key), runnable);
+        lockAndRun(getCacheLock(key), runnable);
     }
 
     public static <T> T lockAndRun(String key, Supplier<T> supplier) {
+        return lockAndRun(getCacheLock(key), supplier);
+    }
 
-        if (!CACHE.containsKey(key)) {
+    private static Lock getCacheLock(String key) {
+        Lock[] lock = new Lock[]{CACHE.get(key)};
+        if (lock[0] == null) {
             lockAndRun(CACHE_LOCK, () -> {
-                if (!CACHE.containsKey(key)) {
-                    CACHE.put(key, new ReentrantLock());
+                lock[0] = CACHE.get(key);
+                if (lock[0] == null) {
+                    lock[0] = new ReentrantLock();
+                    CACHE.put(key, lock[0]);
                 }
             });
         }
-
-        return lockAndRun(CACHE.get(key), supplier);
+        return lock[0];
     }
 
     private static void lockAndRun(Lock lock, Runnable runnable) {
