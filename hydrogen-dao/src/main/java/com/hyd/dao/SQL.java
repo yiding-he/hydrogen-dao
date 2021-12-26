@@ -8,13 +8,15 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 生成 Command 的帮助类
  *
  * @author yiding.he
  */
+@SuppressWarnings({
+    "unused", "BooleanMethodIsAlwaysInverted", "unchecked", "UnusedReturnValue"
+})
 public class SQL {
 
     //在这个类中本人坚持这种“不符合规范”的命名方式，因为考虑到
@@ -85,11 +87,11 @@ public class SQL {
 
     public static class Pair {
 
-        private Joint joint = Joint.AND;  // AND/OR
+        private Joint joint = Joint.AND;  // AND/OR/null
 
         private final String statement;
 
-        private Object[] args;
+        private List<Object> args;
 
         public Pair(String statement) {
             this.statement = statement;
@@ -106,15 +108,21 @@ public class SQL {
         public Pair(Joint joint, String statement, Object... args) {
             this.joint = joint;
             this.statement = statement.trim();
+            this.args = args == null? Collections.emptyList(): Arrays.asList(args);
+        }
+
+        public Pair(Joint joint, String statement, List<Object> args) {
+            this.joint = joint;
+            this.statement = statement.trim();
             this.args = args;
         }
 
         public Object firstArg() {
-            return this.args == null || this.args.length == 0 ? null : this.args[0];
+            return this.args == null || this.args.isEmpty() ? null : this.args.get(0);
         }
 
         public boolean hasArg() {
-            return this.args != null && this.args.length > 0;
+            return this.args != null && !this.args.isEmpty();
         }
 
         protected static String joinPairName(List<Pair> pairs) {
@@ -159,7 +167,7 @@ public class SQL {
                     continue;
                 }
 
-                result.addAll(Arrays.asList(pair.args));
+                result.addAll(pair.args);
             }
 
             return result;
@@ -187,7 +195,7 @@ public class SQL {
 
     /////////////////////////////////////////////////////////
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public static abstract class Generatable<T extends Generatable> {
 
         protected String table;
@@ -254,6 +262,10 @@ public class SQL {
             return (T) this;
         }
 
+        public T Where(String statement, Generatable<T> child) {
+            return Where(true, statement, child);
+        }
+
         public T Where(boolean exp, String statement) {
             if (this instanceof Insert) {
                 throw new IllegalStateException("cannot use 'where' block in Insert");
@@ -274,6 +286,17 @@ public class SQL {
             return (T) this;
         }
 
+        public T Where(boolean exp, String statement, Generatable<T> child) {
+            if (this instanceof Insert) {
+                throw new IllegalStateException("cannot use 'where' block in Insert");
+            }
+            if (exp) {
+                Command childCmd = child.toCommand();
+                this.conditions.add(new Pair(Joint.AND, statement + "(" + childCmd.getStatement() + ")", childCmd.getParams()));
+            }
+            return (T) this;
+        }
+
         public T And(String statement) {
             this.conditions.add(new Pair(Joint.AND, statement));
             return (T) this;
@@ -282,6 +305,10 @@ public class SQL {
         public T And(String statement, Object... args) {
             this.conditions.add(new Pair(Joint.AND, statement, args));
             return (T) this;
+        }
+
+        public T And(String statement, Generatable<T> child) {
+            return And(true, statement, child);
         }
 
         public T And(boolean exp, String statement) {
@@ -294,6 +321,14 @@ public class SQL {
         public T And(boolean exp, String statement, Object... args) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.AND, statement, args));
+            }
+            return (T) this;
+        }
+
+        public T And(boolean exp, String statement, Generatable<T> child) {
+            if (exp) {
+                Command childCmd = child.toCommand();
+                this.conditions.add(new Pair(Joint.AND, statement + "(" + childCmd.getStatement() + ")", childCmd.getParams()));
             }
             return (T) this;
         }
@@ -326,6 +361,10 @@ public class SQL {
             return (T) this;
         }
 
+        public T Or(String statement, Generatable<T> child) {
+            return Or(true, statement, child);
+        }
+
         public T Or(boolean exp, String statement) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.OR, statement));
@@ -336,6 +375,14 @@ public class SQL {
         public T Or(boolean exp, String statement, Object... args) {
             if (exp) {
                 this.conditions.add(new Pair(Joint.OR, statement, args));
+            }
+            return (T) this;
+        }
+
+        public T Or(boolean exp, String statement, Generatable<T> child) {
+            if (exp) {
+                Command childCmd = child.toCommand();
+                this.conditions.add(new Pair(Joint.OR, statement + "(" + childCmd.getStatement() + ")", childCmd.getParams()));
             }
             return (T) this;
         }
@@ -394,7 +441,6 @@ public class SQL {
         }
 
         private String processCondition(int index, String where, Pair condition) {
-
             where = where.trim();
 
             // 第一个条件不能加 and 和 or 前缀
@@ -407,7 +453,7 @@ public class SQL {
             if (!condition.hasArg()) {       // 不带参数的条件
                 where += condition.statement;
 
-            } else if (condition.args.length == 1 && condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
+            } else if (condition.args.size() == 1 && condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
                 List<?> objects = (List<?>) condition.firstArg();
 
                 // marks = "(?,?,?,...,?)"
@@ -427,7 +473,7 @@ public class SQL {
 
                 // marks = "(?,?,?,...,?)"
                 String marks = "(" +
-                    Stream.of(condition.args)
+                    condition.args.stream()
                         .map(o -> {
                             this.params.add(o);
                             return "?";
@@ -439,7 +485,7 @@ public class SQL {
 
             } else {
                 where += condition.statement;
-                this.params.addAll(Arrays.asList(condition.args));
+                this.params.addAll(condition.args);
             }
 
             return where;
@@ -490,6 +536,7 @@ public class SQL {
     /**
      * 用于生成 update 语句的帮助类
      */
+    @SuppressWarnings({"StringConcatenationInLoop", "unused"})
     public static class Update extends Generatable<Update> {
 
         private final List<Pair> updates = new ArrayList<>();
@@ -519,10 +566,10 @@ public class SQL {
                 if (!pair.hasArg()) {
                     statement += pair.statement;
                 } else if (pair.statement.contains("?")) {
-                    this.params.addAll(Arrays.asList(pair.args));
+                    this.params.addAll(pair.args);
                     statement += pair.statement;
                 } else {
-                    this.params.addAll(Arrays.asList(pair.args));
+                    this.params.addAll(pair.args);
                     statement += pair.statement + "=?";
                 }
 
