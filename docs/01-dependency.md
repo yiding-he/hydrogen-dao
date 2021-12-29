@@ -1,7 +1,11 @@
 
 ## Maven 配置
 
-hydrogen-dao 没有发布到中心库，因此你需要下载源代码自己编译安装。
+hydrogen-dao 的发布地址：
+
+https://mvnrepository.com/artifact/com.github.yiding-he/hydrogen-dao
+
+### 配置依赖关系：
 
 新建一个空的 Maven 项目，在 pom.xml 中添加下面的依赖关系：
 
@@ -14,9 +18,9 @@ hydrogen-dao 没有发布到中心库，因此你需要下载源代码自己编�
 </dependency>
 <!--hydrogen-dao 本身-->
 <dependency>
-    <groupId>com.hyd</groupId>
+    <groupId>com.github.yiding-he</groupId>
     <artifactId>hydrogen-dao</artifactId>
-    <version>2.5.0</version>
+    <version>${hydrogen-dao.version}</version>
 </dependency>
 <!--输出日志-->
 <dependency>

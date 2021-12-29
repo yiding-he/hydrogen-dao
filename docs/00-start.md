@@ -3,8 +3,7 @@
 hydrogen-dao 是一个轻量级的 JDBC 数据库操作工具，专注于简化数据库的连接管理 SQL 执行。其主要功能有：
 
 * 连接池管理，状态查看
-* 跨数据库的事务
-* 根据参数值来动态组装 select/insert/update/delete 语句，免除大量的 if-else
+* 根据条件动态组装 SQL 语句，免除大量的 if-else
 * 简化分页查询和批处理
 
 大部分功能都由 com.hyd.dao.DAO 提供。
