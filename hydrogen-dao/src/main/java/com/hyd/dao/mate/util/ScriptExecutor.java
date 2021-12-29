@@ -3,11 +3,13 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAO;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.log.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,7 +43,7 @@ public class ScriptExecutor {
     }
 
     public static void execute(String resourcePath, DAO dao) {
-        execute(resourcePath, dao, Charset.forName("UTF-8"));
+        execute(resourcePath, dao, StandardCharsets.UTF_8);
     }
 
     public static void execute(String resourcePath, DAO dao, String charset) {

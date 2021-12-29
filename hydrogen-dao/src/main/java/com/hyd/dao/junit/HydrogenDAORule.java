@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  */
 public class HydrogenDAORule {
 
-    private static final String SCRIPT_FOLDER = "junit-rule-scripts";
+    private static final String SCRIPT_FOLDER = "scripts";
 
     private final Supplier<DAO> daoSupplier;
 
@@ -80,7 +80,7 @@ public class HydrogenDAORule {
         prepareData.forEach((tableName, rows) -> dao.insert(rows, tableName));
     }
 
-    private void before() {
+    public void before() {
         DAO dao = daoSupplier.get();
 
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/tables.sql", dao);
@@ -88,22 +88,7 @@ public class HydrogenDAORule {
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/before.sql", dao);
     }
 
-/*
-    @Override
-    public Statement apply(Statement statement, Description description) {
-        return new Statement() {
-
-            @Override
-            public void evaluate() throws Throwable {
-                before();
-                statement.evaluate();
-                after();
-            }
-        };
-    }
-*/
-
-    private void after() {
+    public void after() {
         DAO dao = daoSupplier.get();
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/after.sql", dao);
     }

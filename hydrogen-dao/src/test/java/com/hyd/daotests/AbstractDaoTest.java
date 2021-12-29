@@ -1,23 +1,48 @@
 package com.hyd.daotests;
 
 import com.hyd.dao.*;
+import com.hyd.dao.junit.HydrogenDAORule;
 import com.hyd.dao.src.models.Blog;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class AbstractDaoTest extends JUnitRuleTestBase {
+public abstract class AbstractDaoTest {
+
+    protected DAO dao;
+
+    protected HydrogenDAORule rule;
+
+    protected DAO getDao() {
+        return dao;
+    }
+
+    protected abstract DataSource createDataSource();
+
+    protected abstract void closeDataSource(DataSource dataSource) throws SQLException;
 
     @BeforeEach
     public void init() {
-        if (!DataSources.getInstance().contains("default")) {
-            DataSources.getInstance().setDataSource("default", createDataSource());
+        if (!DataSources.getInstance().contains(DEFAULT_DATA_SOURCE_NAME)) {
+            DataSources.getInstance().setDataSource(DEFAULT_DATA_SOURCE_NAME, createDataSource());
         }
-        this.dao = new DAO("default");
+        this.dao = new DAO(DEFAULT_DATA_SOURCE_NAME);
+        this.rule = new HydrogenDAORule(this::getDao);
+        this.rule.before();
+    }
+
+    @AfterEach
+    public void fin() {
+        this.rule.after();
+        DataSources.getInstance().closeAll(this::closeDataSource);
     }
 
     @Test

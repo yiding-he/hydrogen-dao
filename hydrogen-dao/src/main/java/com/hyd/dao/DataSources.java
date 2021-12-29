@@ -18,6 +18,12 @@ import java.util.function.Consumer;
  */
 public class DataSources {
 
+    @FunctionalInterface
+    public interface DataSourceConsumer {
+
+        void accept(DataSource dataSource) throws SQLException;
+    }
+
     private static final DataSources INSTANCE = new DataSources();
 
     public static final String DEFAULT_DATA_SOURCE_NAME = "default";
@@ -53,14 +59,22 @@ public class DataSources {
      * @param dataSourceName 数据源名称
      * @param finalization   删除后要对数据源做什么操作（例如关闭）
      */
-    public void remove(String dataSourceName, Consumer<DataSource> finalization) {
+    public void remove(String dataSourceName, DataSourceConsumer finalization) throws DAOException {
         DataSource dataSource = dataSources.get(dataSourceName);
 
         if (dataSource != null) {
             dataSources.remove(dataSourceName);
             executorFactories.remove(dataSourceName);
-            finalization.accept(dataSource);
+            try {
+                finalization.accept(dataSource);
+            } catch (Exception e) {
+                throw DAOException.wrap(e);
+            }
         }
+    }
+
+    public void closeAll(DataSourceConsumer finalization) {
+        this.dataSources.keySet().forEach(dataSourceName -> remove(dataSourceName, finalization));
     }
 
     public Map<String, DataSource> getDataSources() {

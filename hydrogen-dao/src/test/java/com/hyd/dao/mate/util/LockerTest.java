@@ -1,6 +1,7 @@
 package com.hyd.dao.mate.util;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
