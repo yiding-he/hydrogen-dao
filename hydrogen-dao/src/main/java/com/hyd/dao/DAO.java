@@ -12,6 +12,7 @@ import com.hyd.dao.database.executor.Executor;
 import com.hyd.dao.database.type.NameConverter;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.Str;
+import com.hyd.dao.repository.Repository;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.transaction.TransactionManager;
 
@@ -247,6 +248,7 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public List<Row> query(String sql, Object... params) throws DAOException {
@@ -261,6 +263,7 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> List<T> query(Class<T> clazz, String sql, Object... params) throws DAOException {
@@ -292,6 +295,7 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public Row queryFirst(String sql, Object... params) throws DAOException {
@@ -307,6 +311,7 @@ public class DAO {
      * @param params 参数
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> T queryFirst(Class<T> clazz, String sql, Object... params) throws DAOException {
@@ -364,6 +369,7 @@ public class DAO {
      * @param params        参数
      *
      * @return 查询结果
+     *
      * @throws DAOException         如果发生数据库错误
      * @throws NullPointerException 如果 sql 为 null
      */
@@ -381,6 +387,7 @@ public class DAO {
      * @param params        参数。如果是一个 List，则自动转换为 Array。
      *
      * @return 查询结果。如果 startPosition &lt; 0 或 endPosition &lt; 0 则表示返回所有的查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> List<T> queryRange(
@@ -425,6 +432,7 @@ public class DAO {
      * @param pageIndex 页号
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public Page<Row> queryPage(String sql, int pageSize, int pageIndex, Object... params) throws DAOException {
@@ -441,6 +449,7 @@ public class DAO {
      * @param pageIndex     页号
      *
      * @return 查询结果
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public <T> Page<T> queryPage(
@@ -489,6 +498,7 @@ public class DAO {
      * @param params 查询参数
      *
      * @return 用于获得查询结果的迭代器。如果查询语句为 null，则返回 null。
+     *
      * @throws IllegalArgumentException 如果 sql 为 null
      * @throws DAOException             如果查询失败
      */
@@ -561,6 +571,7 @@ public class DAO {
      * @param params 参数
      *
      * @return 受影响的行数
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(String sql, Object... params) throws DAOException {
@@ -586,6 +597,7 @@ public class DAO {
      * @param command 批量语句
      *
      * @return 受影响的行数
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(BatchCommand command) throws DAOException {
@@ -598,6 +610,7 @@ public class DAO {
      * @param command 流式批处理命令
      *
      * @return 受影响的行数
+     *
      * @throws DAOException 如果执行失败
      */
     public int execute(IteratorBatchCommand command) throws DAOException {
@@ -623,6 +636,7 @@ public class DAO {
      * @param command 要执行的命令
      *
      * @return 受影响的行数
+     *
      * @throws DAOException 如果发生数据库错误
      */
     public int execute(Command command) throws DAOException {
@@ -687,6 +701,7 @@ public class DAO {
      * @param params 调用参数
      *
      * @return 调用结果。第一个元素是 function 的返回值，第二个元素是第一个 OUT 或 IN_OUT 类型的参数，以此类推。
+     *
      * @throws DAOException 如果调用失败
      */
     public List callFunction(String name, Object... params) throws DAOException {
@@ -696,5 +711,31 @@ public class DAO {
         }
 
         return returnWithExecutor(executor -> executor.callFunction(name, params));
+    }
+
+    /**
+     * 根据 model 类创建对应的 Repository 对象
+     */
+    public <T> Repository<T> repository(Class<T> type, String tableName) {
+        return new Repository<>(type, this, tableName);
+    }
+
+    ////////////////////////////////////////////////// deprecated methods
+
+    @Deprecated
+    public int insertList(List<?> list, String tableName) {
+        if (list.isEmpty()) {
+            return 0;
+        }
+        List<Object> objectList = new ArrayList<>(list);
+        return repository(Object.class, tableName).insertBatch(objectList);
+    }
+
+    @Deprecated
+    public int insertObject(Object o, String tableName) {
+        if (o == null) {
+            return 0;
+        }
+        return repository(Object.class, tableName).insertInstance(o);
     }
 }
