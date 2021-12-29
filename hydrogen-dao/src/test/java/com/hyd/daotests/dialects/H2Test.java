@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 public class H2Test extends AbstractDaoTest {
 
     @Override
-    protected DataSource createDataSource() {
+    protected DataSource getDataSource() {
         return DBCPDataSource.newH2MemDataSource();
     }
 }

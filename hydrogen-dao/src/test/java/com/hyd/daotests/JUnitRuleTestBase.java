@@ -14,11 +14,14 @@ public abstract class JUnitRuleTestBase {
 
     protected DAO dao;
 
-    protected abstract DataSource createDataSource();
+    /**
+     * get or create data source
+     */
+    protected abstract DataSource getDataSource();
 
     {
         if (!DataSources.getInstance().contains("default")) {
-            DataSources.getInstance().setDataSource("default", createDataSource());
+            DataSources.getInstance().setDataSource("default", getDataSource());
         }
         this.dao = new DAO("default");
     }
@@ -31,5 +34,13 @@ public abstract class JUnitRuleTestBase {
 
     protected DAO getDao() {
         return this.dao;
+    }
+
+    protected void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

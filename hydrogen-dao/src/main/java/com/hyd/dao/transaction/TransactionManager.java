@@ -103,6 +103,8 @@ public class TransactionManager {
             .getOrDefault(level, Collections.emptyMap())
             .forEach((dataSourceName, context) -> context.commit());
 
+        connectionContextCache.get().remove(level);
+
         LOG.info(() -> "Transaction level " + level + " committed.");
         TransactionManager.level.set(level - 1);
     }
@@ -119,6 +121,8 @@ public class TransactionManager {
         connectionContextCache.get()
             .getOrDefault(level, Collections.emptyMap())
             .forEach((dataSourceName, context) -> context.rollback());
+
+        connectionContextCache.get().remove(level);
 
         LOG.info(() -> "Transaction level " + level + " rollbacked.");
         TransactionManager.level.set(level - 1);

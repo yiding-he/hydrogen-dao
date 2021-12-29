@@ -5,7 +5,6 @@
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
     <img alt="code style" src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square">
   </a>
-  <a href="https://www.codacy.com/manual/yiding.he/hydrogen-dao?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=yiding-he/hydrogen-dao&amp;utm_campaign=Badge_Grade"><img alt="codacy" src="https://api.codacy.com/project/badge/Grade/f5781dbc75b34d219fbb3b34cf293a81"></a>
   <a href="https://frontend.code-inspector.com/project/3258"><img alt="code-inspector" src="https://www.code-inspector.com/project/3258/status/svg"></a>
 </p>
 
@@ -140,6 +139,10 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ```
 
 ## 更新
+
+#### 2021-10-19
+* 版本号更新到 4.0.2 并正式发布到 Maven
+* 修复若干BUG
 
 #### 2021-10-09
 * 版本号更新到 4.0.0 并正式发布到 Maven

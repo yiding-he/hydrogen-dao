@@ -9,6 +9,7 @@ import com.hyd.dao.database.dialects.Dialect;
 import com.hyd.dao.database.dialects.Dialects;
 import com.hyd.dao.log.Logger;
 
+import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -50,12 +51,17 @@ public class ColumnInfoHelper {
             log.debug("Reading columns of table " + fqn + "...");
 
             try {
-                Dialect dialect = Dialects.getDialect(connection);
+                Connection conn = connection;
+                if (connection instanceof PooledConnection) {
+                    conn = ((PooledConnection) connection).getConnection();
+                }
+
+                Dialect dialect = Dialects.getDialect(conn);
 
                 Dialect.ColumnMetaFields columnMeta = dialect.getColumnMetaFields();
-                DatabaseMetaData dbMeta = connection.getMetaData();
+                DatabaseMetaData dbMeta = conn.getMetaData();
 
-                String catalog = dialect.fixCatalog(connection.getCatalog(), fqn);
+                String catalog = dialect.fixCatalog(conn.getCatalog(), fqn);
                 String schema = fqn.getSchema();
                 String fixedName = dialect.fixMetaName(fqn.getName());
 
