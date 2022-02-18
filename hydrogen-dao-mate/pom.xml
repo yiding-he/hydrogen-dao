@@ -14,10 +14,9 @@
   <url>https://github.com/yiding-he/hydrogen-dao</url>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <java.version>11</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hydrogen-dao.version>4.0.3-SNAPSHOT</hydrogen-dao.version>
+    <hydrogen-dao.version>4.1.0-SNAPSHOT</hydrogen-dao.version>
   </properties>
 
   <dependencies>
