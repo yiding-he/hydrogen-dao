@@ -5,6 +5,9 @@ import com.hyd.dao.src.models.Blog;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -159,5 +162,20 @@ public abstract class AbstractDaoTest extends JUnitRuleTestBase {
         pool.awaitTermination(1, TimeUnit.DAYS);
 
         assertEquals(0, ((BasicDataSource) getDataSource()).getNumActive());
+    }
+
+    @Test
+    public void testSpringJdbcTransaction() throws Exception {
+        PlatformTransactionManager transactionManager = new DataSourceTransactionManager(
+            DataSources.getInstance().getDataSource(DataSources.DEFAULT_DATA_SOURCE_NAME)
+        );
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        transactionTemplate.execute(status -> {
+            DAO.runTransaction(() -> {
+                dao.execute("delete from blog where id < 0");
+            });
+            return null;
+        });
     }
 }
