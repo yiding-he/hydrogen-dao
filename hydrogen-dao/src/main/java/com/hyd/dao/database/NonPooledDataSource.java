@@ -1,14 +1,11 @@
 package com.hyd.dao.database;
 
 import com.hyd.dao.DAOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
+
 import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.logging.Logger;
 
 /**
  * 实现一个最简单的数据源
@@ -16,6 +13,7 @@ import javax.sql.DataSource;
  *
  * @author Yiding
  */
+@SuppressWarnings({"unused", "RedundantThrows"})
 public class NonPooledDataSource implements DataSource {
 
     private String driverClassName;
@@ -82,8 +80,8 @@ public class NonPooledDataSource implements DataSource {
     private void initDriver() {
 
         try {
-            Class type = Class.forName(this.driverClassName);
-            Driver driver = (Driver) type.newInstance();
+            Class<?> type = Class.forName(this.driverClassName);
+            Driver driver = (Driver) type.getConstructor().newInstance();
             DriverManager.registerDriver(driver);
         } catch (Exception e) {
             throw new DAOException("Error registering JDBC driver", e);
