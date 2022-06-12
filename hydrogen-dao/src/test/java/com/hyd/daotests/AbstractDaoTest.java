@@ -3,6 +3,7 @@ package com.hyd.daotests;
 import com.hyd.dao.*;
 import com.hyd.dao.junit.HydrogenDAORule;
 import com.hyd.dao.src.models.Blog;
+import com.hyd.dao.src.models.BlogRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -144,5 +145,13 @@ public abstract class AbstractDaoTest {
         } finally {
             assertNotNull(dao.queryFirst("select * from blog where id=?", 1));
         }
+    }
+
+    @Test
+    public void testQueryRecord() {
+        var dao = getDao();
+        var record = dao.queryFirst(BlogRecord.class, "select * from blog where id=1");
+        assertNotNull(record);
+        assertEquals(1L, record.id());
     }
 }

@@ -5,6 +5,7 @@ import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.TypeUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -101,10 +102,14 @@ public class TypeConverter {
      * @throws IOException               如果读取 LOB 数据失败
      */
     public static Object convertRow(
-        Class clazz, Map<String, Object> row, NameConverter nameConverter
+        Class<?> clazz, Map<String, Object> row, NameConverter nameConverter
     )
         throws IllegalAccessException, InstantiationException, SQLException, IOException,
         NoSuchMethodException, InvocationTargetException {
+
+        if (clazz.isRecord()) {
+            return convertRowRecord(clazz, row, nameConverter);
+        }
 
         // pojo 类必须有一个缺省的构造函数。
         Object result = clazz.getDeclaredConstructor().newInstance();
@@ -135,6 +140,25 @@ public class TypeConverter {
         return result;
     }
 
+    private static Object convertRowRecord(
+        Class<?> clazz, Map<String, Object> row, NameConverter nameConverter
+    ) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        var fields = clazz.getDeclaredFields();
+        var constructorArgTypes = new Class[fields.length];
+        var constructorArgValues = new Object[fields.length];
+
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            constructorArgTypes[i] = field.getType();
+            var column = nameConverter.field2Column(field.getName());
+            var rawValue = row.getOrDefault(column, row.get(column.toUpperCase()));
+            constructorArgValues[i] = convertProperty(rawValue, field.getType());
+        }
+
+        Constructor<?> constructor = clazz.getConstructor(constructorArgTypes);
+        return constructor.newInstance(constructorArgValues);
+    }
+
     /**
      * 根据属性类型转换值对象。这里是从 Row 对象的属性值转换为 Bean 对象的属性值
      * <ol>
@@ -146,10 +170,10 @@ public class TypeConverter {
      *
      * @return 转换后的值
      *
-     * @throws SQLException 如果数据库访问 LOB 字段失败
-     * @throws IOException  如果从流中读取内容失败
      */
-    private static Object convertProperty(Object o, Class fieldType) throws SQLException, IOException {
+    @SuppressWarnings("rawtypes")
+    private static Object convertProperty(Object o, Class<?> fieldType)
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         if (fieldType == Boolean.TYPE) {
             String str = String.valueOf(o);
@@ -162,10 +186,13 @@ public class TypeConverter {
             return null;
         } else if (o instanceof Timestamp) {
             return new Date(((Timestamp) o).getTime());
+        } else if (Number.class.isAssignableFrom(fieldType)) {
+            // Assuming all subclasses of Number have a static constructor 'valueOf(String)'
+            return fieldType.getMethod("valueOf", String.class).invoke(null, convertToString(o));
         } else if (fieldType == String.class) {
             return convertToString(o);
         } else if (fieldType.isEnum() && o instanceof String) {
-            return Enum.valueOf(fieldType, (String) o);
+            return Enum.valueOf((Class)fieldType, (String) o);
         } else {
             return o;
         }
