@@ -3,6 +3,7 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.database.type.BlobReader;
 import com.hyd.dao.database.type.ClobUtil;
+import com.hyd.dao.time.UniTime;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.temporal.Temporal;
 import java.util.Date;
 
 /**
@@ -81,6 +83,8 @@ public class TypeUtil {
 
         if (type == String.class) {
             return toDateFromString(value.toString());
+        } else if (value instanceof Temporal) {
+            return UniTime.fromTemporal((Temporal) value).toDate();
         }
 
         try {

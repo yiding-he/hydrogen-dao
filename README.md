@@ -5,9 +5,7 @@
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
     <img alt="code style" src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square">
   </a>
-  <a href="https://frontend.code-inspector.com/project/3258"><img alt="code-inspector" src="https://www.code-inspector.com/project/3258/status/svg"></a>
 </p>
-
 
 
 # hydrogen-dao
