@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>com.github.yiding-he</groupId>
-      <artifactId>hydrogen-dao</artifactId>
+      <artifactId>hydrogen-dao-j17</artifactId>
       <version>${hydrogen-dao.version}</version>
     </dependency>
 

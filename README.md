@@ -12,8 +12,6 @@
 
 # hydrogen-dao
 
-![如何使用](https://user-images.githubusercontent.com/900606/66099687-6e705e80-e5da-11e9-903c-fd7aee85f042.png)
-
 hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 JDBC 接口。主要功能有：
 
 * 执行带参数的查询和更新；
@@ -25,7 +23,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 使用方法参考源码下的 `docs` 目录。
 
-当前分支的版本为 `4.0.0`。
+当前分支的版本为 `6.0.0`。
 
 ## 添加依赖关系
 
@@ -34,7 +32,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 ```xml
 <dependency>
     <groupId>com.github.yiding-he</groupId>
-    <artifactId>hydrogen-dao</artifactId>
+    <artifactId>hydrogen-dao-j17</artifactId>
     <version>${hydrogen-dao.version}</version>
 </dependency>
 ```
@@ -45,10 +43,9 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 
 ```java
 // 初始化 DataSource 对象
-DataSource dataSource = new com.zaxxer.hikari.HikariDataSource();
-...
+DataSource dataSource = ...
 
-// 将 DataSource 对象注册到 DataSources。
+// 将 DataSource 对象注册到 DataSources
 com.hyd.dao.DataSources dataSources = DataSources.getInstance();
 dataSources.setDataSource("default", dataSource);
 
@@ -115,8 +112,6 @@ dao.execute(cmd);
 
 ### 构造动态查询条件
 
-_不用写恶心的 `where 1=1` 了_
-
 ```Java
 dao.query(SQL
     .Select("ID", "NAME", "DESCRIPTION")
@@ -139,6 +134,10 @@ DAO.runTransaction(() -> {  // 所有事务都以 Runnable 的方式执行，简
 ```
 
 ## 更新
+
+#### 2022-06-12
+* 版本号更新到 6.0.0，要求 JDK 版本 17
+* artifact-id 改为 hydrogen-dao-j17
 
 #### 2021-10-19
 * 版本号更新到 4.0.2 并正式发布到 Maven
