@@ -10,33 +10,17 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.hyd.dao.mate.util.Closer.closeResultSet;
 
 /**
  * <p>查询结果迭代器。当查询返回大量结果，又没有足够的内存进行缓存时，可以使用 DAO.queryIterator
  * 方法。该方法返回一个迭代器，用来每次获取一行查询结果。当处理完毕后，请务必记得将其关闭。</p>
- * <p>使用示例：<br><code>
- * RowIterator it;<br>
- * try {<br>
- * &nbsp;&nbsp;&nbsp; it&nbsp;= dao.queryIterator("select
- * * from tt_test");<br>
- * &nbsp;&nbsp;&nbsp; while(it.next()) {<br>
- * &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Map
- * row = it.getRow();<br>
- * &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
- * System.out.println("name = " + row.get("name"));<br>
- * &nbsp;&nbsp;&nbsp; }<br>
- * } finally {<br>
- * &nbsp;&nbsp;&nbsp; if (it != null) {<br>
- * &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
- * it.close();<br>
- * &nbsp;&nbsp;&nbsp; }<br>
- * }
- * </code></p>
  */
-public class RowIterator implements Closeable {
+public class RowIterator implements Closeable, Iterable<Row> {
 
     private final ResultSet rs;
 
@@ -124,37 +108,55 @@ public class RowIterator implements Closeable {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> void iterate(Class<T> type, Consumer<T> consumer) {
+    @Override
+    public Iterator<Row> iterator() {
+        return iterator(Row.class);
+    }
 
-        if (closed) {
-            return;
-        }
-
-        try {
-            while (this.next()) {
-                try {
-                    Row row = this.getRow();
-                    T t = (T) TypeConverter.convertRow(type, row, nameConverter);
-                    consumer.accept(t);
-                } catch (Exception e) {
-                    throw new DAOException(e);
-                }
-            }
-        } finally {
-            close();
-        }
+    public <T> void forEach(Class<T> type, Consumer<T> action) {
+        iterator(type).forEachRemaining(action);
     }
 
     @SuppressWarnings("unchecked")
-    public void iterate(Consumer<Row> consumer) {
-        try {
-            while (this.next()) {
-                Row row = this.getRow();
-                consumer.accept(row);
+    private <T> Iterator<T> iterator(Class<T> type) {
+        Function<Row, T> converter = row -> {
+            if (type.isAssignableFrom(Row.class)) {
+                return (T) row;
+            } else {
+                try {
+                    return (T) TypeConverter.convertRow(type, row, nameConverter);
+                } catch (Throwable e) {
+                    throw DAOException.wrap(e);
+                }
             }
-        } finally {
-            close();
-        }
+        };
+
+        return new Iterator<>() {
+            private T next = null;
+
+            private void fetchNext() {
+                if (RowIterator.this.next()) {
+                    this.next = converter.apply(RowIterator.this.getRow());
+                } else {
+                    this.next = null;
+                }
+            }
+
+            {
+                fetchNext();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return this.next != null;
+            }
+
+            @Override
+            public T next() {
+                T result = this.next;
+                fetchNext();
+                return result;
+            }
+        };
     }
 }

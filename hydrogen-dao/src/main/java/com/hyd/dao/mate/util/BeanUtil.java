@@ -42,7 +42,7 @@ public class BeanUtil {
             PropertyDescriptor propertyDescriptor = getPropertyDescriptor(obj.getClass(), fieldName);
             if (propertyDescriptor == null) {
                 throw new DAOException(
-                        "Field not found for " + obj.getClass().getCanonicalName() + "#" + fieldName);
+                    "Field not found for " + obj.getClass().getCanonicalName() + "#" + fieldName);
             }
 
             Class<?> fieldType = propertyDescriptor.getPropertyType();
@@ -51,7 +51,7 @@ public class BeanUtil {
             Method writeMethod = getPropertyMethod(obj.getClass(), fieldName, false);
             if (writeMethod == null) {
                 throw new DAOException(
-                        "Missing write method for " + obj.getClass().getCanonicalName() + "#" + fieldName);
+                    "Missing write method for " + obj.getClass().getCanonicalName() + "#" + fieldName);
             }
 
             writeMethod.invoke(obj, convertedValue);
@@ -75,7 +75,7 @@ public class BeanUtil {
     private static Method getPropertyMethod(Class clazz, String fieldName, boolean getter) {
         PropertyDescriptor descriptor = getPropertyDescriptor(clazz, fieldName);
         return descriptor == null ? null :
-                getter ? descriptor.getReadMethod() : descriptor.getWriteMethod();
+            getter ? descriptor.getReadMethod() : descriptor.getWriteMethod();
     }
 
     private static PropertyDescriptor getPropertyDescriptor(Class clazz, String fieldName) {
@@ -96,7 +96,7 @@ public class BeanUtil {
 
     /**
      * 将一个值转化为指定的属性类型，以便于赋到对象属性。注意，当 value 的值超过属性类型允许的最大值时，强制转换将起作用。
-     *
+     * <p>
      * 本方法主要处理数字类型的查询结果，对于字符类型和日期类型则不作处理，直接赋值。
      *
      * @param value 值
@@ -109,14 +109,14 @@ public class BeanUtil {
      * @throws InstantiationException 如果执行构造函数失败
      */
     private static Object convertValue(Object value, Class clazz)
-            throws NoSuchMethodException, IllegalAccessException, InstantiationException {
+        throws NoSuchMethodException, IllegalAccessException, InstantiationException {
         if (value == null) {
             return null;
         }
 
         // 如果类型刚好相符就直接返回 value
         if (value.getClass() == clazz ||
-                (clazz.isPrimitive() && TypeConverter.getWrapper(clazz) == value.getClass())) {
+            (clazz.isPrimitive() && TypeConverter.getWrapper(clazz) == value.getClass())) {
             return value;
         }
 
@@ -124,7 +124,7 @@ public class BeanUtil {
             return String.valueOf(value);
 
         } else if (clazz == Integer.class || clazz == Long.class || clazz == Double.class ||
-                clazz == BigDecimal.class || clazz == BigInteger.class) {
+            clazz == BigDecimal.class || clazz == BigInteger.class) {
             try {
                 String str_value = new BigDecimal(String.valueOf(value)).toPlainString();
 
@@ -208,7 +208,7 @@ public class BeanUtil {
         Method getter = null;
         try {
             getter = getPropertyMethod(obj.getClass(), fieldName, true);
-            return getter == null ? null: getter.invoke(obj);
+            return getter == null ? null : getter.invoke(obj);
         } catch (Exception e) {
             if (getter == null) {
                 throw new DAOException(
@@ -282,13 +282,16 @@ public class BeanUtil {
     }
 
     /**
-     * 按照指定的 key 对 Map 数组进行排序
+     * 按照指定的 sortingKey 对 Map 数组进行排序
      *
      * @param maps       要排序的 Map 数组
-     * @param columnName 指定用于排序的 key
+     * @param sortingKey 指定用于排序的 sortingKey
      */
-    public static void sort(Map[] maps, String columnName, Object defaultValue) {
-        Arrays.sort(maps, Comparator.comparing(map -> (Comparable)map.getOrDefault(columnName, defaultValue)));
+    public static <K, V extends Comparable<V>> void sort(Map<K, V>[] maps, K sortingKey, V defaultValue) {
+        sort(Arrays.asList(maps), sortingKey, defaultValue);
+    }
+    public static <K, V extends Comparable<V>> void sort(List<Map<K, V>> maps, K sortingKey, V defaultValue) {
+        maps.sort(Comparator.comparing(map -> map.getOrDefault(sortingKey, defaultValue)));
     }
 
     /**
@@ -303,7 +306,7 @@ public class BeanUtil {
 
         try {
             return t == null ?
-                    (String) getStaticValue(type, "TN") : t.name();
+                (String) getStaticValue(type, "TN") : t.name();
         } catch (Exception e) {
             throw new DAOException("No table related to " + type, e);
         }

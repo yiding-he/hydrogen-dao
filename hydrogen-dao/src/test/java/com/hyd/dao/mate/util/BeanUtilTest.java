@@ -2,8 +2,11 @@ package com.hyd.dao.mate.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BeanUtilTest {
 
@@ -17,10 +20,10 @@ public class BeanUtilTest {
         map2.put("name", "user1");
         map3.put("name", "user2");
 
-        Map[] maps = {map1, map2, map3};
+        var maps = Arrays.asList(map1, map2, map3);
         BeanUtil.sort(maps, "name", "");
-        for (Map map : maps) {
-            System.out.println(map);
-        }
+        assertEquals("user1", maps.get(0).get("name"));
+        assertEquals("user2", maps.get(1).get("name"));
+        assertEquals("user3", maps.get(2).get("name"));
     }
 }

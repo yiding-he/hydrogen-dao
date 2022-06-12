@@ -76,16 +76,33 @@ public abstract class AbstractDaoTest {
     @Test
     public void testQueryIterator() throws Exception {
         AtomicInteger counter = new AtomicInteger();
-        getDao().queryIterator("select * from blog").iterate(row -> {
-            counter.incrementAndGet();
-            System.out.println(row);
-        });
+        try (var rows = getDao().queryIterator("select * from blog")) {
+            rows.forEach(row -> {
+                counter.incrementAndGet();
+                System.out.println(row);
+            });
+        }
+        assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void testQueryIteratorBean() {
+        AtomicInteger counter = new AtomicInteger();
+        try (var rows = getDao().queryIterator("select * from blog")) {
+            rows.forEach(Blog.class, blog -> {
+                counter.incrementAndGet();
+                assertNotNull(blog.getId());
+            });
+        }
         assertEquals(3, counter.get());
     }
 
     @Test
     public void testInsertNullContent() throws Exception {
         getDao().execute("insert into blog(id,title,content)values(?,?,?)", 666, "no-content", null);
+        Blog blog = getDao().queryFirst(Blog.class, "select * from blog where id=?", 666);
+        assertNotNull(blog);
+        assertNull(blog.getContent());
     }
 
     @Test
