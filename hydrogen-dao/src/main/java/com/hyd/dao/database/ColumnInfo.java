@@ -3,6 +3,7 @@ package com.hyd.dao.database;
 /**
  * 用来描述库表字段信息的类
  */
+@SuppressWarnings("unused")
 public class ColumnInfo {
 
     /**

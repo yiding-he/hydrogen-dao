@@ -44,8 +44,7 @@ hydrogen-dao 是一个 Java 的轻量级的数据库访问库，依赖标准的 
 DataSource dataSource = ...
 
 // 将 DataSource 对象注册到 DataSources
-com.hyd.dao.DataSources dataSources = DataSources.getInstance();
-dataSources.setDataSource("default", dataSource);
+com.hyd.dao.DataSources.getInstance().setDataSource("default", dataSource);
 
 // 获得针对某个数据源的 DAO 对象
 DAO dao = new DAO("default");

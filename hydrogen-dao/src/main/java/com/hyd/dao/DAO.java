@@ -183,7 +183,7 @@ public class DAO {
     ////////////////////////////////////////////////////////////////
 
     private void runWithExecutor(Consumer<Executor> consumer) {
-        Executor executor = ExecutorFactory.getExecutor(this);
+        var executor = ExecutorFactory.getExecutor(this);
         try {
             consumer.accept(executor);
         } finally {
@@ -192,7 +192,7 @@ public class DAO {
     }
 
     private <T> T returnWithExecutor(Function<Executor, T> f) {
-        Executor executor = ExecutorFactory.getExecutor(this);
+        var executor = ExecutorFactory.getExecutor(this);
         try {
             return f.apply(executor);
         } finally {
@@ -299,7 +299,7 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public Row queryFirst(String sql, Object... params) throws DAOException {
-        List<Row> list = query(sql, params);
+        var list = query(sql, params);
         return list == null || list.isEmpty() ? null : list.get(0);
     }
 
@@ -315,7 +315,7 @@ public class DAO {
      * @throws DAOException 如果发生数据库错误
      */
     public <T> T queryFirst(Class<T> clazz, String sql, Object... params) throws DAOException {
-        List<T> list = queryRange(clazz, sql, 0, 1, params);
+        var list = queryRange(clazz, sql, 0, 1, params);
         if (list.isEmpty()) {
             return null;
         }
@@ -323,20 +323,20 @@ public class DAO {
     }
 
     public Row queryFirst(SQL.Generatable generatable) {
-        Command command = generatable.toCommand();
+        var command = generatable.toCommand();
         return queryFirst(command.getStatement(), command.getParams());
     }
 
     public <T> T queryFirst(Class<T> clazz, SQL.Generatable generatable) {
-        Command command = generatable.toCommand();
+        var command = generatable.toCommand();
         return queryFirst(clazz, command.getStatement(), command.getParams());
     }
 
     public Row queryById(Object key, String tableName) {
         return returnWithExecutor(executor -> {
-            final QueryBuilder queryBuilder = new QueryBuilder(executor.getContext());
-            final Command command = queryBuilder.buildByKey(tableName, key);
-            final List list = executor.query(null, command.getStatement(), command.getParams(), 0, -1);
+            final var queryBuilder = new QueryBuilder(executor.getContext());
+            final var command = queryBuilder.buildByKey(tableName, key);
+            final var list = executor.query(null, command.getStatement(), command.getParams(), 0, -1);
             return list.isEmpty() ? null : (Row) list.get(0);
         });
     }
@@ -356,7 +356,7 @@ public class DAO {
     }
 
     public <T> List<T> queryRange(Class<T> clazz, SQL.Generatable generatable, int startPosition, int endPosition) {
-        Command command = generatable.toCommand();
+        var command = generatable.toCommand();
         return queryRange(clazz, command.getStatement(), startPosition, endPosition, command.getParams());
     }
 
@@ -394,11 +394,11 @@ public class DAO {
         Class<T> clazz, String sql, int startPosition, int endPosition, Object... params) throws DAOException {
 
         if (params.length == 1 && params[0] instanceof List) {
-            List list = (List) params[0];
+            var list = (List) params[0];
             return queryRange(clazz, sql, startPosition, endPosition, list.toArray(new Object[0]));
         }
 
-        String fixedSql = fixSql(sql);
+        var fixedSql = fixSql(sql);
 
         return returnWithExecutor(executor -> executor.query(
             clazz, fixedSql, Arrays.asList(params), startPosition, endPosition)
@@ -456,11 +456,11 @@ public class DAO {
         Class<T> wrappingClass, String sql,
         int pageSize, int pageIndex, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
-            List list = (List) params[0];
+            var list = (List) params[0];
             return queryPage(wrappingClass, sql, pageSize, pageIndex, list.toArray(new Object[0]));
         }
 
-        String fixedSql = fixSql(sql);
+        var fixedSql = fixSql(sql);
 
         return returnWithExecutor(executor -> executor.queryPage(
             wrappingClass, fixedSql, Arrays.asList(params), pageSize, pageIndex)
@@ -509,12 +509,12 @@ public class DAO {
         }
 
         if (params.length == 1 && params[0] instanceof List) {
-            List list = (List) params[0];
+            var list = (List) params[0];
             return queryIterator(sql, preProcessor, list.toArray(new Object[0]));
         }
 
-        String fixedSql = fixSql(sql);
-        List<Object> paramList = Arrays.asList(params);
+        var fixedSql = fixSql(sql);
+        var paramList = Arrays.asList(params);
 
         return returnWithExecutor(executor -> {
             executor.setAutoCommit(false);
@@ -530,8 +530,8 @@ public class DAO {
      * @return 结果中的数字
      */
     public long count(Command command) {
-        Row row = queryFirst(command);
-        Iterator<Object> iterator = row.values().iterator();
+        var row = queryFirst(command);
+        var iterator = row.values().iterator();
         return ((BigDecimal) iterator.next()).longValue();
     }
 
@@ -544,8 +544,8 @@ public class DAO {
      * @return 结果中的数字
      */
     public long count(String sql, Object... params) {
-        Row row = queryFirst(sql, params);
-        Iterator<Object> iterator = row.values().iterator();
+        var row = queryFirst(sql, params);
+        var iterator = row.values().iterator();
         return ((BigDecimal) iterator.next()).longValue();
     }
 
@@ -557,8 +557,8 @@ public class DAO {
      * @return 结果中的数字
      */
     public long count(SQL.Generatable generatable) {
-        Row row = queryFirst(generatable);
-        Iterator<Object> iterator = row.values().iterator();
+        var row = queryFirst(generatable);
+        var iterator = row.values().iterator();
         return ((BigDecimal) iterator.next()).longValue();
     }
 
@@ -578,7 +578,7 @@ public class DAO {
         if (sql == null) {
             return 0;
         }
-        String fixedSql = fixSql(sql);
+        var fixedSql = fixSql(sql);
 
         List<Object> paramsList;
         if (params.length == 1 && params[0] instanceof List) {
@@ -587,7 +587,7 @@ public class DAO {
             paramsList = Arrays.asList(params);
         }
 
-        Command command = new Command(fixedSql, paramsList);
+        var command = new Command(fixedSql, paramsList);
         return returnWithExecutor(executor -> executor.execute(command));
     }
 
@@ -620,7 +620,7 @@ public class DAO {
     public int execute(SQL.Generatable generatable) {
 
         // 当 Generatable 发现无法生成可执行的 SQL 时，将返回 null
-        Command command = generatable.toCommand();
+        var command = generatable.toCommand();
 
         if (command != null) {
             return execute(command);
@@ -653,7 +653,7 @@ public class DAO {
      */
     private void insert(Map row, String tableName) throws DAOException {
         runWithExecutor(executor -> {
-            Command command = new InsertBuilder(executor.getContext()).build(tableName, row);
+            var command = new InsertBuilder(executor.getContext()).build(tableName, row);
             executor.execute(command);
         });
     }
@@ -672,7 +672,7 @@ public class DAO {
         }
 
         runWithExecutor(executor -> {
-            BatchCommand command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
+            var command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
             executor.execute(command);
         });
     }
@@ -687,7 +687,7 @@ public class DAO {
      */
     public List<Object> call(String name, Object... params) {
         if (params.length == 1 && params[0] instanceof List) {
-            List list = (List) params[0];
+            var list = (List) params[0];
             return call(name, list.toArray(new Object[0]));
         }
 
@@ -706,7 +706,7 @@ public class DAO {
      */
     public List callFunction(String name, Object... params) throws DAOException {
         if (params.length == 1 && params[0] instanceof List) {
-            List list = (List) params[0];
+            var list = (List) params[0];
             callFunction(name, list.toArray(new Object[0]));
         }
 

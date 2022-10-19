@@ -4,6 +4,7 @@ import com.hyd.dao.mate.util.Str;
 
 /**
  * 名称转换规则。
+ * TODO 重构这个类的使用方式，明确定义 column name 的风格和 field name 的风格
  */
 public interface NameConverter {
 

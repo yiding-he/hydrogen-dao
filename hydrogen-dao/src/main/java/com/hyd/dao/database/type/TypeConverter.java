@@ -5,8 +5,6 @@ import com.hyd.dao.mate.util.BeanUtil;
 import com.hyd.dao.mate.util.TypeUtil;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Blob;
@@ -74,11 +72,11 @@ public class TypeConverter {
     public static List<Object> convert(
         Class clazz, List<Object> simpleResult, NameConverter nameConverter
     ) throws Exception {
-        ArrayList<Object> result = new ArrayList<>();
+        var result = new ArrayList<Object>();
 
-        for (Object obj : simpleResult) {
-            Map<String, Object> row = (Map<String, Object>) obj;
-            Object converted = convertRow(clazz, row, nameConverter);
+        for (var obj : simpleResult) {
+            var row = (Map<String, Object>) obj;
+            var converted = convertRow(clazz, row, nameConverter);
             result.add(converted);
         }
 
@@ -112,11 +110,11 @@ public class TypeConverter {
         }
 
         // pojo 类必须有一个缺省的构造函数。
-        Object result = clazz.getDeclaredConstructor().newInstance();
+        var result = clazz.getDeclaredConstructor().newInstance();
 
-        for (String colName : row.keySet()) {
-            String fieldName = nameConverter.column2Field(colName);
-            Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
+        for (var colName : row.keySet()) {
+            var fieldName = nameConverter.column2Field(colName);
+            var field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
             if (field == null) {
                 warn(clazz.getCanonicalName() + "." + fieldName,
                     "Unable to convert column '" + colName + "' to field '" +
@@ -125,7 +123,7 @@ public class TypeConverter {
                 continue;
             }
 
-            Object value = convertProperty(row.get(colName), field.getType());
+            var value = convertProperty(row.get(colName), field.getType());
             if (value != null) {
                 try {
                     BeanUtil.setValueIgnoreCase(result, fieldName, value);
@@ -147,15 +145,15 @@ public class TypeConverter {
         var constructorArgTypes = new Class[fields.length];
         var constructorArgValues = new Object[fields.length];
 
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (var i = 0; i < fields.length; i++) {
+            var field = fields[i];
             constructorArgTypes[i] = field.getType();
             var column = nameConverter.field2Column(field.getName());
             var rawValue = row.getOrDefault(column, row.get(column.toUpperCase()));
             constructorArgValues[i] = convertProperty(rawValue, field.getType());
         }
 
-        Constructor<?> constructor = clazz.getConstructor(constructorArgTypes);
+        var constructor = clazz.getConstructor(constructorArgTypes);
         return constructor.newInstance(constructorArgValues);
     }
 
@@ -176,7 +174,7 @@ public class TypeConverter {
         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         if (fieldType == Boolean.TYPE) {
-            String str = String.valueOf(o);
+            var str = String.valueOf(o);
             if (str.matches("^-?\\d+\\.?\\d+$")) {    // 如果该字段存储的是数字
                 return !"0".equals(str);
             } else {

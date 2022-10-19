@@ -20,7 +20,7 @@ public final class DBCPDataSource {
     public static BasicDataSource newDataSource(
             String driverClass, String url, String username, String password) {
 
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName(driverClass);
         ds.setUrl(url);
         ds.setUsername(username);
@@ -29,21 +29,21 @@ public final class DBCPDataSource {
     }
 
     public static BasicDataSource newH2MemDataSource() {
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");
         ds.setUrl("jdbc:h2:mem:db1");
         return ds;
     }
 
     public static BasicDataSource newH2ServerDataSource(String host, int port, String database) {
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");
         ds.setUrl("jdbc:h2:tcp://" + host + ":" + port + "/" + database + ";IFNOTEXISTS=true");
         return ds;
     }
 
     public static BasicDataSource newH2FileDataSource(String filePath, boolean onlyIfExists) {
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("org.h2.Driver");
         ds.setUrl("jdbc:h2:" + filePath + (onlyIfExists ? ";IFEXISTS=TRUE" : ""));
         return ds;
@@ -52,7 +52,7 @@ public final class DBCPDataSource {
     public static BasicDataSource newOracleDataSource(
             String host, int port, String sid, String username, String password) {
 
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("oracle.jdbc.OracleDriver");
         ds.setUrl("jdbc:oracle:thin:@" + host + ":" + port + ":" + sid);
         ds.setUsername(username);
@@ -64,7 +64,7 @@ public final class DBCPDataSource {
     public static BasicDataSource newMySqlDataSource(
             String url, String username, String password) {
 
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
         ds.setUrl(url);
         ds.setUsername(username);
@@ -76,7 +76,7 @@ public final class DBCPDataSource {
             String host, int port, String database, String username, String password,
             boolean useUnicode, String charEncoding) {
 
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
         ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database +
                 "?serverTimezone=UTC&useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
@@ -88,7 +88,7 @@ public final class DBCPDataSource {
     public static BasicDataSource newRemoteHsqldbDataSource(
             String host, int port, String database, String username, String password) {
 
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
         ds.setUrl("jdbc:hsqldb:hsql://" + host + ":" + port + "/" + database);
         ds.setUsername(username);
@@ -97,7 +97,7 @@ public final class DBCPDataSource {
     }
 
     public static DataSource newSqlServerDataSource(String host, int port, String database, String username, String password) {
-        BasicDataSource ds = new BasicDataSource();
+        var ds = new BasicDataSource();
         ds.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         ds.setUrl("jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + database);
         ds.setUsername(username);

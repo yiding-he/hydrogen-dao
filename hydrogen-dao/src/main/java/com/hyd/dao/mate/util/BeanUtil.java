@@ -3,17 +3,17 @@ package com.hyd.dao.mate.util;
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Table;
 import com.hyd.dao.database.type.TypeConverter;
+import com.hyd.dao.time.UniTime;
 
-import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
@@ -39,16 +39,16 @@ public class BeanUtil {
         }
 
         try {
-            PropertyDescriptor propertyDescriptor = getPropertyDescriptor(obj.getClass(), fieldName);
+            var propertyDescriptor = getPropertyDescriptor(obj.getClass(), fieldName);
             if (propertyDescriptor == null) {
                 throw new DAOException(
                     "Field not found for " + obj.getClass().getCanonicalName() + "#" + fieldName);
             }
 
-            Class<?> fieldType = propertyDescriptor.getPropertyType();
-            Object convertedValue = convertValue(value, fieldType);
+            var fieldType = propertyDescriptor.getPropertyType();
+            var convertedValue = convertValue(value, fieldType);
 
-            Method writeMethod = getPropertyMethod(obj.getClass(), fieldName, false);
+            var writeMethod = getPropertyMethod(obj.getClass(), fieldName, false);
             if (writeMethod == null) {
                 throw new DAOException(
                     "Missing write method for " + obj.getClass().getCanonicalName() + "#" + fieldName);
@@ -73,7 +73,7 @@ public class BeanUtil {
      * @return 方法对象
      */
     private static Method getPropertyMethod(Class clazz, String fieldName, boolean getter) {
-        PropertyDescriptor descriptor = getPropertyDescriptor(clazz, fieldName);
+        var descriptor = getPropertyDescriptor(clazz, fieldName);
         return descriptor == null ? null :
             getter ? descriptor.getReadMethod() : descriptor.getWriteMethod();
     }
@@ -81,8 +81,8 @@ public class BeanUtil {
     private static PropertyDescriptor getPropertyDescriptor(Class clazz, String fieldName) {
 
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-            for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+            var beanInfo = Introspector.getBeanInfo(clazz);
+            for (var descriptor : beanInfo.getPropertyDescriptors()) {
                 if (descriptor.getName().equalsIgnoreCase(fieldName)) {
                     return descriptor;
                 }
@@ -123,10 +123,16 @@ public class BeanUtil {
         if (clazz == String.class) {
             return String.valueOf(value);
 
+        } else if (clazz == UniTime.class && value instanceof Date dateValue) {
+            return UniTime.fromDate(dateValue);
+
+        } else if (clazz == UniTime.class && value instanceof Temporal temporalValue) {
+            return UniTime.fromTemporal(temporalValue);
+
         } else if (clazz == Integer.class || clazz == Long.class || clazz == Double.class ||
             clazz == BigDecimal.class || clazz == BigInteger.class) {
             try {
-                String str_value = new BigDecimal(String.valueOf(value)).toPlainString();
+                var str_value = new BigDecimal(String.valueOf(value)).toPlainString();
 
                 // 避免因为带有小数点而无法转换成 Integer/Long。
                 // 但如果值真的带小数，那么为了避免精度丢失，只有抛出异常了。
@@ -138,7 +144,7 @@ public class BeanUtil {
 
             } catch (InvocationTargetException e) {
                 if (e.getTargetException() instanceof NumberFormatException) {
-                    String message = "Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz;
+                    var message = "Value " + value + " (" + value.getClass() + ") cannot convert to " + clazz;
                     throw new DAOException(message, e);
                 }
             }
@@ -147,7 +153,7 @@ public class BeanUtil {
 
         } else if (clazz.isPrimitive()) { // 处理基本型别
 
-            BigDecimal bdValue = new BigDecimal(String.valueOf(value));
+            var bdValue = new BigDecimal(String.valueOf(value));
 
             if (clazz == Integer.TYPE) {
 
@@ -259,7 +265,7 @@ public class BeanUtil {
      */
     private static Object getStaticValue(Class<?> clazz, String fieldName) throws Exception {
         try {
-            Field field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
+            var field = TypeUtil.getFieldIgnoreCase(clazz, fieldName);
             if (field == null) {
                 return null;
             }
@@ -302,7 +308,7 @@ public class BeanUtil {
      * @return 表名。如果没有得到表名则会抛出异常。
      */
     public static String getTableName(Class<?> type) {
-        Table t = type.getAnnotation(Table.class);
+        var t = type.getAnnotation(Table.class);
 
         try {
             return t == null ?

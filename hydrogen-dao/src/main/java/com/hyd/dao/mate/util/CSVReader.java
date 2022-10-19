@@ -2,13 +2,8 @@ package com.hyd.dao.mate.util;
 
 import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,27 +53,12 @@ public class CSVReader {
     }
 
     public static List<Row> read(InputStream inputStream, Charset charset) throws DAOException {
-
         Objects.requireNonNull(inputStream, "input stream is null");
-
-        List<String> lines = new ArrayList<>();
-        String line;
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
+        try (inputStream; BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
+            return convertLines(reader.lines().toList());
         } catch (IOException e) {
             throw new DAOException(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                // nothing to do
-            }
         }
-
-        return convertLines(lines);
     }
 
     private static List<Row> convertLines(List<String> lines) {

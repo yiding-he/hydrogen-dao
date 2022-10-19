@@ -2,7 +2,6 @@ package com.hyd.dao.mate.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,9 +47,9 @@ public class Batch<T> {
     public void forEachBatch(Consumer<Collection<T>> consumer) {
         List<T> buffer = new ArrayList<>();
 
-        Iterator<T> iterator = stream.iterator();
+        var iterator = stream.iterator();
         while (iterator.hasNext()) {
-            T t = iterator.next();
+            var t = iterator.next();
             buffer.add(t);
             if (buffer.size() >= batchSize) {
                 consumer.accept(new ArrayList<>(buffer));
@@ -66,9 +65,9 @@ public class Batch<T> {
     public Batch<T> sumEachBatch(Function<Collection<T>, Integer> func) {
         List<T> list = new ArrayList<>();
 
-        Iterator<T> iterator = stream.iterator();
+        var iterator = stream.iterator();
         while (iterator.hasNext()) {
-            T t = iterator.next();
+            var t = iterator.next();
             list.add(t);
             if (list.size() >= batchSize) {
                 resultCount += func.apply(new ArrayList<>(list));

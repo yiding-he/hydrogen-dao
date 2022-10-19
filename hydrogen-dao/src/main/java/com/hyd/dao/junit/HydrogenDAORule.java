@@ -39,13 +39,13 @@ public class HydrogenDAORule {
     private void init() {
 
         // 搜索文件列表
-        List<File> csvFiles = scanCsvFiles();
+        var csvFiles = scanCsvFiles();
 
         // 将文件内容插入到数据库
-        for (File csvFile : csvFiles) {
-            String fileName = csvFile.getName();
-            String tableName = fileName.substring(0, fileName.length() - 4);
-            List<Row> rows = CSVReader.read(csvFile, "UTF-8");
+        for (var csvFile : csvFiles) {
+            var fileName = csvFile.getName();
+            var tableName = fileName.substring(0, fileName.length() - 4);
+            var rows = CSVReader.read(csvFile, "UTF-8");
             prepareData.put(tableName, rows);
         }
     }
@@ -56,16 +56,16 @@ public class HydrogenDAORule {
      * @return csv 文件列表
      */
     private List<File> scanCsvFiles() {
-        String classPath = System.getProperty("java.class.path", ".");
-        String[] classPathElements = classPath.split(System.getProperty("path.separator"));
+        var classPath = System.getProperty("java.class.path", ".");
+        var classPathElements = classPath.split(System.getProperty("path.separator"));
         List<File> csvFiles = new ArrayList<>();
 
-        for (String pathElement : classPathElements) {
-            File file = new File(pathElement);
+        for (var pathElement : classPathElements) {
+            var file = new File(pathElement);
             if (file.exists() && file.isDirectory()) {
-                File csvFolder = new File(file, scriptFolder);
+                var csvFolder = new File(file, scriptFolder);
                 if (csvFolder.exists() && csvFolder.isDirectory()) {
-                    File[] files = csvFolder.listFiles(f -> f.getName().toLowerCase().endsWith(".csv"));
+                    var files = csvFolder.listFiles(f -> f.getName().toLowerCase().endsWith(".csv"));
                     if (files != null) {
                         csvFiles.addAll(Arrays.asList(files));
                     }
@@ -81,7 +81,7 @@ public class HydrogenDAORule {
     }
 
     public void before() {
-        DAO dao = daoSupplier.get();
+        var dao = daoSupplier.get();
 
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/tables.sql", dao);
         insertData(dao);
@@ -89,7 +89,7 @@ public class HydrogenDAORule {
     }
 
     public void after() {
-        DAO dao = daoSupplier.get();
+        var dao = daoSupplier.get();
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/after.sql", dao);
     }
 }

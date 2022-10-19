@@ -2,6 +2,7 @@ package com.hyd.dao;
 
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.CaseInsensitiveHashMap;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,7 +23,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
     private static final Logger LOG = Logger.getLogger(Row.class);
 
     public Double getDoubleObject(String key) {
-        Object value = get(key);
+        var value = get(key);
         if (value == null) {
             return null;
         } else if (value instanceof String) {
@@ -38,7 +39,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
 
     public double getDouble(String key, double defaultValue) {
         try {
-            Double value = getDoubleObject(key);
+            var value = getDoubleObject(key);
             return value == null ? defaultValue : value;
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
@@ -54,7 +55,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      * @return 字段值
      */
     public Long getLongObject(String key) {
-        Object value = get(key);
+        var value = get(key);
         if (value == null) {
             return null;
         } else if (value instanceof String) {
@@ -78,7 +79,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      */
     public long getLong(String key, long defaultValue) {
         try {
-            Long l = getLongObject(key);
+            var l = getLongObject(key);
             return l == null ? defaultValue : l;
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
@@ -94,7 +95,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      * @return 字段的值
      */
     public Integer getIntegerObject(String key) {
-        Object value = get(key);
+        var value = get(key);
         if (value == null) {
             return null;
         } else if (value instanceof String) {
@@ -118,7 +119,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      */
     public int getInteger(String key, int defaultValue) {
         try {
-            Integer i = getIntegerObject(key);
+            var i = getIntegerObject(key);
             return i == null ? defaultValue : i;
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
@@ -156,7 +157,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      * @return 字段的值
      */
     public Date getDate(String key, String pattern) {
-        Object value = get(key);
+        var value = get(key);
         if (value == null) {
             return null;
         } else if (value instanceof String) {
@@ -183,7 +184,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
     }
 
     public String getString(String key) {
-        Object value = get(key);
+        var value = get(key);
         if (value == null) {
             return null;
         } else {

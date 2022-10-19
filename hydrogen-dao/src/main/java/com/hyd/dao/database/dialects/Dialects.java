@@ -29,8 +29,8 @@ public class Dialects {
     }
 
     public static Dialect getDialect(Connection connection) {
-        for (int i = DIALECTS.size() - 1; i >= 0; i--) {
-            Dialect dialect = DIALECTS.get(i);
+        for (var i = DIALECTS.size() - 1; i >= 0; i--) {
+            var dialect = DIALECTS.get(i);
             if (dialect.getMatcher().test(connection)) {
                 return dialect;
             }

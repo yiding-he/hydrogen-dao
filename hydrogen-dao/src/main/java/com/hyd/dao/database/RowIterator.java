@@ -67,7 +67,7 @@ public class RowIterator implements Closeable, Iterable<Row> {
                 return false;
             }
 
-            boolean next = rs.next();
+            var next = rs.next();
             if (!next) {
                 close();
             }
@@ -84,7 +84,7 @@ public class RowIterator implements Closeable, Iterable<Row> {
      */
     public Row getRow() {
         try {
-            Row row = ResultSetUtil.readRow(rs);
+            var row = ResultSetUtil.readRow(rs);
             if (this.rowPreProcessor != null) {
                 this.rowPreProcessor.accept(row);
             }
@@ -153,7 +153,7 @@ public class RowIterator implements Closeable, Iterable<Row> {
 
             @Override
             public T next() {
-                T result = this.next;
+                var result = this.next;
                 fetchNext();
                 return result;
             }

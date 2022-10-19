@@ -79,7 +79,7 @@ public class TypeUtil {
             return (Date) value;
         }
 
-        Class<?> type = value.getClass();
+        var type = value.getClass();
 
         if (type == String.class) {
             return toDateFromString(value.toString());
@@ -97,7 +97,7 @@ public class TypeUtil {
     }
 
     private static Date toDateFromString(String s) {
-        for (String pattern : DATE_PATTERNS) {
+        for (var pattern : DATE_PATTERNS) {
             try {
                 return new SimpleDateFormat(pattern).parse(s);
             } catch (ParseException e) {
@@ -132,8 +132,8 @@ public class TypeUtil {
             return null;
         }
 
-        Field[] fields = type.getDeclaredFields();
-        for (Field field : fields) {
+        var fields = type.getDeclaredFields();
+        for (var field : fields) {
             if (field.getName().equalsIgnoreCase(fieldName)) {
                 return field;
             }

@@ -21,7 +21,6 @@ import com.hyd.dao.sp.StorageProcedureHelper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -52,10 +51,10 @@ public class DefaultExecutor extends Executor {
     public Page queryPage(Class clazz, String sql, List params, int pageSize, int pageIndex) {
 
         // startPos 从 0 开始算起，包含
-        int startPos = pageIndex * pageSize;
+        var startPos = pageIndex * pageSize;
 
         // endPos 不包含
-        int endPos = startPos + pageSize;
+        var endPos = startPos + pageSize;
 
         String rangedSql = null;
         try {
@@ -109,10 +108,10 @@ public class DefaultExecutor extends Executor {
     @SuppressWarnings("unchecked")
     private int queryCount(String sql, List params) {
         try {
-            String countSql = getCountSql(sql);
+            var countSql = getCountSql(sql);
             List<Row> list = query(null, countSql, params, -1, -1);
             if (!list.isEmpty()) {
-                Row map = list.get(0);
+                var map = list.get(0);
                 return map.getInteger("cnt", 0);
             } else {
                 return 0;
@@ -135,7 +134,7 @@ public class DefaultExecutor extends Executor {
         } catch (SQLException e) {
             throw new DAOException("Query failed:", e, sql, params);
         }
-        RowIterator rowIterator = new RowIterator(rs, preProcessor);
+        var rowIterator = new RowIterator(rs, preProcessor);
         rowIterator.setNameConverter(getNameConverter());
         return rowIterator;
     }
@@ -190,7 +189,7 @@ public class DefaultExecutor extends Executor {
             }
             rs = st.executeQuery(sql);
         } else {
-            PreparedStatement ps = createPreparedStatement(sql);
+            var ps = createPreparedStatement(sql);
             fixStatement(ps);
             st = ps;
             insertParams(params);
@@ -217,18 +216,18 @@ public class DefaultExecutor extends Executor {
         printBatchCommand(command);
         try {
             // 执行语句
-            List<List<Object>> params = command.getParams();
-            PreparedStatement ps = createPreparedStatement(command.getCommand());
+            var params = command.getParams();
+            var ps = createPreparedStatement(command.getCommand());
             st = ps;
 
-            for (List<Object> param : params) {
+            for (var param : params) {
                 insertParams(param);
                 ps.addBatch();
             }
 
-            int counter = 0;
-            int[] counts = ps.executeBatch();
-            for (int count : counts) {
+            var counter = 0;
+            var counts = ps.executeBatch();
+            for (var count : counts) {
                 if (count == Statement.SUCCESS_NO_INFO) {
                     counter++;
                 } else {
@@ -248,17 +247,17 @@ public class DefaultExecutor extends Executor {
     @Override
     public int execute(IteratorBatchCommand command) {
 
-        int batchSize = command.getBatchSize();
-        int counter = 0;
+        var batchSize = command.getBatchSize();
+        var counter = 0;
         if (batchSize < 1) {
             throw new IllegalStateException("Batch command size must > 0");
         }
 
-        Iterator<List<Object>> params = command.getParams();
+        var params = command.getParams();
         List<List<Object>> buffer = new ArrayList<>(batchSize);
 
         while (params.hasNext()) {
-            List<Object> next = params.next();
+            var next = params.next();
 
             buffer.add(next);
             if (buffer.size() >= batchSize) {
@@ -287,7 +286,7 @@ public class DefaultExecutor extends Executor {
                 }
                 st.executeUpdate(sql);
             } else {
-                PreparedStatement ps = createPreparedStatement(sql);
+                var ps = createPreparedStatement(sql);
                 st = ps;
                 insertParams(params);
                 if (TIMEOUT != -1) {
@@ -311,9 +310,9 @@ public class DefaultExecutor extends Executor {
      * @throws SQLException 如果插入参数失败
      */
     private void insertParams(List<Object> params) throws SQLException {
-        PreparedStatement ps = (PreparedStatement) st;
-        for (int i = 0; i < params.size(); i++) {
-            Object value = params.get(i);
+        var ps = (PreparedStatement) st;
+        for (var i = 0; i < params.size(); i++) {
+            var value = params.get(i);
 
             if (value != null) {
                 value = TypeUtil.convertParamValue(value);
@@ -329,9 +328,9 @@ public class DefaultExecutor extends Executor {
     @Override
     public List call(String name, Object[] params) {
         try {
-            SpParam[] spParams = StorageProcedureHelper.createSpParams(name, params, getConnection());
+            var spParams = StorageProcedureHelper.createSpParams(name, params, getConnection());
             LOG.debug(findCaller() + "(procedure)" + name + Arrays.asList(spParams));
-            CallableStatement cs = StorageProcedureHelper.createCallableStatement(name, spParams, getConnection());
+            var cs = StorageProcedureHelper.createCallableStatement(name, spParams, getConnection());
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
             }
@@ -347,13 +346,13 @@ public class DefaultExecutor extends Executor {
 
         try {
             LOG.debug(findCaller() + "(function)" + name + Arrays.asList(params));
-            SpParam[] spParams = FunctionHelper.createFunctionParams(name, params, getConnection());
-            int resultType = spParams[0].getSqlType();
+            var spParams = FunctionHelper.createFunctionParams(name, params, getConnection());
+            var resultType = spParams[0].getSqlType();
 
             // 去掉第一个
             spParams = Arr.subarray(spParams, 1, spParams.length);
 
-            CallableStatement cs = FunctionHelper.createCallableStatement(name, resultType, spParams, getConnection());
+            var cs = FunctionHelper.createCallableStatement(name, resultType, spParams, getConnection());
             if (TIMEOUT != -1) {
                 cs.setQueryTimeout(TIMEOUT);
             }
@@ -375,7 +374,7 @@ public class DefaultExecutor extends Executor {
      * @return 用于接受返回值的参数组
      */
     private SpParam[] createOutputParams(int resultType, SpParam[] params) {
-        SpParam[] outParams = new SpParam[params.length + 1];
+        var outParams = new SpParam[params.length + 1];
         System.arraycopy(params, 0, outParams, 1, params.length);
         outParams[0] = new SpParam(SpParamType.OUT, resultType, null);
         return outParams;
@@ -392,11 +391,11 @@ public class DefaultExecutor extends Executor {
     private List readResult(SpParam[] params, CallableStatement cs) {
         List<Object> result = new ArrayList<>();
         try {
-            for (int i = 0; i < params.length; i++) {
-                SpParam param = params[i];
+            for (var i = 0; i < params.length; i++) {
+                var param = params[i];
                 if (param.getType() == SpParamType.OUT || param.getType() == SpParamType.IN_OUT) {
-                    Object value = cs.getObject(i + 1);
-                    Object parsedValue = getDialect().parseCallableStatementResult(param.getSqlType(), value);
+                    var value = cs.getObject(i + 1);
+                    var parsedValue = getDialect().parseCallableStatementResult(param.getSqlType(), value);
                     result.add(parsedValue);
                 }
             }
@@ -424,11 +423,11 @@ public class DefaultExecutor extends Executor {
     }
 
     private int getResultSetType() {
-
-        // 普通数据库可以指定为 TYPE_FORWARD_ONLY（这样效率更高），而且在查询时可以调用 ResultSet.absolute() 方法；
+        // 创建 ResultSet 时类型参数值的选择:
+        // MySQL/Oracle 等多数数据库可以指定为 TYPE_FORWARD_ONLY，且在查询时可以调用 ResultSet.absolute() 方法向前定位；
         // http://download.oracle.com/docs/cd/B10500_01/java.920/a96654/resltset.htm#1023726
-        // 但是 SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
-
+        // 但是 MS SQLServer 就必须是 TYPE_SCROLL_SENSITIVE，否则调用 ResultSet.absolute() 就会报错。
+        // 其他类型数据库兼容性尚未确定
         return getDialect().resultSetTypeForReading();
     }
 
@@ -444,12 +443,12 @@ public class DefaultExecutor extends Executor {
 
     private String findCaller() {
 
-        StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
-        boolean daoStarted = false;
+        var traceElements = Thread.currentThread().getStackTrace();
+        var daoStarted = false;
 
-        for (StackTraceElement traceElement : traceElements) {
-            String className = traceElement.getClassName();
-            int lineNumber = traceElement.getLineNumber();
+        for (var traceElement : traceElements) {
+            var className = traceElement.getClassName();
+            var lineNumber = traceElement.getLineNumber();
 
             if (!daoStarted) {
                 if (className.startsWith("com.hyd.dao.")) {
@@ -465,7 +464,7 @@ public class DefaultExecutor extends Executor {
     }
 
     private void printBatchCommand(BatchCommand command) {
-        String sql = Str.n(command.getCommand());
+        var sql = Str.n(command.getCommand());
         info.setLastCommand(sql);
         info.setLastExecuteTime(new java.util.Date());
 
@@ -473,7 +472,7 @@ public class DefaultExecutor extends Executor {
 
         if (BATCH_LOG.isEnabled(Logger.Level.Debug)) {
             BATCH_LOG.debug("Batch(" + context.getDataSourceName() + "):" + sql.replaceAll("\n", " ") + "; parameters:");
-            for (List<Object> param : params) {
+            for (var param : params) {
                 BATCH_LOG.debug(param.toString());
             }
 
@@ -507,7 +506,7 @@ public class DefaultExecutor extends Executor {
 
     private void closeConnection() {
         try {
-            Connection connection = getConnection();
+            var connection = getConnection();
             if (!connection.isClosed()) {
                 connection.close();
             }
@@ -519,7 +518,7 @@ public class DefaultExecutor extends Executor {
     @Override
     public boolean isClosed() {
         try {
-            Connection connection = getConnection();
+            var connection = getConnection();
             return connection == null || connection.isClosed();
         } catch (SQLException e) {
             LOG.error("Error checking connection: " + e.getMessage(), e);

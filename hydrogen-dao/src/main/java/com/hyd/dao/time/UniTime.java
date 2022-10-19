@@ -1,5 +1,6 @@
 package com.hyd.dao.time;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.*;
 import java.time.chrono.ChronoZonedDateTime;
@@ -23,8 +24,9 @@ import java.util.stream.StreamSupport;
  * 1、DateTimeFormatter 无法将不带时间部分的字符串解析成完整的 LocalDateTime 对象，这里补完一个零点的时刻即可；
  * 2、Temporal 的 plus() 和 minus() 方法只接受非负数，这里合并成一个可接受正数和负数的方法。
  */
-public final class UniTime implements Comparable<UniTime>, Serializable {
+public record UniTime(ZonedDateTime value) implements Comparable<UniTime>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -55,6 +57,7 @@ public final class UniTime implements Comparable<UniTime>, Serializable {
      * 从 Date 对象转化
      */
     public static UniTime fromDate(Date date) {
+        Objects.requireNonNull(date);
         return new UniTime(ZonedDateTime.ofInstant(date.toInstant(), ZONE));
     }
 
@@ -62,8 +65,9 @@ public final class UniTime implements Comparable<UniTime>, Serializable {
      * 从 Calendar 对象转化
      */
     public static UniTime fromCalendar(Calendar calendar) {
-        if (calendar instanceof GregorianCalendar) {
-            return fromTemporal(((GregorianCalendar) calendar).toZonedDateTime());
+        Objects.requireNonNull(calendar);
+        if (calendar instanceof GregorianCalendar gCal) {
+            return fromTemporal(gCal.toZonedDateTime());
         } else {
             return fromTemporal(calendar.toInstant());
         }
@@ -73,9 +77,9 @@ public final class UniTime implements Comparable<UniTime>, Serializable {
      * 从 Temporal 对象转化。如果对象中没有时区，则取默认时区
      */
     public static UniTime fromTemporal(Temporal temporal) {
-
-        if (temporal instanceof ZonedDateTime) {
-            return new UniTime((ZonedDateTime) temporal);
+        Objects.requireNonNull(temporal);
+        if (temporal instanceof ZonedDateTime zdt) {
+            return new UniTime(zdt);
         }
 
         // 年月日的最小值都是 1，时分秒的最小值都是 0
@@ -144,16 +148,6 @@ public final class UniTime implements Comparable<UniTime>, Serializable {
     }
 
     ////////////////////////////////////////////////////////////// 成员和构造方法
-
-    private final ZonedDateTime value;
-
-    public UniTime(ZonedDateTime value) {
-        this.value = value;
-    }
-
-    public ZonedDateTime getValue() {
-        return value;
-    }
 
     @Override
     public String toString() {
@@ -443,11 +437,6 @@ public final class UniTime implements Comparable<UniTime>, Serializable {
         }
         UniTime uniTime = (UniTime) object;
         return Objects.equals(value, uniTime.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
     }
 
     @Override

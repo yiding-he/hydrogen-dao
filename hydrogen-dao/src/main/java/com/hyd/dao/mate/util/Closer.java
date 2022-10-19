@@ -1,6 +1,5 @@
 package com.hyd.dao.mate.util;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,7 +20,7 @@ public class Closer {
         }
 
         try {
-            Statement st = rs.getStatement();
+            var st = rs.getStatement();
             closeStatement(st);
         } catch (SQLException e) {
             // ignore this
@@ -37,7 +36,7 @@ public class Closer {
     private static void closeStatement(Statement st) throws SQLException {
         if (st != null && !st.isClosed()) {
             try {
-                Connection conn = st.getConnection();
+                var conn = st.getConnection();
                 if (conn != null) {
                     conn.close();
                 }

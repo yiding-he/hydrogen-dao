@@ -11,7 +11,7 @@ public class Arr {
             return (T[]) new Object[0];
         }
 
-        Object[] result = new Object[end - start];
+        var result = new Object[end - start];
         System.arraycopy(arr, start, result, 0, end - start);
         return (T[]) result;
     }

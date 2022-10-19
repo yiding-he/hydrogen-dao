@@ -26,7 +26,7 @@ public class OracleDialect implements Dialect {
     public Predicate<Connection> getMatcher() {
         return connection -> {
             try {
-                String databaseProductName = connection.getMetaData().getDatabaseProductName();
+                var databaseProductName = connection.getMetaData().getDatabaseProductName();
                 return PRODUCT_NAME_PATTERN.matcher(databaseProductName).matches();
             } catch (SQLException e) {
                 throw new DAOException(e);
@@ -36,10 +36,10 @@ public class OracleDialect implements Dialect {
 
     @Override
     public String wrapRangeQuery(String sql, int startPos, int endPos) {
-        int _startPos = startPos + 1;
-        String sql_prefix = "select * from ( select pagnation_wrapper.*, rownum " +
+        var _startPos = startPos + 1;
+        var sql_prefix = "select * from ( select pagination_wrapper.*, rownum " +
             ResultSetUtil.PAGINATION_WRAPPER_COLUMN_NAME + " from (";
-        String sql_suffix = ") pagnation_wrapper) where " +
+        var sql_suffix = ") pagination_wrapper) where " +
             ResultSetUtil.PAGINATION_WRAPPER_COLUMN_NAME + " between " + _startPos + " and " + endPos;
         return sql_prefix + sql + sql_suffix;
     }
@@ -48,7 +48,7 @@ public class OracleDialect implements Dialect {
     public Object parseCallableStatementResult(int sqlType, Object value) {
         try {
             if (sqlType == TYPE_CURSOR) {
-                ResultSet rs1 = (ResultSet) value;
+                var rs1 = (ResultSet) value;
                 return ResultSetUtil.readResultSet(rs1, null, NameConverter.DEFAULT, -1, -1);
             } else {
                 return Dialect.super.parseCallableStatementResult(sqlType, value);

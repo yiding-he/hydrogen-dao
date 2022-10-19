@@ -4,11 +4,10 @@ import com.hyd.dao.DAOException;
 import com.hyd.dao.Row;
 import com.hyd.dao.mate.util.ResultSetUtil;
 import com.hyd.dao.mate.util.Str;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,8 +45,8 @@ public final class StorageProcedureHelper {
      */
     public static CallableStatement createCallableStatement(
         String name, SpParam[] params, Connection connection) throws SQLException {
-        String call_str = generateCallStatement(name, params);
-        CallableStatement cs = connection.prepareCall(call_str);
+        var call_str = generateCallStatement(name, params);
+        var cs = connection.prepareCall(call_str);
         setupParams(params, cs);
         return cs;
     }
@@ -61,8 +60,8 @@ public final class StorageProcedureHelper {
      * @throws SQLException 如果设置参数失败
      */
     private static void setupParams(SpParam[] params, CallableStatement cs) throws SQLException {
-        for (int i = 0; i < params.length; i++) {
-            SpParam param = params[i];
+        for (var i = 0; i < params.length; i++) {
+            var param = params[i];
             if ((param.getType() == SpParamType.IN || param.getType() == SpParamType.IN_OUT)
                 && param.getValue() != null) {
                 cs.setObject(i + 1, param.getValue());
@@ -103,17 +102,17 @@ public final class StorageProcedureHelper {
      */
     public static SpParam[] createSpParams(String name, Object[] params, Connection conn) throws SQLException {
         try {
-            List<Row> rows = getSpParamDefinitions(conn, name);
+            var rows = getSpParamDefinitions(conn, name);
 
-            SpParam[] sp_params = new SpParam[rows.size()];
-            int param_counter = 0;
+            var sp_params = new SpParam[rows.size()];
+            var param_counter = 0;
 
-            for (int i = 0; i < rows.size(); i++) {
-                Row row = rows.get(i);
-                int data_type = getIntegerValue(row, "data_type");
-                int column_type = getIntegerValue(row, "column_type");
+            for (var i = 0; i < rows.size(); i++) {
+                var row = rows.get(i);
+                var data_type = getIntegerValue(row, "data_type");
+                var column_type = getIntegerValue(row, "column_type");
 
-                SpParamType type = SP_PARAM_TYPES.get(column_type);
+                var type = SP_PARAM_TYPES.get(column_type);
                 Object value;
                 if (type != SpParamType.OUT) {
                     value = params[param_counter];
@@ -133,7 +132,7 @@ public final class StorageProcedureHelper {
     }
 
     private static int getIntegerValue(HashMap row, String colName) {
-        Object dataType = row.get(colName);
+        var dataType = row.get(colName);
 
         if (dataType != null) {
             return new BigDecimal(dataType.toString()).intValue();
@@ -152,10 +151,10 @@ public final class StorageProcedureHelper {
      * @throws Exception 如果获取存储过程信息失败
      */
     private static List<Row> getSpParamDefinitions(Connection conn, String spName) throws Exception {
-        DatabaseMetaData metaData = conn.getMetaData();
+        var metaData = conn.getMetaData();
 
         String schema;
-        String fixedSpName = spName;
+        var fixedSpName = spName;
 
         if (!spName.contains(".")) {
             schema = metaData.getUserName().toUpperCase();
@@ -164,8 +163,8 @@ public final class StorageProcedureHelper {
             fixedSpName = spName.substring(spName.lastIndexOf(".") + 1);
         }
 
-        try (ResultSet procedures = metaData.getProcedureColumns(null, schema, fixedSpName.toUpperCase(), "%")) {
-            List<Row> rows = ResultSetUtil.readResultSet(procedures);
+        try (var procedures = metaData.getProcedureColumns(null, schema, fixedSpName.toUpperCase(), "%")) {
+            var rows = ResultSetUtil.readResultSet(procedures);
             rows.sort(Comparator.comparing(m -> m.getIntegerObject("sequence")));
             return rows;
         }

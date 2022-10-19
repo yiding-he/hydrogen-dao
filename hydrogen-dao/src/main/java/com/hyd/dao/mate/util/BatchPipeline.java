@@ -1,6 +1,8 @@
 package com.hyd.dao.mate.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.BaseStream;
 import java.util.stream.Stream;
@@ -46,7 +48,7 @@ public class BatchPipeline<T> {
             return;
         }
 
-        List<T> list = Collections.unmodifiableList(new ArrayList<>(buffer));
+        var list = List.copyOf(buffer);
         buffer.clear();
         if (batchOperation != null) {
             batchOperation.accept(list);
@@ -67,7 +69,7 @@ public class BatchPipeline<T> {
 
     @SafeVarargs
     public final void feed(T... items) {
-        for (T item : items) {
+        for (var item : items) {
             feed(item);
         }
     }
@@ -77,9 +79,9 @@ public class BatchPipeline<T> {
     }
 
     public void feed(BaseStream<T, ?> itemStream) {
-        Iterator<T> iterator = itemStream.iterator();
+        var iterator = itemStream.iterator();
         while (iterator.hasNext()) {
-            T item = iterator.next();
+            var item = iterator.next();
             feed(item);
         }
     }

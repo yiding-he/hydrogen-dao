@@ -65,7 +65,10 @@ public class MySqlDialect implements Dialect {
     public void setupStatement(Statement statement, ExecuteMode executeMode) throws SQLException {
         if (executeMode == ExecuteMode.Streaming) {
             // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-implementation-notes.html
-            // Chapter "ResultSet"
+            // Chapter "ResultSet":
+            // "If you are working with ResultSets that have a large number of rows or large values
+            //  and cannot allocate heap space in your JVM for the memory required, you can tell the driver
+            //  to stream the results back one row at a time."
             statement.setFetchSize(Integer.MIN_VALUE);
         }
     }

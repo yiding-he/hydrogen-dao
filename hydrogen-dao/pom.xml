@@ -11,14 +11,14 @@
   <packaging>jar</packaging>
 
   <name>hydrogen-dao</name>
-  <description>A Light Weight JDBC Access Framework</description>
+  <description>A Lightweight JDBC Access Framework</description>
   <url>https://github.com/yiding-he/hydrogen-dao</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <spring-boot.version>2.7.0</spring-boot.version>
+    <spring-boot.version>2.7.4</spring-boot.version>
   </properties>
 
   <dependencyManagement>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
 
     <!-- Logging -->
@@ -132,12 +132,11 @@
       <artifactId>jackson-databind</artifactId>
       <optional>true</optional>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+    <!-- https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2 -->
     <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-      <version>1.2.74</version>
-      <optional>true</optional>
+      <groupId>com.alibaba.fastjson2</groupId>
+      <artifactId>fastjson2</artifactId>
+      <version>2.0.15</version>
     </dependency>
 
     <!-- Unit Testing -->
@@ -160,7 +159,6 @@
   <developers>
     <developer>
       <name>Yiding He</name>
-      <url>https://heyiding.com:666</url>
       <email>yiding.he@gmail.com</email>
       <roles>
         <role>owner</role>
@@ -172,7 +170,7 @@
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -194,14 +192,13 @@
       </distributionManagement>
       <repositories>
         <repository>
-          <id>dev-nexus-server</id>
-          <name>znxunzhi Repository</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
+          <id>Aliyun</id>
+          <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
           <snapshots>
-            <enabled>true</enabled>
+            <enabled>false</enabled>
           </snapshots>
         </repository>
       </repositories>
@@ -210,7 +207,7 @@
       <id>mainland-prc-china</id>
       <repositories>
         <repository>
-          <id>aliyun</id>
+          <id>Aliyun</id>
           <url>https://maven.aliyun.com/repository/public/</url>
           <releases>
             <enabled>true</enabled>

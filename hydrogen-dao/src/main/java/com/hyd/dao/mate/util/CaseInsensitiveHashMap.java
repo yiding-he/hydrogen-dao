@@ -1,5 +1,6 @@
 package com.hyd.dao.mate.util;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import java.util.Map;
  */
 public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // lowercase -> original
@@ -23,7 +25,7 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
      * @throws IllegalArgumentException 如果 key 不是一个字符串
      */
     public V get(String key) {
-        String originalKey = originalKeys.get(key.toLowerCase());
+        var originalKey = originalKeys.get(key.toLowerCase());
         if (originalKey == null) {
             return null;
         } else {
@@ -39,10 +41,9 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
      *
      * @throws IllegalArgumentException 如果 key 不是一个字符串
      */
-    @SuppressWarnings({"unchecked"})
     public V put(String key, V value) {
-        String lcKey = key.toLowerCase();
-        String originalKey = originalKeys.get(lcKey);
+        var lcKey = key.toLowerCase();
+        var originalKey = originalKeys.get(lcKey);
         if (originalKey != null) {
             super.remove(originalKey);
         }
@@ -64,7 +65,7 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
             throw new IllegalArgumentException("Key must be a string.");
         }
 
-        String lcKey = ((String) key).toLowerCase();
+        var lcKey = ((String) key).toLowerCase();
         return originalKeys.containsKey(lcKey);
     }
 
@@ -74,8 +75,8 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
             throw new IllegalArgumentException("Key must be a string.");
         }
 
-        String lcKey = ((String) key).toLowerCase();
-        String originalKey = originalKeys.get(lcKey);
+        var lcKey = ((String) key).toLowerCase();
+        var originalKey = originalKeys.get(lcKey);
         originalKeys.remove(lcKey);
         return super.remove(originalKey);
     }
@@ -86,9 +87,9 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
             throw new IllegalArgumentException("Key must be a string.");
         }
 
-        String lcKey = ((String) key).toLowerCase();
-        String originalKey = originalKeys.get(lcKey);
-        boolean found = super.remove(originalKey, value);
+        var lcKey = ((String) key).toLowerCase();
+        var originalKey = originalKeys.get(lcKey);
+        var found = super.remove(originalKey, value);
         if (found) {
             originalKeys.remove(lcKey);
         }

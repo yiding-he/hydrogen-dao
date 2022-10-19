@@ -1,7 +1,6 @@
 package com.hyd.dao.database.type;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -22,7 +21,7 @@ public class BlobReader {
      * @throws IOException  如果从流中读取内容失败
      */
     public static String readString(Blob blob, String charset) throws SQLException, IOException {
-        byte[] result = readBytes(blob);
+        var result = readBytes(blob);
         return new String(result, charset);
     }
 
@@ -37,12 +36,12 @@ public class BlobReader {
      * @throws IOException  如果从流中读取内容失败
      */
     public static byte[] readBytes(Blob blob) throws SQLException, IOException {
-        InputStream stream = blob.getBinaryStream();
-        byte[] result = new byte[0];
-        byte[] buf = new byte[4096];
+        var stream = blob.getBinaryStream();
+        var result = new byte[0];
+        var buf = new byte[4096];
         int size;
         while ((size = stream.read(buf)) != -1) {
-            byte[] new_result = new byte[result.length + size];
+            var new_result = new byte[result.length + size];
             System.arraycopy(result, 0, new_result, 0, result.length);
             System.arraycopy(buf, 0, new_result, result.length, size);
             result = new_result;
