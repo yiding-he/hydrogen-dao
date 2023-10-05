@@ -1,9 +1,6 @@
 package com.hyd.dao.database.dialects;
 
-import com.hyd.dao.database.dialects.impl.H2Dialect;
-import com.hyd.dao.database.dialects.impl.MsSqlServerDialect;
-import com.hyd.dao.database.dialects.impl.MySqlDialect;
-import com.hyd.dao.database.dialects.impl.OracleDialect;
+import com.hyd.dao.database.dialects.impl.*;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -12,7 +9,7 @@ import java.util.List;
 public class Dialects {
 
     /**
-     * 注册所有 Dialect，优先级从低到高
+     * 注册所有 Dialect，优先级从低到高（遍历是逆序的）
      */
     private static final List<Dialect> DIALECTS = new ArrayList<>();
 
@@ -22,6 +19,7 @@ public class Dialects {
         DIALECTS.add(new MsSqlServerDialect());
         DIALECTS.add(new MySqlDialect());
         DIALECTS.add(new H2Dialect());
+        DIALECTS.add(new TidbDialect());
     }
 
     public static void registerDialect(Dialect dialect) {
