@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.hyd.daotests.DataSourceFactories.LOCAL_HOST_3306;
 import static org.junit.Assert.*;
 
 public class RepositoryTest extends JUnitRuleTestBase {
@@ -194,6 +195,6 @@ public class RepositoryTest extends JUnitRuleTestBase {
 
     @Override
     protected DataSource getDataSource() {
-        return DataSourceFactories.mysqlDataSource();
+        return DataSourceFactories.getDataSource(LOCAL_HOST_3306);
     }
 }

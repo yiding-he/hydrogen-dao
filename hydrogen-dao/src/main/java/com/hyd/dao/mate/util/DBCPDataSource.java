@@ -18,7 +18,7 @@ public final class DBCPDataSource {
     }
 
     public static BasicDataSource newDataSource(
-            String driverClass, String url, String username, String password) {
+        String driverClass, String url, String username, String password) {
 
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(driverClass);
@@ -50,7 +50,7 @@ public final class DBCPDataSource {
     }
 
     public static BasicDataSource newOracleDataSource(
-            String host, int port, String sid, String username, String password) {
+        String host, int port, String sid, String username, String password) {
 
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("oracle.jdbc.OracleDriver");
@@ -62,10 +62,14 @@ public final class DBCPDataSource {
     }
 
     public static BasicDataSource newMySqlDataSource(
-            String url, String username, String password) {
+        String url, String username, String password
+    ) {
+
+        var driverClassName =
+            Cls.exists("com.mysql.cj.jdbc.Driver") ? "com.mysql.cj.jdbc.Driver" : "com.mysql.jdbc.Driver";
 
         BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName("com.mysql.jdbc.Driver");
+        ds.setDriverClassName(driverClassName);
         ds.setUrl(url);
         ds.setUsername(username);
         ds.setPassword(password);
@@ -73,20 +77,20 @@ public final class DBCPDataSource {
     }
 
     public static BasicDataSource newMySqlDataSource(
-            String host, int port, String database, String username, String password,
-            boolean useUnicode, String charEncoding) {
+        String host, int port, String database, String username, String password,
+        boolean useUnicode, String charEncoding) {
 
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
         ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database +
-                "?serverTimezone=UTC&useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
+            "?serverTimezone=UTC&useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
         ds.setUsername(username);
         ds.setPassword(password);
         return ds;
     }
 
     public static BasicDataSource newRemoteHsqldbDataSource(
-            String host, int port, String database, String username, String password) {
+        String host, int port, String database, String username, String password) {
 
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
