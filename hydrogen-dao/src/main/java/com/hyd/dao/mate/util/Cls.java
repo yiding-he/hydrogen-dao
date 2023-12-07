@@ -18,7 +18,7 @@ public class Cls {
         Class<?> _type = type;
         while (_type != null) {
             try {
-                type.getDeclaredField(field);
+                _type.getDeclaredField(field);
                 return true;
             } catch (NoSuchFieldException e) {
                 _type = _type.getSuperclass();
