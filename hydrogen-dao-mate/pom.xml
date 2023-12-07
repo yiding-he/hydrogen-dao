@@ -23,7 +23,7 @@
     <dependency>
       <groupId>com.github.yiding-he</groupId>
       <artifactId>hydrogen-dao</artifactId>
-      <version>4.0.0</version>
+      <version>4.0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
