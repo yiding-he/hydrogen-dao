@@ -56,13 +56,13 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
       <version>2.9.0</version>
-      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>druid</artifactId>
       <version>1.2.8</version>
-      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Optional JDBC Drivers -->
