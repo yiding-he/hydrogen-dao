@@ -179,14 +179,14 @@
         <snapshotRepository>
           <id>dev-nexus-server</id>
           <name>Snapshots</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
+          <url>https://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
       <repositories>
         <repository>
           <id>dev-nexus-server</id>
           <name>znxunzhi Repository</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
+          <url>https://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
           <releases>
             <enabled>true</enabled>
           </releases>
