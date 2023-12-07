@@ -637,11 +637,13 @@ public class DAO {
      *
      * @throws DAOException 如果发生数据库错误
      */
-    private void insert(Map row, String tableName) throws DAOException {
-        runWithExecutor(executor -> {
-            Command command = new InsertBuilder(executor.getContext()).build(tableName, row);
-            executor.execute(command);
-        });
+    public void insert(Row row, String tableName) throws DAOException {
+        if (row == null) {
+            return;
+        }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).build(tableName, row)
+        ));
     }
 
     /**
@@ -656,11 +658,27 @@ public class DAO {
         if (rows == null || rows.isEmpty()) {
             return;
         }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).buildBatch(tableName, rows)
+        ));
+    }
 
-        runWithExecutor(executor -> {
-            BatchCommand command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
-            executor.execute(command);
-        });
+    public void insertBean(Object bean, String tableName) {
+        if (bean == null) {
+            return;
+        }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).build(tableName, bean)
+        ));
+    }
+
+    public void insertBeans(Collection<?> beans, String tableName) {
+        if (beans == null || beans.isEmpty()) {
+            return;
+        }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).buildBatch(tableName, beans)
+        ));
     }
 
     /**
