@@ -1,11 +1,11 @@
 root = true
 
-[*.{txt, java, xml, md, properties}]
+[*.{txt,java,xml,md,properties}]
 charset = utf-8
 indent_style = space
 end_of_line = lf
 
-[*.{txt, java, xml}]
+[*.{txt,java,xml}]
 indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true

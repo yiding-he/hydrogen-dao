@@ -22,12 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * 事务可以分多级，每一级用 Map 保存多个数据源的当前连接。
  * 每一级都需要单独执行 commit/rollback。当执行 commit/rollback
  * 时，会对该级的所有数据源执行。
- * <p>
- * 这个不是分布式事务，无法保证一致性。
- * <p>
+ * <ul>
+ *   <li>这个不是分布式事务，无法保证一致性。</li>
+ * <ul>
  * 关于多级事务：
  * 多级事务会占用多个数据库连接（每一级事务对每个用到的数据源都会占用一个连接），
  * 连接池不够用的情况下可能会造成假死，所以请慎重使用
+ * 如果检测到处于 Spring JDBC 事务当中，会禁用多级事务，完全从 Spring 获取连接
  */
 public class TransactionManager {
 
@@ -45,6 +46,10 @@ public class TransactionManager {
 
     private static final ThreadLocal<Integer> level = ThreadLocal.withInitial(() -> 0);
 
+    private static boolean isInSpringTransaction() {
+        return Cls.exists("org.springframework.jdbc.datasource.DataSourceUtils") && SpringConnectionFactory.isTransactionActive();
+    }
+
     /////////////////////////////////////////////////////////
 
     private TransactionManager() {
@@ -57,6 +62,10 @@ public class TransactionManager {
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isInTransaction() {
+        if (isInSpringTransaction()) {
+            return true;
+        }
+
         return getLevel() > 0;
     }
 
@@ -80,7 +89,7 @@ public class TransactionManager {
     public static void start() {
         int level;
 
-        if (!isInTransaction()) {
+        if (!isInTransaction() || isInSpringTransaction()) {
             level = 1;
         } else {
             level = getLevel() + 1;
@@ -94,34 +103,40 @@ public class TransactionManager {
      * 提交当前级别事务
      */
     public static void commit() {
-        if (!isInTransaction()) {
+        int level = getLevel();
+        if (!isInTransaction() || isInSpringTransaction()) {
+            TransactionManager.level.set(Math.max(0, level - 1));
             return;
         }
 
-        int level = getLevel();
         connectionContextCache.get()
             .getOrDefault(level, Collections.emptyMap())
             .forEach((dataSourceName, context) -> context.commit());
 
+        connectionContextCache.get().remove(level);
+
         LOG.info(() -> "Transaction level " + level + " committed.");
-        TransactionManager.level.set(level - 1);
+        TransactionManager.level.set(Math.max(0, level - 1));
     }
 
     /**
      * 回退当前级别事务
      */
     public static void rollback() {
-        if (!isInTransaction()) {
+        int level = getLevel();
+        if (!isInTransaction() || isInSpringTransaction()) {
+            TransactionManager.level.set(Math.max(0, level - 1));
             return;
         }
 
-        int level = TransactionManager.level.get();
         connectionContextCache.get()
             .getOrDefault(level, Collections.emptyMap())
             .forEach((dataSourceName, context) -> context.rollback());
 
+        connectionContextCache.get().remove(level);
+
         LOG.info(() -> "Transaction level " + level + " rollbacked.");
-        TransactionManager.level.set(level - 1);
+        TransactionManager.level.set(Math.max(0, level - 1));
     }
 
     /**
@@ -130,7 +145,7 @@ public class TransactionManager {
      * @param isolation JDBC 事务隔离级别
      */
     public static void setTransactionIsolation(int isolation) {
-        if (!isInTransaction()) {
+        if (!isInTransaction() || isInSpringTransaction()) {
             return;
         }
 
@@ -144,7 +159,7 @@ public class TransactionManager {
      */
     public static ConnectionContext getConnectionContext(DAO dao) {
         // 如果要求独立于事务之外，则直接返回不妨到缓存
-        if (dao.isStandAlone() || !isInTransaction()) {
+        if (dao.isStandAlone() || !isInTransaction() || isInSpringTransaction()) {
             return createConnectionContext(dao);
         }
 
