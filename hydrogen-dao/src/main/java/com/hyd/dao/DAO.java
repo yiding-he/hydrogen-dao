@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Main facade of hydrogen-dao. It is thread safe.
@@ -482,7 +483,7 @@ public class DAO {
 
     /**
      * 执行查询，返回迭代器
-     *
+     * <br/>
      * <strong>注意：不关闭迭代器的话，可能造成数据库连接泄露！</strong>
      *
      * @param sql    要执行的查询语句
@@ -662,6 +663,21 @@ public class DAO {
             new InsertBuilder(executor.getContext()).buildBatch(tableName, rows)
         ));
     }
+
+    public void insertMap(Map<String, Object> map, String tableName) {
+        Row row = new Row();
+        row.putAll(map);
+        insert(row, tableName);
+    }
+
+    public void insertMaps(Collection<Map<String, Object>> maps, String tableName) {
+        insert(maps.stream().map(map -> {
+            Row row = new Row();
+            row.putAll(map);
+            return row;
+        }).collect(Collectors.toList()), tableName);
+    }
+
 
     public void insertBean(Object bean, String tableName) {
         if (bean == null) {
