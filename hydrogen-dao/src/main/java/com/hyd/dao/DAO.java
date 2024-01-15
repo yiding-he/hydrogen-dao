@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Main facade of hydrogen-dao. It is thread safe.
@@ -644,40 +645,6 @@ public class DAO {
     }
 
     /**
-     * 插入一条记录
-     *
-     * @param row       包含字段和值的记录
-     * @param tableName 表名
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    private void insert(Map row, String tableName) throws DAOException {
-        runWithExecutor(executor -> {
-            var command = new InsertBuilder(executor.getContext()).build(tableName, row);
-            executor.execute(command);
-        });
-    }
-
-    /**
-     * 批量插入 Map 对象
-     *
-     * @param rows      封装记录的对象
-     * @param tableName 表名
-     *
-     * @throws DAOException 如果发生数据库错误
-     */
-    public void insert(List<Row> rows, String tableName) throws DAOException {
-        if (rows == null || rows.isEmpty()) {
-            return;
-        }
-
-        runWithExecutor(executor -> {
-            var command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
-            executor.execute(command);
-        });
-    }
-
-    /**
      * 调用存储过程
      *
      * @param name   存储过程名称
@@ -720,13 +687,10 @@ public class DAO {
         return new Repository<>(type, this, tableName);
     }
 
+    ////////////////////////////////////////
+
     /**
-     * 插入一条记录
-     *
-     * @param row       包含字段和值的记录
-     * @param tableName 表名
-     *
-     * @throws DAOException 如果发生数据库错误
+     * 插入单条 Row
      */
     public void insert(Row row, String tableName) throws DAOException {
         if (row == null) {
@@ -738,28 +702,31 @@ public class DAO {
     }
 
     /**
-     * 批量插入 Map 对象
-     *
-     * @param rows      封装记录的对象
-     * @param tableName 表名
-     *
-     * @throws DAOException 如果发生数据库错误
+     * 插入 Row 集合
      */
-    public void insert(List<Row> rows, String tableName) throws DAOException {
+    public void insert(Collection<Row> rows, String tableName) throws DAOException {
         if (rows == null || rows.isEmpty()) {
             return;
         }
-        runWithExecutor(executor -> executor.execute(
-            new InsertBuilder(executor.getContext()).buildBatch(tableName, rows)
-        ));
+
+        runWithExecutor(executor -> {
+            var command = new InsertBuilder(executor.getContext()).buildBatch(tableName, rows);
+            executor.execute(command);
+        });
     }
 
+    /**
+     * 插入单个 Map
+     */
     public void insertMap(Map<String, Object> map, String tableName) {
         Row row = new Row();
         row.putAll(map);
         insert(row, tableName);
     }
 
+    /**
+     * 插入 Map 集合
+     */
     public void insertMaps(Collection<Map<String, Object>> maps, String tableName) {
         insert(maps.stream().map(map -> {
             Row row = new Row();
@@ -768,7 +735,9 @@ public class DAO {
         }).collect(Collectors.toList()), tableName);
     }
 
-
+    /**
+     * 插入 Bean 对象
+     */
     public void insertBean(Object bean, String tableName) {
         if (bean == null) {
             return;
@@ -778,6 +747,9 @@ public class DAO {
         ));
     }
 
+    /**
+     * 插入 Bean 集合
+     */
     public void insertBeans(Collection<?> beans, String tableName) {
         if (beans == null || beans.isEmpty()) {
             return;

@@ -57,7 +57,7 @@ public class HydrogenDAORule {
      */
     private List<File> scanCsvFiles() {
         var classPath = System.getProperty("java.class.path", ".");
-        var classPathElements = classPath.split(System.getProperty("path.separator"));
+        var classPathElements = classPath.split(File.pathSeparator);
         List<File> csvFiles = new ArrayList<>();
 
         for (var pathElement : classPathElements) {
