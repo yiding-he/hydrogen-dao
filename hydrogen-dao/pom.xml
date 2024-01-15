@@ -180,6 +180,23 @@
     <connection>https://github.com/yiding-he/hydrogen-dao.git</connection>
   </scm>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
   <profiles>
     <profile>
       <id>dev</id>
@@ -187,18 +204,19 @@
         <snapshotRepository>
           <id>dev-nexus-server</id>
           <name>Snapshots</name>
-          <url>http://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
+          <url>https://${env.DEV_NEXUS_SERVER}/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
       </distributionManagement>
       <repositories>
         <repository>
-          <id>Aliyun</id>
-          <url>https://maven.aliyun.com/repository/public/</url>
+          <id>dev-nexus-server</id>
+          <name>znxunzhi Repository</name>
+          <url>https://${env.DEV_NEXUS_SERVER}/nexus/content/groups/public</url>
           <releases>
             <enabled>true</enabled>
           </releases>
           <snapshots>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
       </repositories>

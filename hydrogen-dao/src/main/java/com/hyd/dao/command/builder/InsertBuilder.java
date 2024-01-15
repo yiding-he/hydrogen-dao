@@ -10,6 +10,7 @@ import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.type.NameConverter;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.hyd.dao.command.builder.helper.CommandBuilderHelper.*;
@@ -32,7 +33,7 @@ public final class InsertBuilder extends CommandBuilder {
      *
      * @return 批处理插入命令
      */
-    public BatchCommand buildBatch(String tableName, List<?> objects) {
+    public BatchCommand buildBatch(String tableName, Collection<?> objects) {
 
         if (objects == null || objects.isEmpty()) {
             return BatchCommand.EMPTY;
@@ -40,7 +41,7 @@ public final class InsertBuilder extends CommandBuilder {
 
         final NameConverter nameConverter = context.getNameConverter();
         final FQN fqn = new FQN(context, tableName);
-        final Object sample = objects.get(0);
+        final Object sample = objects.iterator().next();
         final List<ColumnInfo> infos = getBatchColumnInfo(context, tableName, sample);
         final SQL.Insert insert = new SQL.Insert(fqn.getQuotedName());
 

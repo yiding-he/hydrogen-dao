@@ -720,22 +720,70 @@ public class DAO {
         return new Repository<>(type, this, tableName);
     }
 
-    ////////////////////////////////////////////////// deprecated methods
-
-    @Deprecated
-    public int insertList(List<?> list, String tableName) {
-        if (list.isEmpty()) {
-            return 0;
+    /**
+     * 插入一条记录
+     *
+     * @param row       包含字段和值的记录
+     * @param tableName 表名
+     *
+     * @throws DAOException 如果发生数据库错误
+     */
+    public void insert(Row row, String tableName) throws DAOException {
+        if (row == null) {
+            return;
         }
-        List<Object> objectList = new ArrayList<>(list);
-        return repository(Object.class, tableName).insertBatch(objectList);
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).build(tableName, row)
+        ));
     }
 
-    @Deprecated
-    public int insertObject(Object o, String tableName) {
-        if (o == null) {
-            return 0;
+    /**
+     * 批量插入 Map 对象
+     *
+     * @param rows      封装记录的对象
+     * @param tableName 表名
+     *
+     * @throws DAOException 如果发生数据库错误
+     */
+    public void insert(List<Row> rows, String tableName) throws DAOException {
+        if (rows == null || rows.isEmpty()) {
+            return;
         }
-        return repository(Object.class, tableName).insertInstance(o);
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).buildBatch(tableName, rows)
+        ));
+    }
+
+    public void insertMap(Map<String, Object> map, String tableName) {
+        Row row = new Row();
+        row.putAll(map);
+        insert(row, tableName);
+    }
+
+    public void insertMaps(Collection<Map<String, Object>> maps, String tableName) {
+        insert(maps.stream().map(map -> {
+            Row row = new Row();
+            row.putAll(map);
+            return row;
+        }).collect(Collectors.toList()), tableName);
+    }
+
+
+    public void insertBean(Object bean, String tableName) {
+        if (bean == null) {
+            return;
+        }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).build(tableName, bean)
+        ));
+    }
+
+    public void insertBeans(Collection<?> beans, String tableName) {
+        if (beans == null || beans.isEmpty()) {
+            return;
+        }
+        runWithExecutor(executor -> executor.execute(
+            new InsertBuilder(executor.getContext()).buildBatch(tableName, beans)
+        ));
     }
 }
