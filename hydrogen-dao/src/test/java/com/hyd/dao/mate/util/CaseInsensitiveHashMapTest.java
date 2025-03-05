@@ -2,7 +2,10 @@ package com.hyd.dao.mate.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 
 public class CaseInsensitiveHashMapTest {
 
@@ -24,11 +27,17 @@ public class CaseInsensitiveHashMapTest {
         assertTrue(map.containsKey("aaaaaa"));
         assertFalse(map.containsKey("bbbbbb"));
 
+        // keySet 只能返回原始 key
         assertTrue(map.keySet().contains("AAAaaa"));
-        assertTrue(map.keySet().contains("aaaaaa"));
+        assertFalse(map.keySet().contains("aaaaaa"));
 
-        map.put("aaaAAA", "CCCCCC");
+        // entrySet 只能返回原始 key
+        assertTrue(map.entrySet().stream().anyMatch(e -> e.getKey().equals("AAAaaa")));
+        assertTrue(map.entrySet().stream().noneMatch(e -> e.getKey().equals("aaaaaa")));
+
+        map.putAll(Map.of("AAAaaa", "CCCCCC"));
         assertEquals("CCCCCC", map.get("AAAAAA"));
         assertEquals("CCCCCC", map.get("AAAaaa"));
+
     }
 }
