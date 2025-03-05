@@ -1,7 +1,10 @@
 package com.hyd.dao.mate.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 对 key 忽略大小写的 HashMap
@@ -95,7 +98,32 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
         return found;
     }
 
+    @Override
+    public void putAll(Map<? extends String, ? extends V> m) {
+        for (Map.Entry<? extends String, ? extends V> entry : m.entrySet()) {
+            put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        originalKeys.clear();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return new HashSet<>(originalKeys.values());
+    }
+
+    @Override
+    public Set<Entry<String, V>> entrySet() {
+        return originalKeys.entrySet().stream().map(entry ->
+            new SimpleEntry<>(entry.getValue(), super.get(entry.getValue()))
+        ).collect(Collectors.toSet());
+    }
+
     public String getOriginalKey(String key) {
-        return originalKeys.get(key);
+        return originalKeys.get(key.toLowerCase());
     }
 }
