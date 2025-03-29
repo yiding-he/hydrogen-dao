@@ -139,6 +139,18 @@
       <version>2.0.15</version>
     </dependency>
 
+    <!-- Optional SpringBoot -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+      <optional>true</optional>
+    </dependency>
+
     <!-- Unit Testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

@@ -1,4 +1,4 @@
-package com.hyd.dao.springboot.multidatasource;
+package com.hyd.daotests.springboot;
 
 import com.hyd.dao.DAO;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-/**
- * 在 SpringBoot 项目中使用多数据源的例子
- */
 @Configuration
 public class MultiDataSourceConf {
 
