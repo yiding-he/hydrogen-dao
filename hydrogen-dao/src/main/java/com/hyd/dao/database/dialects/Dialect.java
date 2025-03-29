@@ -21,6 +21,11 @@ public interface Dialect {
         Uppercase, Lowercase, Unchanged
     }
 
+    /**
+     * JDBC Driver 当中如何命名表元数据字段。
+     * 万一有哪个数据库驱动存在不同的命名，可以针对该驱动
+     * 覆写 {@link Dialect#getColumnMetaFields()} 方法。
+     */
     interface ColumnMetaFields {
 
         String columnNameField();

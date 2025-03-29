@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,8 +27,6 @@ public abstract class AbstractDaoTest {
 
     protected abstract DataSource createDataSource();
 
-    protected abstract void closeDataSource(DataSource dataSource) throws SQLException;
-
     @BeforeEach
     public void init() {
         if (!DataSources.getInstance().contains(DEFAULT_DATA_SOURCE_NAME)) {
@@ -43,7 +40,6 @@ public abstract class AbstractDaoTest {
     @AfterEach
     public void fin() {
         this.rule.after();
-        DataSources.getInstance().closeAll(this::closeDataSource);
     }
 
     @Test
