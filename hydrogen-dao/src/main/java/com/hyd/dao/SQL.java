@@ -2,12 +2,19 @@ package com.hyd.dao;
 
 
 import com.hyd.dao.command.Command;
+import com.hyd.dao.database.type.NameConverter;
+import lombok.Setter;
 
+import java.io.Serializable;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.springframework.util.StringUtils.uncapitalize;
 
 /**
  * 生成 Command 的帮助类
@@ -45,12 +52,54 @@ public class SQL {
 
     /////////////////////////////////////////////////////////
 
+    @FunctionalInterface
+    public interface Getter<T, R> extends Serializable {
+        @SuppressWarnings("unused")
+        R apply(T t);
+    }
+
+    /**
+     * 解析 lambda 表达式，得到原始的属性名
+     */
+    protected static <T, R> String parseFieldName(Getter<T, R> getter) {
+        try {
+            var lambdaClass = getter.getClass();
+            var writeReplaceMethod = lambdaClass.getDeclaredMethod("writeReplace");
+            writeReplaceMethod.setAccessible(true);
+            var serializedForm = (SerializedLambda) writeReplaceMethod.invoke(getter);
+            return extractPropFromGetter(serializedForm.getImplMethodName());
+        } catch (Exception e) {
+            throw DAOException.wrap(e);
+        }
+    }
+
+    protected static String extractPropFromGetter(String getterMethodName) {
+        if (getterMethodName.startsWith("is")) {
+            return uncapitalize(getterMethodName.substring(2));
+        } else if (getterMethodName.startsWith("get")) {
+            return uncapitalize(getterMethodName.substring(3));
+        } else {
+            throw new IllegalArgumentException("Invalid getter method name: " + getterMethodName);
+        }
+    }
+
+    /////////////////////////////////////////////////////////
+
     public static Select Select(String columns) {
         return new Select(columns);
     }
 
     public static Select Select(String... columns) {
         return new Select(columns);
+    }
+
+    @SafeVarargs
+    public static <T, R> Select Select(Getter<T, R>... getters) {
+        return new Select(getters);
+    }
+
+    public static Select Select(NameConverter converter) {
+        return new Select(converter);
     }
 
     public static Update Update(String table) {
@@ -198,6 +247,9 @@ public class SQL {
     @SuppressWarnings("rawtypes")
     public static abstract class Generatable<T extends Generatable> {
 
+        @Setter
+        protected NameConverter nameConverter = NameConverter.DEFAULT;
+
         protected String table;
 
         protected String statement;
@@ -224,6 +276,11 @@ public class SQL {
 
         public boolean hasParams() {
             return !params.isEmpty();
+        }
+
+        public T converter(NameConverter nameConverter) {
+            this.nameConverter = nameConverter;
+            return (T) this;
         }
 
         public T LeftJoin(String statement, Object... params) {
@@ -633,6 +690,10 @@ public class SQL {
 
         private long limit = -1;
 
+        public Select(NameConverter converter) {
+            this.nameConverter = converter;
+        }
+
         public Select(String columns) {
             this.columns = columns;
         }
@@ -641,8 +702,24 @@ public class SQL {
             this.columns = String.join(",", columns);
         }
 
+        public <T, R> Select(Getter<T, R>... getters) {
+            this.columns = Stream.of(getters)
+                .map(SQL::parseFieldName)
+                .map(field -> this.nameConverter.field2Column(field))
+                .collect(Collectors.joining(","));
+        }
+
         public Select Columns(String... columns) {
             this.columns = String.join(",", columns);
+            return this;
+        }
+
+        @SafeVarargs
+        public final <T, R> Select Columns(Getter<T, R>... getters) {
+            this.columns = Stream.of(getters)
+                .map(SQL::parseFieldName)
+                .map(field -> this.nameConverter.field2Column(field))
+                .collect(Collectors.joining(","));
             return this;
         }
 

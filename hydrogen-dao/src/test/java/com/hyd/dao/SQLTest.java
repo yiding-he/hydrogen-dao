@@ -1,6 +1,8 @@
 package com.hyd.dao;
 
 import com.hyd.dao.command.Command;
+import com.hyd.dao.database.type.NameConverter;
+import com.hyd.daotests.model.Blog;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -56,5 +58,13 @@ public class SQLTest {
             .OrderBy("col3 desc")
             .Limit(100)
         );
+    }
+
+    @Test
+    public void testSelectFromGetters() {
+        output(
+            Select(NameConverter.NONE)
+                .Columns(Blog::getId, Blog::getCreateTime, Blog::getTitle)
+                .From("blog").Limit(10));
     }
 }

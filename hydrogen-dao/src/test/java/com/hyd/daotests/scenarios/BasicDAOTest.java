@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.hyd.dao.SQL.Select;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"RedundantThrows", "CallToPrintStackTrace"})
@@ -20,6 +21,15 @@ public interface BasicDAOTest extends TestBase {
     @Test
     default void query() throws Exception {
         List<Row> rows = getDao().query("select * from blog");
+        assertFalse(rows.isEmpty());
+        rows.forEach(System.out::println);
+    }
+
+    @Test
+    default void querySelect() throws Exception {
+        var rows = getDao().query(Select(
+            Blog::getId, Blog::getTitle, Blog::getContent
+        ).From("blog"));
         assertFalse(rows.isEmpty());
         rows.forEach(System.out::println);
     }
