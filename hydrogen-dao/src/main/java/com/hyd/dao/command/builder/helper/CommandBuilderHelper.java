@@ -53,7 +53,7 @@ public class CommandBuilderHelper {
     }
 
     /**
-     * 根据 bean 类型过滤字段列表，删除类型中没有定义的字段
+     * 过滤 select 字段列表，去掉实体类中不存在的字段
      */
     public static List<ColumnInfo> filterColumnsByType(List<ColumnInfo> original, Class<?> type, NameConverter nameConverter) {
         // 如果类型不是 POJO 而是 Map 则无需过滤，原样返回

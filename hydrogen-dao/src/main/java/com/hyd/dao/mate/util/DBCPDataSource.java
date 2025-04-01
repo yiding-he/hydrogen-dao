@@ -65,7 +65,7 @@ public final class DBCPDataSource {
             String url, String username, String password) {
 
         var ds = new BasicDataSource();
-        ds.setDriverClassName("com.mysql.jdbc.Driver");
+        ds.setDriverClassName(getMysqlDriverName());
         ds.setUrl(url);
         ds.setUsername(username);
         ds.setPassword(password);
@@ -77,12 +77,22 @@ public final class DBCPDataSource {
             boolean useUnicode, String charEncoding) {
 
         var ds = new BasicDataSource();
-        ds.setDriverClassName("com.mysql.jdbc.Driver");
+        ds.setDriverClassName(getMysqlDriverName());
         ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database +
                 "?serverTimezone=UTC&useUnicode=" + useUnicode + "&characterEncoding=" + charEncoding);
         ds.setUsername(username);
         ds.setPassword(password);
         return ds;
+    }
+
+    private static String getMysqlDriverName() {
+        var mysqlDriverName = "";
+        if (Cls.exists("com.mysql.cj.jdbc.Driver")) {
+            mysqlDriverName = ("com.mysql.cj.jdbc.Driver");
+        } else if (Cls.exists("com.mysql.jdbc.Driver")) {
+            mysqlDriverName = ("com.mysql.jdbc.Driver");
+        }
+        return mysqlDriverName;
     }
 
     public static BasicDataSource newRemoteHsqldbDataSource(

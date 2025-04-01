@@ -7,6 +7,7 @@ import com.hyd.dao.database.ColumnInfo;
 import com.hyd.dao.database.ConnectionContext;
 import com.hyd.dao.database.FQN;
 import com.hyd.dao.database.type.NameConverter;
+import com.hyd.dao.etc.Nullable;
 
 import java.util.List;
 
@@ -47,8 +48,13 @@ public final class QueryBuilder extends CommandBuilder {
 
     /**
      * 根据 obj 对象构建查询语句
+     *
+     * @param tableName 表名
+     * @param obj       对象, 如果为 null, 则查询所有字段，否则：
+     *                  1. 根据对象属性和实际表字段决定查询哪些字段；
+     *                  2. 根据对象当中不为空的属性值构建查询条件。
      */
-    public Command build(String tableName, Object obj) {
+    public Command build(String tableName, @Nullable Object obj) {
         final FQN fqn = new FQN(context, tableName);
         final SQL.Select select = new SQL.Select("*").From(fqn.getQuotedName());
 

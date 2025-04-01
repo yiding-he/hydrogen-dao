@@ -80,7 +80,7 @@ public class Logger {
         }
     };
 
-    //////////////////////////////////////////////////////////////// reflection methods
+    /// ///////////////////////////////////////////////////////////// reflection methods
 
     private static Class<?> cls(String className) {
         try {
@@ -122,11 +122,25 @@ public class Logger {
         }
     }
 
-    ////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////
 
     public enum Level {
         Trace, Debug, Info, Warn, Error,
         ;
+    }
+
+    /**
+     * 全局日志级别过滤器，只有大于等于这个级别的日志才会被记录下来。
+     * 用于在性能测试中减少输出日志
+     */
+    private static Level globalLevelFilter = null;
+
+    public static void setGlobalLevelFilter(Level globalLevelFilter) {
+        Logger.globalLevelFilter = globalLevelFilter;
+    }
+
+    public static void clearGlobalLevelFilter() {
+        Logger.globalLevelFilter = null;
     }
 
     public enum LoggerType {
@@ -206,7 +220,7 @@ public class Logger {
         }
     }
 
-    ////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////
 
     private static LoggerFactory loggerFactory;
 
@@ -258,7 +272,7 @@ public class Logger {
 
     private static final Object[] EMPTY_ARR = new Object[]{};
 
-    ////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////
 
     private Object logger;
 
@@ -474,6 +488,9 @@ public class Logger {
     }
 
     public boolean isEnabled(Level level) {
+        if (globalLevelFilter != null && globalLevelFilter.compareTo(level) > 0) {
+            return false;
+        }
         String methodName = "is" + level + "Enabled";
 
         if (type == LoggerType.LOGBACK) {

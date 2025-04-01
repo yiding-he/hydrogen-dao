@@ -1,6 +1,6 @@
 package com.hyd.dao.mate.util;
 
-import com.hyd.dao.src.models.Blog;
+import com.hyd.daotests.model.Blog;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

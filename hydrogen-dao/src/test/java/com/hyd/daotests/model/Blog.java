@@ -1,7 +1,10 @@
-package com.hyd.dao.src.models;
+package com.hyd.daotests.model;
+
+import com.hyd.dao.Table;
 
 import java.util.Date;
 
+@Table(name = "blog")
 public class Blog {
 
     private Long id;

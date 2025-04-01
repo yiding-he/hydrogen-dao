@@ -1,56 +1,31 @@
-package com.hyd.daotests;
+package com.hyd.daotests.scenarios;
 
-import com.hyd.dao.*;
-import com.hyd.dao.junit.HydrogenDAORule;
-import com.hyd.dao.src.models.Blog;
-import com.hyd.dao.src.models.BlogRecord;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.hyd.dao.DAO;
+import com.hyd.dao.Page;
+import com.hyd.dao.Row;
+import com.hyd.dao.TransactionException;
+import com.hyd.daotests.TestBase;
+import com.hyd.daotests.model.Blog;
+import com.hyd.daotests.model.BlogRecord;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class AbstractDaoTest {
-
-    protected DAO dao;
-
-    protected HydrogenDAORule rule;
-
-    protected DAO getDao() {
-        return dao;
-    }
-
-    protected abstract DataSource createDataSource();
-
-    @BeforeEach
-    public void init() {
-        if (!DataSources.getInstance().contains(DEFAULT_DATA_SOURCE_NAME)) {
-            DataSources.getInstance().setDataSource(DEFAULT_DATA_SOURCE_NAME, createDataSource());
-        }
-        this.dao = new DAO(DEFAULT_DATA_SOURCE_NAME);
-        this.rule = new HydrogenDAORule(this::getDao);
-        this.rule.before();
-    }
-
-    @AfterEach
-    public void fin() {
-        this.rule.after();
-    }
+@SuppressWarnings({"RedundantThrows", "CallToPrintStackTrace"})
+public interface BasicDAOTest extends TestBase {
 
     @Test
-    public void query() throws Exception {
+    default void query() throws Exception {
         List<Row> rows = getDao().query("select * from blog");
         assertFalse(rows.isEmpty());
         rows.forEach(System.out::println);
     }
 
     @Test
-    public void queryObject() throws Exception {
+    default void queryObject() throws Exception {
         List<Blog> blogs = getDao().query(Blog.class, "select * from blog");
         assertFalse(blogs.isEmpty());
 
@@ -61,7 +36,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testQueryPage() throws Exception {
+    default void testQueryPage() throws Exception {
         Page<Blog> page = getDao().queryPage(Blog.class, "select * from blog", 2, 0);
         assertNotNull(page);
         assertFalse(page.isEmpty());
@@ -71,7 +46,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testQueryIterator() throws Exception {
+    default void testQueryIterator() throws Exception {
         AtomicInteger counter = new AtomicInteger();
         try (var rows = getDao().queryIterator("select * from blog")) {
             rows.forEach(row -> {
@@ -83,7 +58,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testQueryIteratorBean() {
+    default void testQueryIteratorBean() {
         AtomicInteger counter = new AtomicInteger();
         try (var rows = getDao().queryIterator("select * from blog")) {
             rows.forEach(Blog.class, blog -> {
@@ -95,7 +70,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testInsertNullContent() throws Exception {
+    default void testInsertNullContent() throws Exception {
         getDao().execute("insert into blog(id,title,content)values(?,?,?)", 666, "no-content", null);
         Blog blog = getDao().queryFirst(Blog.class, "select * from blog where id=?", 666);
         assertNotNull(blog);
@@ -103,14 +78,14 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void queryMap() throws Exception {
+    default void queryMap() throws Exception {
         List<Row> rows = getDao().query("select * from blog");
         assertFalse(rows.isEmpty());
         assertNotNull(rows.get(0).get("id"));
     }
 
     @Test
-    public void testDelete() {
+    default void testDelete() {
         assertNotNull(getDao().queryFirst("select * from blog where id=?", 1));
         getDao().execute("delete from blog where id=?", 1);
         assertNull(getDao().queryFirst("select * from blog where id=?", 1));
@@ -118,7 +93,7 @@ public abstract class AbstractDaoTest {
 
 
     @Test
-    public void testRunTransactionCommit() throws Exception {
+    default void testRunTransactionCommit() throws Exception {
         DAO dao = getDao();
         DAO.runTransaction(() -> {
             assertNotNull(dao.queryFirst("select * from blog where id=?", 1));
@@ -128,7 +103,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testRunTransactionRollback() throws Exception {
+    default void testRunTransactionRollback() throws Exception {
         DAO dao = getDao();
         try {
             DAO.runTransaction(() -> {
@@ -144,7 +119,7 @@ public abstract class AbstractDaoTest {
     }
 
     @Test
-    public void testQueryRecord() {
+    default void testQueryRecord() {
         var dao = getDao();
         var record = dao.queryFirst(BlogRecord.class, "select * from blog where id=1");
         assertNotNull(record);

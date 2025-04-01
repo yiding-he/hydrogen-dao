@@ -2,6 +2,7 @@ package com.hyd.daotests.benchmark;
 
 import com.hyd.dao.DAO;
 import com.hyd.dao.DataSources;
+import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.dao.repository.Repository;
 import lombok.Data;
@@ -15,6 +16,10 @@ import static com.hyd.dao.DataSources.DEFAULT_DATA_SOURCE_NAME;
 
 // 性能测试的目的是衡量代码效率，所以只测试单核性能
 public class InsertBenchmark {
+
+    static {
+        Logger.setGlobalLevelFilter(Logger.Level.Info);
+    }
 
     public static final String DROP_TABLE = "drop table if exists table1";
 
