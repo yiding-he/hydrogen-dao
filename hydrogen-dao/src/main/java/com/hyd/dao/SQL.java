@@ -621,7 +621,7 @@ public class SQL {
      */
     public static class Select extends Generatable<Select> {
 
-        private final String columns;
+        private String columns;
 
         private String from;
 
@@ -639,6 +639,11 @@ public class SQL {
 
         public Select(String... columns) {
             this.columns = String.join(",", columns);
+        }
+
+        public Select Columns(String... columns) {
+            this.columns = String.join(",", columns);
+            return this;
         }
 
         public Select From(String from) {
