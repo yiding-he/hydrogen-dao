@@ -33,4 +33,8 @@ public abstract class AbstractTestBase implements TestBase {
 
     protected abstract DataSource createDataSource();
 
+    @Override
+    public DAO getDao() {
+        return dao;
+    }
 }

@@ -15,14 +15,14 @@ public interface RepositoryTest extends TestBase {
     }
 
     @Test
-    default void testQueryById() {
+    default void testRepositoryQueryById() {
         var blog = getRepository().queryById(1);
         assertNotNull(blog);
         System.out.println(blog);
     }
 
     @Test
-    default void testQueryByInstance() {
+    default void testRepositoryQueryByInstance() {
         var blog = new Blog();
         blog.setId(2L);
         var list = getRepository().queryByInstance(blog);
@@ -31,8 +31,18 @@ public interface RepositoryTest extends TestBase {
     }
 
     @Test
-    default void testCustomQuery() {
+    default void testCustomRepositoryQuery() {
         var nonHiddenBlogs = getRepository().query(select -> select.Where("hidden=?", "false"));
         assertEquals(2, nonHiddenBlogs.size());
+    }
+
+    @Test
+    default void testRepositoryQueryPage() {
+        var page = getRepository().queryPage(
+            select -> select.Where("id<?", 100), 2, 0
+        );
+        assertEquals(2, page.getList().size());
+        assertEquals(3, page.getTotal());
+        assertEquals(2, page.getTotalPage());
     }
 }

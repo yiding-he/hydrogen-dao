@@ -80,6 +80,9 @@ public class HydrogenDAORule {
         prepareData.forEach((tableName, rows) -> dao.insert(rows, tableName));
     }
 
+    /**
+     * 在单元测试开始前执行，用于初始化数据库
+     */
     public void before() {
         var dao = daoSupplier.get();
 
@@ -88,6 +91,9 @@ public class HydrogenDAORule {
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/before.sql", dao);
     }
 
+    /**
+     * 在单元测试结束后执行，用于清理数据库
+     */
     public void after() {
         var dao = daoSupplier.get();
         ScriptExecutor.execute("classpath:/" + scriptFolder + "/after.sql", dao);

@@ -1,6 +1,5 @@
 package com.hyd.daotests.dialects;
 
-import com.hyd.dao.DAO;
 import com.hyd.dao.mate.util.DBCPDataSource;
 import com.hyd.daotests.AbstractTestBase;
 import com.hyd.daotests.scenarios.BasicDAOTest;
@@ -17,8 +16,4 @@ public class H2Test extends AbstractTestBase
         return DBCPDataSource.newH2MemDataSource();
     }
 
-    @Override
-    public DAO getDao() {
-        return dao;
-    }
 }
