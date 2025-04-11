@@ -19,11 +19,11 @@ import java.util.function.Function;
  */
 public class Repository<T> {
 
-    private final DAO dao;
+    protected final DAO dao;
 
-    private final String tableName;
+    protected final String tableName;
 
-    private final Class<T> type;
+    protected final Class<T> type;
 
     /**
      * 构造方法
