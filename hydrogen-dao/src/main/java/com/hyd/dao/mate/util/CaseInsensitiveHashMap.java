@@ -1,5 +1,7 @@
 package com.hyd.dao.mate.util;
 
+import com.hyd.dao.etc.NotNull;
+
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,15 +114,15 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String, V> {
         originalKeys.clear();
     }
 
-    @Override
+    @Override @NotNull
     public Set<String> keySet() {
         return new HashSet<>(originalKeys.values());
     }
 
-    @Override
+    @Override @NotNull
     public Set<Entry<String, V>> entrySet() {
-        return originalKeys.entrySet().stream().map(entry ->
-            new SimpleEntry<>(entry.getValue(), super.get(entry.getValue()))
+        return originalKeys.values().stream().map(
+            s -> new SimpleEntry<>(s, super.get(s))
         ).collect(Collectors.toSet());
     }
 

@@ -3,6 +3,7 @@ package com.hyd.dao;
 
 import com.hyd.dao.command.Command;
 import com.hyd.dao.database.type.NameConverter;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -47,13 +48,14 @@ public class SQL {
         }
 
         String str = obj.toString();
-        return str.length() == 0 || str.trim().length() == 0;
+        return str.isEmpty() || str.trim().isEmpty();
     }
 
-    /////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////
 
     @FunctionalInterface
-    public interface Getter<T, R> extends Serializable {
+    public interface GetterRef<T, R> extends Serializable {
+
         @SuppressWarnings("unused")
         R apply(T t);
     }
@@ -61,12 +63,12 @@ public class SQL {
     /**
      * 解析 lambda 表达式，得到原始的属性名
      */
-    protected static <T, R> String parseFieldName(Getter<T, R> getter) {
+    protected static <T, R> String parseFieldName(GetterRef<T, R> getterRef) {
         try {
-            var lambdaClass = getter.getClass();
+            var lambdaClass = getterRef.getClass();
             var writeReplaceMethod = lambdaClass.getDeclaredMethod("writeReplace");
             writeReplaceMethod.setAccessible(true);
-            var serializedForm = (SerializedLambda) writeReplaceMethod.invoke(getter);
+            var serializedForm = (SerializedLambda) writeReplaceMethod.invoke(getterRef);
             return extractPropFromGetter(serializedForm.getImplMethodName());
         } catch (Exception e) {
             throw DAOException.wrap(e);
@@ -83,7 +85,7 @@ public class SQL {
         }
     }
 
-    /////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////
 
     public static Select Select(String columns) {
         return new Select(columns);
@@ -94,8 +96,8 @@ public class SQL {
     }
 
     @SafeVarargs
-    public static <T, R> Select Select(Getter<T, R>... getters) {
-        return new Select(getters);
+    public static <T, R> Select Select(GetterRef<T, R>... getterRefs) {
+        return new Select(getterRefs);
     }
 
     public static Select Select(NameConverter converter) {
@@ -114,14 +116,22 @@ public class SQL {
         return new Delete(table);
     }
 
-    /////////////////////////////////////////////////////////
+    public static CteContext With(Cte... ctes) {
+        return new CteContext(ctes);
+    }
+
+    /// //////////////////////////////////////////////////////
 
     public enum Joint {
         AND, OR
     }
 
+    /**
+     * SQL JOIN 类型，注意数据库是否支持
+     */
+    @Getter
     public enum JoinType {
-        InnerJoin(" INNER JOIN "), OuterJoin(" OUTER JOIN "), LeftJoin(" LEFT JOIN "), RightJoin(" RIGHT JOIN ");
+        InnerJoin("INNER JOIN"), FullJoin("FULL JOIN"), LeftJoin("LEFT JOIN"), RightJoin("RIGHT JOIN");
 
         private final String code;
 
@@ -129,9 +139,6 @@ public class SQL {
             this.code = code;
         }
 
-        public String getCode() {
-            return code;
-        }
     }
 
     public static class Pair {
@@ -157,7 +164,7 @@ public class SQL {
         public Pair(Joint joint, String statement, Object... args) {
             this.joint = joint;
             this.statement = statement.trim();
-            this.args = args == null? Collections.emptyList(): Arrays.asList(args);
+            this.args = args == null ? Collections.emptyList() : Arrays.asList(args);
         }
 
         public Pair(Joint joint, String statement, List<Object> args) {
@@ -242,7 +249,78 @@ public class SQL {
         }
     }
 
-    /////////////////////////////////////////////////////////
+    public static class Cte extends Select {
+
+        public Cte(NameConverter converter) {
+            super(converter);
+        }
+
+        public Cte(String columns) {
+            super(columns);
+        }
+
+        public Cte(String... columns) {
+            super(columns);
+        }
+
+        public Cte(Select src) {
+            super("");
+            super.copy(src);
+        }
+
+        public <T, R> Cte(GetterRef<T, R>... getterRefs) {
+            super(getterRefs);
+        }
+
+        @Getter
+        private String alias;
+
+        public Cte AsCTE(String alias) {
+            this.alias = alias;
+            return this;
+        }
+    }
+
+    public static class CteContext {
+
+        private final List<Cte> ctes = new ArrayList<>();
+
+        public CteContext(Cte... ctes) {
+            this.ctes.addAll(Arrays.asList(ctes));
+        }
+
+        public Select Select(String columns) {
+            return new Select(columns).ctes(ctes);
+        }
+
+        public Select Select(String... columns) {
+            return new Select(columns).ctes(ctes);
+        }
+
+        @SafeVarargs
+        public final <T, R> Select Select(GetterRef<T, R>... getterRefs) {
+            return new Select(getterRefs).ctes(ctes);
+        }
+
+        public Select Select(NameConverter converter) {
+            return new Select(converter).ctes(ctes);
+        }
+
+        public Update Update(String table) {
+            return new Update(table).ctes(ctes);
+        }
+
+        public Insert Insert(String table) {
+            return new Insert(table).ctes(ctes);
+        }
+
+        public Delete Delete(String table) {
+            return new Delete(table).ctes(ctes);
+        }
+    }
+
+
+    /// //////////////////////////////////////////////////////
 
     @SuppressWarnings("rawtypes")
     public static abstract class Generatable<T extends Generatable> {
@@ -250,25 +328,35 @@ public class SQL {
         @Setter
         protected NameConverter nameConverter = NameConverter.DEFAULT;
 
+        @Getter
         protected String table;
 
         protected String statement;
 
+        @Getter
         protected List<Object> params = new ArrayList<>();
 
         protected List<Pair> conditions = new ArrayList<>();
 
         protected List<Join> joins = new ArrayList<>();
 
+        protected List<Cte> ctes = new ArrayList<>();
+
+        protected void copy(Generatable<T> generatable) {
+            this.nameConverter = generatable.nameConverter;
+            this.table = generatable.table;
+            this.statement = generatable.statement;
+            this.params.addAll(generatable.params);
+            this.conditions.addAll(generatable.conditions);
+            this.joins.addAll(generatable.joins);
+        }
+
+        protected T ctes(List<Cte> ctes) {
+            this.ctes.addAll(ctes);
+            return (T) this;
+        }
+
         public abstract Command toCommand();
-
-        public String getTable() {
-            return table;
-        }
-
-        public List<Object> getParams() {
-            return params;
-        }
 
         public boolean hasConditions() {
             return !conditions.isEmpty();
@@ -298,8 +386,8 @@ public class SQL {
             return (T) this;
         }
 
-        public T OuterJoin(String statement, Object... params) {
-            this.joins.add(new Join(JoinType.OuterJoin, statement, params));
+        public T FullJoin(String statement, Object... params) {
+            this.joins.add(new Join(JoinType.FullJoin, statement, params));
             return (T) this;
         }
 
@@ -472,52 +560,60 @@ public class SQL {
             return (T) this;
         }
 
-        protected String generateJoinBlock() {
+        protected Command generateJoinBlock() {
             StringBuilder joinBlock = new StringBuilder();
+            var params = new ArrayList<>();
             for (Join join : joins) {
-                joinBlock.append(join.type.getCode()).append(join.statement);
-                this.params.addAll(join.params);
+                joinBlock.append(join.type.getCode()).append(" ").append(join.statement);
+                params.addAll(join.params);
             }
-            return joinBlock.toString();
+            return new Command(joinBlock.toString(), params);
         }
 
-        protected String generateWhereBlock() {
-            String where = "";
-
+        protected Command generateWhereBlock() {
+            var command = new Command();
             if (!this.conditions.isEmpty()) {
-                where = "where ";
-
+                command.append("WHERE");
                 for (int i = 0, conditionsSize = conditions.size(); i < conditionsSize; i++) {
                     Pair condition = conditions.get(i);
-                    where = processCondition(i, where, condition);
+                    command.append(processCondition(i, condition));
                 }
-
             }
-
-            return " " + where;
+            return command;
         }
 
-        private String processCondition(int index, String where, Pair condition) {
-            where = where.trim();
+        protected Command generateCteBlock() {
+            if (ctes.isEmpty()) {
+                return new Command();
+            }
+            var command = new Command(" WITH ", new ArrayList<>());
+            for (var cte : ctes) {
+                command.append(cte.toCommand());
+                command.append("AS " + cte.alias + ",");
+            }
+            command.removeSuffix(",");
+            return command;
+        }
+
+        private Command processCondition(int index, Pair condition) {
+            var where = "";
+            var params = new ArrayList<>();
 
             // 第一个条件不能加 and 和 or 前缀
-            if (index > 0 && !where.endsWith("(")) {
-                where += (condition.joint == null ? "" : (" " + condition.joint.name() + " "));
+            if (index > 0) {
+                where += (condition.joint == null ? "" : (condition.joint.name() + " "));
             }
-
-            where += " ";
 
             if (!condition.hasArg()) {       // 不带参数的条件
                 where += condition.statement;
 
-            } else if (condition.args.size() == 1 && condition.firstArg() instanceof List) {   // 参数为 List 的条件（即 in 条件）
-                List<?> objects = (List<?>) condition.firstArg();
+            } else if (condition.args.size() == 1 && condition.firstArg() instanceof List<?> objects) {   // 参数为 List 的条件（即 in 条件）
 
                 // marks = "(?,?,?,...,?)"
                 String marks = "(" +
                     objects.stream()
                         .map(o -> {
-                            this.params.add(o);
+                            params.add(o);
                             return "?";
                         })
                         .collect(Collectors.joining(",")) +
@@ -526,13 +622,15 @@ public class SQL {
                 // "A in ?" -> "A in (?,?,?)"
                 where += condition.statement.replace("?", marks);
 
-            } else if (condition.statement.endsWith("in ?")) {
+            } else if (
+                condition.statement.endsWith("IN ?") || condition.statement.endsWith("in ?")
+            ) {
 
                 // marks = "(?,?,?,...,?)"
                 String marks = "(" +
                     condition.args.stream()
                         .map(o -> {
-                            this.params.add(o);
+                            params.add(o);
                             return "?";
                         }).collect(Collectors.joining(",")) +
                     ")";
@@ -542,14 +640,14 @@ public class SQL {
 
             } else {
                 where += condition.statement;
-                this.params.addAll(condition.args);
+                params.addAll(condition.args);
             }
 
-            return where;
+            return new Command(where, params);
         }
     }
 
-    /////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////
 
     public static class Insert extends Generatable<Insert> {
 
@@ -579,12 +677,15 @@ public class SQL {
 
         @Override
         public Command toCommand() {
-            this.statement = "insert into " + table +
-                "(" + Pair.joinPairName(pairs) + ") values " +
-                "(" + Pair.joinPairHolder(pairs) + ")";
-            this.params = Pair.joinPairValue(pairs);
-
-            return new Command(statement, params);
+            var command = generateCteBlock();
+            var insertBlock = new Command(
+                "insert into " + table +
+                    "(" + Pair.joinPairName(pairs) + ") values " +
+                    "(" + Pair.joinPairHolder(pairs) + ")",
+                Pair.joinPairValue(pairs)
+            );
+            command.append(insertBlock);
+            return command;
         }
     }
 
@@ -593,6 +694,7 @@ public class SQL {
     /**
      * 用于生成 update 语句的帮助类
      */
+    @Getter
     @SuppressWarnings({"StringConcatenationInLoop", "unused"})
     public static class Update extends Generatable<Update> {
 
@@ -602,17 +704,12 @@ public class SQL {
             this.table = table;
         }
 
-        public List<Pair> getUpdates() {
-            return updates;
-        }
-
         @Override
         public Command toCommand() {
-            this.params.clear();
-            this.statement = "update " + table +
-                " set " + generateSetBlock() + " " + generateWhereBlock();
-
-            return new Command(this.statement, this.params);
+            var command = new Command("UPDATE " + table + " SET ");
+            command.append(generateSetBlock());
+            command.append(generateWhereBlock());
+            return generateCteBlock().append(command);
         }
 
         private String generateSetBlock() {
@@ -690,6 +787,16 @@ public class SQL {
 
         private long limit = -1;
 
+        protected void copy(Select other) {
+            super.copy(other);
+            this.columns = other.columns;
+            this.from = other.from;
+            this.orderBy = other.orderBy;
+            this.groupBy = other.groupBy;
+            this.skip = other.skip;
+            this.limit = other.limit;
+        }
+
         public Select(NameConverter converter) {
             this.nameConverter = converter;
         }
@@ -702,11 +809,8 @@ public class SQL {
             this.columns = String.join(",", columns);
         }
 
-        public <T, R> Select(Getter<T, R>... getters) {
-            this.columns = Stream.of(getters)
-                .map(SQL::parseFieldName)
-                .map(field -> this.nameConverter.field2Column(field))
-                .collect(Collectors.joining(","));
+        public <T, R> Select(GetterRef<T, R>... getterRefs) {
+            this.Columns(getterRefs);
         }
 
         public Select Columns(String... columns) {
@@ -715,8 +819,8 @@ public class SQL {
         }
 
         @SafeVarargs
-        public final <T, R> Select Columns(Getter<T, R>... getters) {
-            this.columns = Stream.of(getters)
+        public final <T, R> Select Columns(GetterRef<T, R>... getterRefs) {
+            this.columns = Stream.of(getterRefs)
                 .map(SQL::parseFieldName)
                 .map(field -> this.nameConverter.field2Column(field))
                 .collect(Collectors.joining(","));
@@ -753,29 +857,42 @@ public class SQL {
             return this;
         }
 
+        public Cte AsCTE(String alias) {
+            return new Cte(this).AsCTE(alias);
+        }
+
         @Override
         public Command toCommand() {
             this.params.clear();
-            this.statement = "select " + this.columns + " from " + this.from + " ";
-            this.statement += generateJoinBlock();
-            this.statement += generateWhereBlock();
-            this.statement += generateGroupBy();
-            this.statement += generateOrderBy();
-            this.statement += this.skip > 0 ? (" skip " + this.skip + " ") : "";
-            this.statement += this.limit > 0 ? (" limit " + this.limit + " ") : "";
-            return new Command(this.statement, this.params);
+            var command = generateCteBlock();
+            command.append("SELECT " + this.columns + " FROM " + this.from + " ");
+            command.append(generateJoinBlock());
+            command.append(generateWhereBlock());
+            command.append(generateGroupBy());
+            command.append(generateOrderBy());
+            command.append(generateSkip());
+            command.append(generateLimit());
+            return command;
         }
 
-        private String generateGroupBy() {
-            return isEmpty(this.groupBy) ? "" : (" group by " + this.groupBy);
+        private Command generateGroupBy() {
+            return new Command(isEmpty(this.groupBy) ? "" : (" GROUP BY " + this.groupBy));
         }
 
-        private String generateOrderBy() {
-            return isEmpty(this.orderBy) ? "" : (" order by " + this.orderBy);
+        private Command generateOrderBy() {
+            return new Command(isEmpty(this.orderBy) ? "" : (" ORDER BY " + this.orderBy));
+        }
+
+        private Command generateSkip() {
+            return new Command(this.skip > 0 ? (" SKIP " + this.skip + " ") : "");
+        }
+
+        private Command generateLimit() {
+            return new Command(this.limit > 0 ? (" LIMIT " + this.limit + " ") : "");
         }
     }
 
-    /////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////
 
     public static class Delete extends Generatable<Delete> {
 
@@ -785,9 +902,10 @@ public class SQL {
 
         @Override
         public Command toCommand() {
-            this.params.clear();
-            this.statement = "delete from " + table + generateWhereBlock();
-            return new Command(this.statement, this.params);
+            var command = generateCteBlock();
+            command.append("DELETE FROM " + table);
+            command.append(generateWhereBlock());
+            return command;
         }
     }
 }

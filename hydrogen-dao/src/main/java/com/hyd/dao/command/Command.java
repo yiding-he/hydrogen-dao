@@ -1,10 +1,17 @@
 package com.hyd.dao.command;
 
+import com.hyd.dao.mate.util.Str;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 对 PreparedStatement 语句和参数的封装
  */
+@Setter
+@Getter
 public class Command {
 
     /**
@@ -18,9 +25,11 @@ public class Command {
     private List<Object> params;
 
     /**
-     * 缺省构造函数
+     * 默认构造函数
      */
     public Command() {
+        this.statement = "";
+        this.params = new ArrayList<>();
     }
 
     /**
@@ -34,40 +43,37 @@ public class Command {
         this.params = params;
     }
 
-    /**
-     * 获得 SQL 语句
-     *
-     * @return SQL 语句
-     */
-    public String getStatement() {
-        return statement;
-    }
-
-    /**
-     * 设置 SQL 语句
-     *
-     * @param statement SQL 语句
-     */
-    public void setStatement(String statement) {
+    public Command(String statement) {
         this.statement = statement;
+        this.params = new ArrayList<>();
     }
 
-    /**
-     * 获得参数
-     *
-     * @return 参数
-     */
-    public List<Object> getParams() {
-        return params;
+    public Command append(Command other) {
+        return append(other.statement, other.params);
     }
 
-    /**
-     * 设置参数
-     *
-     * @param params 参数
-     */
-    public void setParams(List<Object> params) {
-        this.params = params;
+    public Command append(String statement) {
+        return append(statement, new ArrayList<>());
+    }
+
+    public Command append(String statement, List<Object> params) {
+        // 如果两边都不为空则需要进行整理：
+        // 1. 对于前面的语句，去掉首尾空白字符，避免出现多个空格；
+        // 2. 对于后面的语句，加上一个空格前缀，避免粘在一起。
+        if (!Str.isEmptyString(this.statement) && !Str.isEmptyString(statement)) {
+            this.statement = this.statement.trim();
+            statement = " " + statement;
+        }
+        this.statement += statement;
+        this.params.addAll(params);
+        return this;
+    }
+
+    public Command removeSuffix(String suffix) {
+        if (statement.endsWith(suffix)) {
+            statement = statement.substring(0, statement.length() - suffix.length());
+        }
+        return this;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.hyd.dao;
 
+import com.hyd.dao.etc.NotNull;
+import com.hyd.dao.etc.Nullable;
 import com.hyd.dao.log.Logger;
 import com.hyd.dao.mate.util.CaseInsensitiveHashMap;
 
@@ -22,7 +24,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
 
     private static final Logger LOG = Logger.getLogger(Row.class);
 
-    public Double getDoubleObject(String key) {
+    public @Nullable Double getDoubleObject(String key) {
         var value = get(key);
         if (value == null) {
             return null;
@@ -54,7 +56,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      *
      * @return 字段值
      */
-    public Long getLongObject(String key) {
+    public @Nullable Long getLongObject(String key) {
         var value = get(key);
         if (value == null) {
             return null;
@@ -94,7 +96,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      *
      * @return 字段的值
      */
-    public Integer getIntegerObject(String key) {
+    public @Nullable Integer getIntegerObject(String key) {
         var value = get(key);
         if (value == null) {
             return null;
@@ -139,7 +141,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      *
      * @return 字段的值
      */
-    public Date getDate(String key) {
+    public @Nullable Date getDate(String key) {
         return getDate(key, DEFAULT_DATE_PATTERN);
     }
 
@@ -156,7 +158,7 @@ public class Row extends CaseInsensitiveHashMap<Object> implements Map<String, O
      *
      * @return 字段的值
      */
-    public Date getDate(String key, String pattern) {
+    public @Nullable Date getDate(String key, @NotNull String pattern) {
         var value = get(key);
         if (value == null) {
             return null;
