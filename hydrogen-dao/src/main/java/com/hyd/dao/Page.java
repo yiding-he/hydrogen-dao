@@ -1,5 +1,8 @@
 package com.hyd.dao;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,12 +11,16 @@ import java.util.List;
 /**
  * 分页查询结果
  */
+@Getter
 public class Page<T> {
 
+    @Setter
     private int total;      // 总记录数
 
+    @Setter
     private int pageIndex;
 
+    @Setter
     private int pageSize;
 
     private List<T> list;
@@ -37,30 +44,6 @@ public class Page<T> {
         this.list = new ArrayList<>(c);
         this.total = total;
         this.pageIndex = pageIndex;
-        this.pageSize = pageSize;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    public void setTotal(int total) {
-        this.total = total;
-    }
-
-    public int getPageIndex() {
-        return pageIndex;
-    }
-
-    public void setPageIndex(int pageIndex) {
-        this.pageIndex = pageIndex;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
 
@@ -88,7 +71,4 @@ public class Page<T> {
         return list == null ? null : list.get(index);
     }
 
-    public List<T> getList() {
-        return list;
-    }
 }

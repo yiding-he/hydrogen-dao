@@ -26,9 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>这个不是分布式事务，无法保证一致性。</li>
  * <ul>
  * 关于多级事务：
- * 多级事务会占用多个数据库连接（每一级事务对每个用到的数据源都会占用一个连接），
+ * 如果检测到处于 Spring JDBC 事务（例如使用 @Transactional 注解）当中，
+ * 会禁用多级事务，完全从 Spring 获取连接。否则在框架内管理多级事务。
+ * 框架内多级事务会占用多个数据库连接（每一级事务对每个用到的数据源都会占用一个连接），
  * 连接池不够用的情况下可能会造成假死，所以请慎重使用
- * 如果检测到处于 Spring JDBC 事务当中，会禁用多级事务，完全从 Spring 获取连接
  */
 public class TransactionManager {
 
@@ -89,7 +90,7 @@ public class TransactionManager {
     public static void start() {
         int level;
 
-        if (!isInTransaction() || isInSpringTransaction()) {
+        if (isInSpringTransaction() || !isInTransaction()) {
             level = 1;
         } else {
             level = getLevel() + 1;
@@ -104,7 +105,7 @@ public class TransactionManager {
      */
     public static void commit() {
         int level = getLevel();
-        if (!isInTransaction() || isInSpringTransaction()) {
+        if (isInSpringTransaction() || !isInTransaction()) {
             TransactionManager.level.set(Math.max(0, level - 1));
             return;
         }
@@ -124,7 +125,7 @@ public class TransactionManager {
      */
     public static void rollback() {
         int level = getLevel();
-        if (!isInTransaction() || isInSpringTransaction()) {
+        if (isInSpringTransaction() || !isInTransaction()) {
             TransactionManager.level.set(Math.max(0, level - 1));
             return;
         }
@@ -145,7 +146,7 @@ public class TransactionManager {
      * @param isolation JDBC 事务隔离级别
      */
     public static void setTransactionIsolation(int isolation) {
-        if (!isInTransaction() || isInSpringTransaction()) {
+        if (isInSpringTransaction() || !isInTransaction()) {
             return;
         }
 
@@ -159,7 +160,7 @@ public class TransactionManager {
      */
     public static ConnectionContext getConnectionContext(DAO dao) {
         // 如果要求独立于事务之外，则直接返回不妨到缓存
-        if (dao.isStandAlone() || !isInTransaction() || isInSpringTransaction()) {
+        if (dao.isStandAlone() || isInSpringTransaction() || !isInTransaction()) {
             return createConnectionContext(dao);
         }
 

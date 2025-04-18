@@ -15,6 +15,7 @@ import com.hyd.dao.mate.util.Str;
 import com.hyd.dao.repository.Repository;
 import com.hyd.dao.snapshot.Snapshot;
 import com.hyd.dao.transaction.TransactionManager;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -40,19 +41,22 @@ public class DAO {
 
     private static final Logger LOG = Logger.getLogger(DAO.class);
 
-    /////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     /**
      * data source name
      */
     private final String dataSourceName;
 
-    private final NameConverter nameConverter;
+    @Setter
+    private NameConverter nameConverter;
 
     /**
      * If it is out of current transaction
      */
     private boolean standAlone;
+
+    /*///////////////////////////////////////////////*/
 
     public DAO(String dataSourceName) {
         this(dataSourceName, false, NameConverter.DEFAULT);
@@ -83,7 +87,7 @@ public class DAO {
         return nameConverter;
     }
 
-    /////////////////////////// TRANSACTION //////////////////////////////
+    /*//////////////// TRANSACTION ////////////////*/
 
     /**
      * Runs a transaction.
@@ -124,7 +128,7 @@ public class DAO {
         }
     }
 
-    /////////////////// QUERY //////////////////////
+    /*//////////////// QUERY ////////////////*/
 
     /**
      * 将 sql id 替换为真实的 SQL 语句，以及去掉语句结尾的分号
@@ -181,7 +185,7 @@ public class DAO {
         return dataSourceName;
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     private void runWithExecutor(Consumer<Executor> consumer) {
         var executor = ExecutorFactory.getExecutor(this);
@@ -201,7 +205,7 @@ public class DAO {
         }
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     /**
      * 执行包装成 Command 对象的查询
@@ -271,7 +275,7 @@ public class DAO {
         return queryRange(clazz, sql, -1, -1, params);
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     public Row queryFirst(MappedCommand mappedCommand) {
         return queryFirst(mappedCommand.toCommand());
@@ -342,7 +346,7 @@ public class DAO {
         });
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     public List<Row> queryRange(Command command, int startPosition, int endPosition) {
         return queryRange(command.getStatement(), startPosition, endPosition, command.getParams());
@@ -406,7 +410,7 @@ public class DAO {
         );
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     public Page<Row> queryPage(SQL.Generatable generatable, int pageSize, int pageIndex) {
         return queryPage(generatable.toCommand(), pageSize, pageIndex);
@@ -468,7 +472,7 @@ public class DAO {
         );
     }
 
-    ////////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     public RowIterator queryIterator(SQL.Generatable<SQL.Select> generatable) throws DAOException {
         return queryIterator(generatable.toCommand());
@@ -563,7 +567,7 @@ public class DAO {
         return ((BigDecimal) iterator.next()).longValue();
     }
 
-    /////////////////// UPDATE //////////////////////
+    /*//////////////// UPDATE ////////////////*/
 
     /**
      * 执行 SQL 语句
@@ -687,7 +691,7 @@ public class DAO {
         return new Repository<>(type, this, tableName);
     }
 
-    ////////////////////////////////////////
+    /*///////////////////////////////////////////////*/
 
     /**
      * 插入单条 Row

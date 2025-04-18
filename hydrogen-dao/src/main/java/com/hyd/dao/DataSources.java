@@ -1,12 +1,10 @@
 package com.hyd.dao;
 
-import com.hyd.dao.database.ExecutorFactory;
-import com.hyd.dao.database.type.NameConverter;
+import lombok.Getter;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -16,6 +14,7 @@ import java.util.function.Consumer;
  *
  * @author yiding.he
  */
+@Getter
 public class DataSources {
 
     @FunctionalInterface
@@ -31,19 +30,7 @@ public class DataSources {
     /**
      * dsName -> DataSource
      */
-    private Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
-
-    /**
-     * dsName -> ExecutorFactory
-     * TODO: clean useless variables
-     */
-    private final Map<String, ExecutorFactory> executorFactories = new HashMap<>();
-
-    /**
-     * dsName -> NameConverter
-     * TODO: clean useless variables
-     */
-    private final Map<String, NameConverter> columnNameConverters = new HashMap<>();
+    private final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
 
     public static DataSources getInstance() {
         return INSTANCE;
@@ -54,17 +41,16 @@ public class DataSources {
     }
 
     /**
-     * 删除指定的数据源
+     * 释放并删除指定的数据源。仅当某些特殊的数据源实现需要手工释放时使用
      *
      * @param dataSourceName 数据源名称
-     * @param finalization   删除后要对数据源做什么操作（例如关闭）
+     * @param finalization   如何释放数据源
      */
     public void remove(String dataSourceName, DataSourceConsumer finalization) throws DAOException {
         DataSource dataSource = dataSources.get(dataSourceName);
 
         if (dataSource != null) {
             dataSources.remove(dataSourceName);
-            executorFactories.remove(dataSourceName);
             try {
                 finalization.accept(dataSource);
             } catch (Exception e) {
@@ -73,16 +59,14 @@ public class DataSources {
         }
     }
 
+    /**
+     * 关闭所有数据源，可选，如果当服务终止时需要进行手工资源释放的话
+     *
+     * @param finalization 如何释放数据源
+     */
+    @SuppressWarnings("unused")
     public void closeAll(DataSourceConsumer finalization) {
         this.dataSources.keySet().forEach(dataSourceName -> remove(dataSourceName, finalization));
-    }
-
-    public Map<String, DataSource> getDataSources() {
-        return dataSources;
-    }
-
-    public void setDataSources(Map<String, DataSource> dataSources) {
-        this.dataSources = dataSources;
     }
 
     public void setDataSource(String dataSourceName, DataSource dataSource) {
@@ -93,16 +77,12 @@ public class DataSources {
         return this.dataSources.get(dataSourceName);
     }
 
-    public void setColumnNameConverter(String dataSourceName, NameConverter nameConverter) {
-        this.columnNameConverters.put(dataSourceName, nameConverter);
-    }
-
     public boolean contains(String dsName) {
         return this.dataSources.containsKey(dsName);
     }
 
     /**
-     * 操作数据库，连接然后自动关闭连接。
+     * 直接获取数据库连接并执行操作，操作完成后本方法将自动释放数据库连接。
      *
      * @param dataSourceName     数据源名称
      * @param connectionConsumer 要进行的操作
