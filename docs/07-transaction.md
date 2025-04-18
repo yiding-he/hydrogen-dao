@@ -10,7 +10,7 @@ final User user1 = new User(111L, "user01", "pass01");
 final User user2 = new User(222L, "user02", "pass02");
 
 try {
-    DAO.runTransactionWithException(new Runnable() {
+    DAO.runTransaction(new Runnable() {
 
             public void run() {
                 dao.insert(user1);
@@ -29,4 +29,4 @@ try {
 
 ### 嵌套事务
 
-hydrogen-dao 支持嵌套事务，但要注意，每层事务都会把持一个数据库连接，直到该事务提交或回滚。因此在数据库连接有限的情况下，请不要执行层次过多的事务；在极端情况下，当事务层次超过连接池的最大连接数时，整个应用都可能阻塞无响应。
+对多级事务的处理参考 `com.hyd.dao.transaction.TransactionManager` 的 Javadoc 文档。

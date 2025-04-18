@@ -2,7 +2,7 @@ hydrogen-dao 需要一个 JDBC 数据源来实现数据库访问。只需要标�
 
 hydrogen-dao 支持同时管理多个数据源，不论它们各自属于什么类型的数据库。
 
-### 创建 Datasources 对象
+### 创建 DataSources 对象
 
 `com.hyd.dao.DataSources` 是管理数据源的类，并且是单例的。
 
@@ -25,7 +25,7 @@ datasources.setDataSource("db1", ds);
 配置好数据源后，就可以调用 DataSources 的 getDAO() 方法来获得 DAO 对象了。
 
 ```java
-DAO dao = datasources.getDAO("db1");  // 这个 DAO 对象的所有操作都是针对 db1 数据库
+DAO dao = new DAO("db1");  // 这个 DAO 对象的所有操作都是针对 db1 数据库
 ```
 
 ### 完整例子

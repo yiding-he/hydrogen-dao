@@ -5,10 +5,10 @@ String name = null;
 String maxAge = 50;
 
 dao.execute(SQL
-        .Update("user_table")
-        .Set("last_update", new Date())
-        .Where(name != null, "name=?", name)
-        .And("age <= ?", maxAge));
+    .Update("user_table")
+    .Set("last_update", new Date())
+    .Where(name != null, "name=?", name)
+    .And("age <= ?", maxAge));
 ```
 
 上面的例子中，因为 name 值为空，所以最后生成的语句就是
@@ -19,4 +19,4 @@ update user_table set last_update = ? where age <= ?
 
 而不会包含 name 条件。
 
-`SQL` 类的具体使用方法，请参考单元测试。
+`SQL` 类的具体使用方法，请参考单元测试 `src/test/java/com/hyd/dao/SQLTest.java`。

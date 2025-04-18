@@ -10,11 +10,11 @@ int pageIndex = 2;  // 页号，0 表示第一页
 
 // 分页查询。为了获取总记录数，实际上查询了两次
 Page<User> page = dao.queryPage(
-        User.class, sql, pageSize, pageIndex, "Adm%");
+    User.class, sql, pageSize, pageIndex, "Adm%");
 
 System.out.println("Total count: " + page.getTotal());
 
-for (User user: page) {
+for (User user: page.getList()) {
     System.out.println(user);
 }
 ```

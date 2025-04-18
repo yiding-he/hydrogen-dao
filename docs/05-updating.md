@@ -37,10 +37,10 @@ com.hyd.dao.SQL 类帮助生成一个包含动态条件的语句。当条件不�
 
 ```java
 dao.execute(SQL
-        .Update("USER")
-        .Set("ROLE=?", roleId)
-        .Where("USERID>?", 10)
-        .And(username != null, "USERNAME=?", username) // 如果 username 为 null，则本条件不会生成
+    .Update("USER")
+    .Set("ROLE=?", roleId)
+    .Where("USERID>?", 10)
+    .And(username != null, "USERNAME=?", username) // 如果 username 为 null，则本条件不会生成
 );
 ```
 

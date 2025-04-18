@@ -4,8 +4,8 @@
 ```java
 // 简单查询
 List<Row> users = dao.query(
-        "select * from users where id in(?,?,?)", 
-        1, 2, 3
+    "select * from users where id in(?,?,?)", 
+    1, 2, 3
 );
 ```
 
@@ -15,7 +15,7 @@ query() 方法返回一个 Row 对象列表，Row 是 Map<String, Object> 的子
 
 ### 查询结果包装成 Pojo
 
-你可以指定将查询结果包装成什么样的 Pojo 对象。hydrogen-dao 有一套固定的命名转换规则，将查询结果的字段名匹配到 Pojo 类的属性名上。下面是几个例子：
+你可以指定将查询结果包装成什么样的 Pojo 对象。hydrogen-dao 有一套默认的命名转换规则，将查询结果的字段名匹配到 Pojo 类的属性名上。下面是几个例子：
 
 
 字段名         |属性名
@@ -25,14 +25,20 @@ address         |address
 _my_member_id | MyMemberId
 class              | CLASS
 
+定制命名转换规则：首先自己实现 `com.hyd.dao.database.type.NameConverter` 接口，然后使用下面的方式替换掉默认的 NameConverter：
+
+```java
+dao.setNameConverter(new MyNameConverter());
+```
 
 注意，当使用了像 `abstract`/`private`/`protected`/`static`/`void`/`interface`/`enum`/`class` 等 Java 关键字来做字段名时，因为这些名字不可能转为 Pojo 类的属性名，hydrogen-dao 将其转换为大写。如果你有一条查询语句返回了一个名为 `class` 的字段，而你想用 Pojo 来接收它，你可以在 Pojo 中定义一个名为 "`CLASS`" 的属性。
 
 ```java
 // 查询结果包装成 Pojo
 List<User> users = dao.query(User.class, 
-        "select * from users where id in(?,?,?)",
-         1, 2, 3);
+    "select * from users where id in(?,?,?)",
+    1, 2, 3
+);
 ```
 
 ### 带参数名的查询
@@ -41,9 +47,9 @@ List<User> users = dao.query(User.class,
 
 ```java
 MappedCommand mappedCommand = new MappedCommand(
-        "select * from USER where USERNAME=#username# and ROLE in (#role#)")
-        .setParam("username", "admin")
-        .setParam("role", new int[]{1, 2, 3, 4, 5, 6});
+    "select * from USER where USERNAME=#username# and ROLE in (#role#)")
+    .setParam("username", "admin")
+    .setParam("role", new int[]{1, 2, 3, 4, 5, 6});
 
 List<User> users = dao.query(User.class, mappedCommand);
 ```
